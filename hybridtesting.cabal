@@ -1,0 +1,59 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.2.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: a79f3cf28cea60a70976e98cb0b99bc6289a02b2a180ccb3a1f0af979e5fdc4f
+
+name:           hybridtesting
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/koengit/hybridtesting#readme>
+homepage:       https://github.com/koengit/hybridtesting#readme
+bug-reports:    https://github.com/koengit/hybridtesting/issues
+author:         Koen Claessen
+maintainer:     koen@chalmers.se
+copyright:      2020 Koen Claessen
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/koengit/hybridtesting
+
+library
+  exposed-modules:
+       Process
+       Badness
+       Plot
+       Process.Combinators
+       Process.Eval
+       Process.Input
+       Process.Language
+       Process.Pretty
+       Process.Simplify
+       Utils
+       VBool
+       Helicopter
+--  other-modules:
+--      Paths_hybridtesting
+  hs-source-dirs:
+      src
+      examples
+  build-depends:
+      base >=4.7 && <5,
+      containers,
+      QuickCheck,
+      uniplate,
+      pretty,
+      reflection,
+      process,
+      directory,
+      filepath,
+      random
+  default-language: Haskell2010
+
+
