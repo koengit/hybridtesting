@@ -34,7 +34,6 @@ data Step =
 
 data Expr =
    Var Var      -- variable
- | Delta        -- delta-t
    -- Arithmetic
  | Double Double -- constant
  | Plus Expr Expr
@@ -60,6 +59,9 @@ data PrimitiveKind = Functional | Temporal
 data Var =
     Global String
   | Local Int
+  | Delta
+  | Pre
+  | Post
   deriving (Eq, Ord, Typeable, Data)
 
 -- The definition of a primitive

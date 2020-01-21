@@ -30,21 +30,21 @@ testCase =
   [12,4,5,-2,3,1,5,2.5,6,4.5,8,7.5,10.25,9.75,12.5,12,14,13.5,15.25,14.75] ++
   replicate 50 16
 
-test = fst (runIdentity $ simulate 0.01 (concat [replicate 60 (Map.singleton angle (DoubleValue (x/10000))) | x <- testCase]) (lower stdPrims helicopter))
-plotIt = plot "helicopter" 0.01 test helicopter
+test = simulateReal 0.01 (concat [replicate 60 (Map.singleton angle (val (DoubleValue (x/10000)))) | x <- testCase]) (lower stdPrims helicopter)
+plotIt = plot "helicopter" 0.01 test
 
 test' = take 6000 (control 0.01 speed angle 1 (lower stdPrims helicopter))
-plotIt' = plot "helicopter" 0.01 test' helicopter
+plotIt' = plot "helicopter" 0.01 test'
 
-control :: Double -> Var -> Var -> Double -> Process -> [Env]
+control :: Valued f => Double -> Var -> Var -> Double -> Process -> [Env f]
 control delta output input setpoint p = go env0
   where
-    env0 = fst (runIdentity (execStep delta (Map.singleton input (DoubleValue 0)) (start p)))
+    env0 = execStep delta (Map.singleton input (val (DoubleValue 0))) (start p)
     go env = envs ++ go (last envs)
       where
         inp = controlled env
         envs = take (ceiling (tick / delta)) (tail (iterate (exec delta inp) env))
-    exec delta x env = fst (runIdentity (execStep delta (Map.insert input (DoubleValue x) env) (step p)))
+    exec delta x env = fst (runIdentity (execStep delta (Map.insert input (val (DoubleValue x)) env) (step p)))
     get var env = x
       where
         Just (DoubleValue x) = Map.lookup var env
@@ -58,7 +58,7 @@ control delta output input setpoint p = go env0
       get output $
         foldn horizon (exec tick 1) env0
 
-    controlled :: Env -> Double
+    controlled :: Valued f => Env f -> Double
     controlled env =
       get input env + (reference - freeResponse) / unitResponse
       where

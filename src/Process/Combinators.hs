@@ -115,7 +115,7 @@ var :: Var -> Expr
 var = Var
 
 delta :: Expr
-delta = Delta
+delta = Var Delta
 
 double :: Double -> Expr
 double = Double

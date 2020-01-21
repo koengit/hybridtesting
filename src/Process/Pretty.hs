@@ -54,6 +54,9 @@ instance Pretty Expr where
 instance Pretty Var where
   pPrint (Global x) = text x
   pPrint (Local n) = text "x" <#> pPrint n
+  pPrint Delta     = text "dt"
+  pPrint Pre       = text "$pre"
+  pPrint Post      = text "$post"
 
 instance Pretty Doc where
   pPrint = id
@@ -70,7 +73,6 @@ instance Pretty Doc where
 -- 9: atomic
 ppExp :: Rational -> Expr -> Doc
 ppExp _ (Var x) = pPrint x
-ppExp _ Delta = text "dt"
 ppExp _ (Double x) = text (shortest (show x) (printf "%.5f" x))
   where
     shortest x y

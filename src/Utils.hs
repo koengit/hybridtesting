@@ -47,3 +47,10 @@ fixpoint f x = fxp x
 foldn :: Int -> (a -> a) -> a -> a
 foldn 0 _ x = x
 foldn n f x = f (foldn (n-1) f x)
+
+takeUntil :: (a -> Bool) -> [a] -> [a]
+takeUntil p (x:xs)
+  | p x        = [x]
+  | otherwise  = x : takeUntil p xs
+takeUntil p [] = []
+

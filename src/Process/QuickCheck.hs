@@ -2,6 +2,7 @@ module Process.QuickCheck where
 
 import Process
 import Process.Input
+import Utils
 import Test.QuickCheck
 import System.Random
 import Control.Monad
@@ -112,15 +113,18 @@ checkAssertions :: Double -> Duration -> Types -> Process -> Property
 checkAssertions delta maxdur types p =
   forAllShrink (genInput maxdur types) (shrinkInput types) $ \input ->
     let
-      inps = sampleInput delta input
-      (envs, res) = runIdentity (simulate delta inps p)
+      inps  = sampleInput delta input
+      envs  = map (Map.map runIdentity) (simulateReal delta inps p)
+      envs' = takeUntil (boolValue . (Map.! Post)) envs
+      
+      final = last envs'
+      pre   = boolValue $ final Map.! Pre
+      post  = boolValue $ final Map.! Post
     in
-      case res of
-        OK -> property True
-        PreconditionFailed _ -> property Discard
-        PostconditionFailed msg ->
-          counterexample ("After " ++ show (fromIntegral (length envs) * delta) ++ "s:") $
-          flip (foldr counterexample)
-            [ "  " ++ show x ++ " = " ++ show v | (x, v) <- Map.toList (last envs) ] $
-          counterexample ("Postcondition failed: " ++ msg) False
-                                                                      
+      not (null envs') Test.QuickCheck.==>
+      counterexample ("After " ++ show (fromIntegral (length envs') * delta) ++ "s:") $
+      flip (foldr counterexample)
+        [ "  " ++ show x ++ " = " ++ show v | (x, v) <- Map.toList final ] $
+      counterexample "Postcondition failed." $
+        pre Test.QuickCheck.==> post
+

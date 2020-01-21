@@ -9,148 +9,152 @@ import Data.Functor.Identity
 import Process.Language
 import Process.Pretty()
 import Text.PrettyPrint.HughesPJClass
-import VBool
+import qualified Val
 
-type Env = Map Var Value
-data Value = DoubleValue Double | BoolValue Bool deriving (Eq, Ord)
+--------------------------------------------------------------------------------
+
+type Env f = Map Var (f Value)
+
+data Value
+  = DoubleValue{ doubleValue :: Double }
+  | BoolValue{ boolValue :: Bool }
+ deriving (Eq, Ord)
+
+constant :: Value -> Expr
+constant (DoubleValue x) = Double x
+constant (BoolValue   x) = Bool x
 
 instance Show Value where
   show (DoubleValue x) = show x
   show (BoolValue x) = show x
 
-data VValue = DoubleVValue Double | VBoolVValue VBool deriving (Eq, Ord)
-
-instance Show VValue where
-  show (DoubleVValue x) = show x
-  show (VBoolVValue x) = show x
+--------------------------------------------------------------------------------
 
 class Valued f where
-  -- Very much like Monad, but with if-then-else and Ord constraints
-  val :: a -> f a
-  vmap :: Ord b => (a -> b) -> f a -> f b
-  vlift :: Ord c => (a -> b -> c) -> f a -> f b -> f c
-  vbind :: Ord b => f a -> (a -> f b) -> f b
-  vifThenElse :: Ord a => VBool -> f a -> f a -> f a
-  vprune :: (Ord a, Ord b) => (a -> b) -> f a -> f a
-  vprune _ = id
-  vbool :: VBool -> f Bool
-  vbool = val . isTrue
+  val         :: a -> f a
+  vmap        :: Ord b => (a -> b) -> f a -> f b
+  vlift       :: Ord c => (a -> b -> c) -> f a -> f b -> f c
+  vifThenElse :: Ord a => f Bool -> f a -> f a -> f a
+  vprune      :: Ord a => f a -> f a
+  vfail       :: String -> f a
 
-  -- A default instance for monads.
-  default val :: Monad f => a -> f a
-  val = return
-  default vmap :: (Monad f, Ord b) => (a -> b) -> f a -> f b
-  vmap = fmap
-  default vlift :: (Monad f, Ord c) => (a -> b -> c) -> f a -> f b -> f c
-  vlift = liftM2
-  default vbind :: (Monad f, Ord b) => f a -> (a -> f b) -> f b
-  vbind = (>>=)
-  default vifThenElse :: Monad f => VBool -> f a -> f a -> f a
-  vifThenElse x my mz = if isTrue x then my else mz
+instance Valued Identity where
+  val               = return
+  vmap              = fmap
+  vlift             = liftM2
+  vifThenElse c a b = if runIdentity c then a else b
+  vprune            = id
+  vfail s           = error s
 
-vsequence :: (Valued f, Ord a) => [f a] -> f [a]
-vsequence [] = val []
-vsequence (x:xs) = vlift (:) x (vsequence xs)
+instance Valued Maybe where
+  val                      = return
+  vmap                     = fmap
+  vlift                    = liftM2
+  vifThenElse (Just c) a b = if c then a else b
+  vifThenElse Nothing  a b = Nothing
+  vprune                   = id
+  vfail _s                 = Nothing
 
-instance Valued Identity
+instance Valued Val.Val where
+  val         = Val.val
+  vmap        = Val.mapVal
+  vlift       = Val.liftVal
+  vifThenElse = Val.ifThenElse
+  vprune      = Val.forget
+  vfail s     = error s
 
-doubleVal :: VValue -> Double
-doubleVal (DoubleVValue x) = x
-doubleVal _ = error "type error: got bool but expected double"
+--------------------------------------------------------------------------------
 
-boolVal :: VValue -> VBool
-boolVal (VBoolVValue x) = x
-boolVal _ = error "type error: got double but expected bool"
-
-constant :: VValue -> Expr
-constant (DoubleVValue x) = Double x
-constant (VBoolVValue x) = Bool (isTrue x)
-
-eval :: Maybe Double -> Env -> Expr -> VValue
-eval mdelta env x = runIdentity (evalM mdelta env x)
-
-evalM :: Monad m => Maybe Double -> Env -> Expr -> m VValue
-evalM _ env (Var x) =
+eval :: Valued f => Env f -> Expr -> f Value
+eval env (Var x) =
   case Map.lookup x env of
-    Nothing -> fail ("variable " ++ show x ++ " not bound")
-    Just (DoubleValue x) -> return (DoubleVValue x)
-    Just (BoolValue x) -> return (VBoolVValue (bool x))
-evalM mdelta _ Delta =
-  case mdelta of
-    Nothing -> fail "delta not defined"
-    Just delta -> return (DoubleVValue delta)
-evalM _ _ (Double x) =
-  return (DoubleVValue x)
-evalM delta env (Plus e1 e2) =
-  DoubleVValue <$> liftM2 (+)
-    (doubleVal <$> evalM delta env e1)
-    (doubleVal <$> evalM delta env e2)
-evalM delta env (Times e1 e2) =
-  DoubleVValue <$> liftM2 (*)
-    (doubleVal <$> evalM delta env e1)
-    (doubleVal <$> evalM delta env e2)
-evalM delta env (Power e1 e2) =
-  DoubleVValue <$> liftM2 (**)
-    (doubleVal <$> evalM delta env e1)
-    (doubleVal <$> evalM delta env e2)
-evalM delta env (Negate e) =
-  DoubleVValue . negate . doubleVal <$> evalM delta env e
-evalM delta env (Not e) =
-  VBoolVValue . nt . boolVal <$> evalM delta env e
-evalM delta env (And e1 e2) =
-  VBoolVValue <$> liftM2 (&&+)
-    (boolVal <$> evalM delta env e1)
-    (boolVal <$> evalM delta env e2)
-evalM _ _ (Bool x) =
-  return (VBoolVValue (bool x))
-evalM delta env (Positive e) =
-  VBoolVValue . (>=% 0) . doubleVal <$> evalM delta env e
-evalM delta env (Zero e) =
-  VBoolVValue . (==% 0) . doubleVal <$> evalM delta env e
-evalM _ _ e =
-  fail $ show $
+    Nothing -> vfail ("variable " ++ show x ++ " not bound")
+    Just v  -> v
+
+eval _ (Double x) =
+  val (DoubleValue x)
+
+eval env (Plus e1 e2) =
+  DoubleValue `vmap` vlift (+)
+    (doubleValue `vmap` eval env e1)
+    (doubleValue `vmap` eval env e2)
+
+eval env (Times e1 e2) =
+  DoubleValue `vmap` vlift (*)
+    (doubleValue `vmap` eval env e1)
+    (doubleValue `vmap` eval env e2)
+
+eval env (Power e1 e2) =
+  DoubleValue `vmap` vlift (**)
+    (doubleValue `vmap` eval env e1)
+    (doubleValue `vmap` eval env e2)
+
+eval env (Negate e) =
+  (DoubleValue . negate . doubleValue) `vmap` eval env e
+
+eval env (Not e) =
+  (BoolValue . not . boolValue) `vmap` eval env e
+
+eval env (And e1 e2) =
+  BoolValue `vmap` vlift (&&)
+    (boolValue `vmap` eval env e1)
+    (boolValue `vmap` eval env e2)
+
+eval _ (Bool x) =
+  val (BoolValue x)
+
+eval env (Positive e) =
+  (BoolValue . (>= 0) . doubleValue) `vmap` eval env e
+
+eval env (Zero e) =
+  (BoolValue . (== 0) . doubleValue) `vmap` eval env e
+
+eval _ e =
+  vfail $ show $
     sep [
       text "don't know how to evaluate",
       nest 2 (pPrint e),
       text "(try using 'lower stdPrims' before simulating)"]
 
-data Result = OK | PreconditionFailed String | PostconditionFailed String
-  deriving (Eq, Ord, Show)
+--------------------------------------------------------------------------------
 
-execStep :: Valued f => Double -> Env -> Step -> f (Env, Result)
-execStep delta env (If e s1 s2) =
-  vifThenElse (boolVal $ eval (Just delta) env e)
-    (execStep delta env s1)
-    (execStep delta env s2)
-execStep delta env (Assume str e s) =
-  vifThenElse (boolVal $ eval (Just delta) env e)
-    (execStep delta env s)
-    (val (env, PreconditionFailed str))
-execStep delta env (Assert str e s) =
-  vifThenElse (boolVal $ eval (Just delta) env e)
-    (execStep delta env s)
-    (val (env, PostconditionFailed str))
-execStep delta env (Update m) =
-  -- N.B. Map.union is left-biased
-  -- Non-valued version: val (Map.union (Map.map (eval (Just delta) env) m) env, OK)
-  vmap (\xs -> (Map.union (Map.fromList xs) env, OK)) $
-    vsequence [ single x (eval (Just delta) env y) | (x, y) <- Map.toList m ]
-  where
-    single x (DoubleVValue y) = val (x, DoubleValue y)
-    single x (VBoolVValue vb) = vmap (x,) (vmap BoolValue (vbool vb))
+execStep :: Valued f => Env f -> Step -> Env f
+execStep env p = Map.union (go p) env
+ where
+  go (If e s1 s2)     = Map.unionWith (vifThenElse (boolValue `vmap` eval env e))
+                          (go s1)
+                          (go s2)
+  go (Update m)       = Map.map (eval env) m
+  go (Assume str e s) = Map.alter (alt e) Pre  (go s)
+  go (Assert str e s) = Map.alter (alt e) Post (go s)
+    
+  alt e Nothing  = Just (eval env e)
+  alt e (Just w) = Just (BoolValue `vmap` vlift (&&) (boolValue `vmap` eval env e)
+                                                     (boolValue `vmap` w))
 
-simulate :: Valued f => Double -> [Env] -> Process -> f ([Env], Result)
-simulate delta inputs process =
-  vmap (\(_, history, err) -> (tail (reverse history), err)) $
-  foldl sim (val (Map.empty, [], OK)) (zip (Map.empty:inputs) (start process:repeat (step process)))
-  where
-    sim state (input, step) =
-      vprune badness $ vbind state $ \(env, history, err) ->
-        case err of
-          OK ->
-            vmap (\(env, res) -> (env, env:history, res)) $
-              execStep delta (Map.union input env) step
-          _ -> val (env, history, err)
-    badness (_, _, PreconditionFailed _) = 0
-    badness (_, _, OK) = 1
-    badness (_, _, PostconditionFailed _) = 2
+--------------------------------------------------------------------------------
+
+simulate :: Valued f => Double -> [Env f] -> Process -> [Env f]
+simulate delta inputs process = go (execStep empty (start process)) inputs
+ where
+  empty = Map.fromList
+          [ (Delta, val (DoubleValue delta))
+          , (Pre,   val (BoolValue True))
+          , (Post,  val (BoolValue True))
+          ]
+
+  go state []         = []
+  go state (inp:inps) = state' : go (Map.map vprune state') inps
+   where
+    state' = execStep (Map.union inp state) (step process)
+
+simulateReal :: Double -> [Env Identity] -> Process -> [Env Identity]
+simulateReal = simulate
+
+simulateVal :: Double -> [Env Identity] -> Process -> [Env Val.Val]
+simulateVal delta inputs process = simulate delta inputs' process
+ where
+  inputs' = map (Map.map (val . runIdentity)) inputs
+
+--------------------------------------------------------------------------------
+

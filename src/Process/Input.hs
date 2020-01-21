@@ -70,7 +70,7 @@ sampleSignal delta xs =
       where
         x = fromIntegral i / fromIntegral n
 
-sampleInput :: Double -> Input -> [Env]
+sampleInput :: Valued f => Double -> Input -> [Env f]
 sampleInput delta (Input dur xs) =
   foldr (zipWith Map.union) (replicate n Map.empty) .
   map toEnv .
@@ -78,4 +78,4 @@ sampleInput delta (Input dur xs) =
   Map.map (sampleSignal delta) $ xs
   where
     n = truncate (dur / delta)
-    toEnv (x, xs) = map (Map.singleton x) xs
+    toEnv (x, xs) = map (Map.singleton x . val) xs
