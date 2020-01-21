@@ -8,9 +8,7 @@ import VBool
 --import Data
 import Test.QuickCheck
 import Badness
-import System.Process
 import GHC.Generics( Generic )
-import qualified Process
 
 newtype Val a = Val { vals :: [(a,VBool)] }
  deriving ( Eq, Ord, Show )
@@ -129,10 +127,10 @@ smash (Val vs) =
 
 --------------------------------------------------------------------------------
 
-forget :: (Ord a, Ord b) => (a -> b) -> Val a -> Val a
-forget badness (Val xs) = Val (sort (take 100 (reverse (sortBy (comparing best) xs))))
+forget :: Ord a => Val a -> Val a
+forget (Val xs) = Val (take 100 (reverse (sortBy (comparing best) xs)))
  where
-  best (x,a) = (isTrue a, badness x, howTrue a)
+  best (_,v) = v
 
 propVal :: Val Bool -> VBool
 propVal (Val bs) = foldr1 (&&+) [ if b then v else nt v | (b,v) <- bs ]
@@ -142,17 +140,7 @@ propVal0 (Val bs) = head [ if isTrue v then good 5 else bad 5 | (True,v) <- bs ]
 
 --------------------------------------------------------------------------------
 
-instance Process.Valued Val where
-  val = val
-  vmap = mapVal
-  vlift = liftVal
-  vbind x f = smash (mapVal f x)
-  vifThenElse = ifThenElse . vbool
-  vprune = forget
-  vbool = vbool
-
---------------------------------------------------------------------------------
-
+{-
 f :: (Num a, VCompare a, Choice a) => a -> a
 f x =
   ifThenElse (x <? a) 10
@@ -295,6 +283,7 @@ plot3D (xL,xR) (yL,yR) fs =
   dz   = (maxZ-minZ) / 33 -- 3%
   minz = minZ-dz
   maxz = maxZ+dz
+-}
 
 ----
 

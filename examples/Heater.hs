@@ -97,14 +97,14 @@ property =
     let stablefor = integralReset 1 (var goalTemp /=? old 0 (var goalTemp)) in
     loop (assert "temperature not close enough" (stablefor <=? 50 ||| abs (var goalTemp - var roomTemp) <=? 1))
 
-run :: Valued f => Process -> f ([Env], Result)
-run p = simulate 1 test (lower stdPrims p)
+run :: Process -> [Env Identity]
+run p = simulateReal 1 test (lower stdPrims p)
   where
     test = replicate 10 (temp 25) ++ replicate 90 (temp 10)
-    temp k = Map.singleton goalTemp (DoubleValue 25)
+    temp k = Map.singleton goalTemp (val (DoubleValue 25))
 
-test = runIdentity $ run (system cgood)
-tesT = runIdentity $ run (systeM cgood)
+test = plot "heater" 0.1 $ run (system cgood)
+tesT = plot "heater" 0.1 $ run (systeM cgood)
 
 {-
 test', tesT' :: Val ([Env], Result)
