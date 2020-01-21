@@ -34,8 +34,10 @@ library
        Process.Input
        Process.Language
        Process.Pretty
+       Process.QuickCheck
        Process.Simplify
        Utils
+       Val
        VBool
        Helicopter
 --  other-modules:
