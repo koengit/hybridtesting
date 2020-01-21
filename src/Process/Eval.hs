@@ -63,6 +63,10 @@ instance Valued Val.Val where
   vprune      = Val.forget
   vfail s     = error s
 
+vlift3 :: (Valued f, Ord a, Ord b, Ord d) => (a -> b -> c -> d) -> f a -> f b -> f c -> f d
+vlift3 f x y z =
+  vlift (uncurry f) (vlift (,) x y) z
+
 --------------------------------------------------------------------------------
 
 eval :: Valued f => Env f -> Expr -> f Value
@@ -134,15 +138,20 @@ execStep env p = Map.union (go p) env
 
 --------------------------------------------------------------------------------
 
-simulate :: Valued f => Double -> [Env f] -> Process -> [Env f]
-simulate delta inputs process = go (execStep empty (start process)) inputs
- where
-  empty = Map.fromList
-          [ (Delta, val (DoubleValue delta))
-          , (Pre,   val (BoolValue True))
-          , (Post,  val (BoolValue True))
-          ]
+emptyEnv :: Valued f => Double -> Env f
+emptyEnv delta =
+  Map.fromList
+  [ (Delta, val (DoubleValue delta))
+  , (Pre,   val (BoolValue True))
+  , (Post,  val (BoolValue True))
+  ]
 
+--------------------------------------------------------------------------------
+
+simulate :: Valued f => Double -> [Env f] -> Process -> [Env f]
+simulate delta inputs process =
+  go (execStep (emptyEnv delta) (start process)) inputs
+ where
   go state []         = []
   go state (inp:inps) = state' : go (Map.map vprune state') inps
    where

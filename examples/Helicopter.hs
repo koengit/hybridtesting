@@ -1,4 +1,5 @@
 -- A helicopter using model predictive control.
+{-# LANGUAGE ScopedTypeVariables #-}
 module Helicopter where
 
 import Process
@@ -12,6 +13,7 @@ import qualified Data.Set as Set
 import Data.List
 import qualified Data.Map as Map
 import Data.Functor.Identity
+import Data.Maybe
 
 angle, speed, s :: Var
 angle = Global "angle"
@@ -36,34 +38,42 @@ plotIt = plot "helicopter" 0.01 test
 test' = take 6000 (control 0.01 speed angle 1 (lower stdPrims helicopter))
 plotIt' = plot "helicopter" 0.01 test'
 
-control :: Valued f => Double -> Var -> Var -> Double -> Process -> [Env f]
+control :: forall f. Valued f => Double -> Var -> Var -> Double -> Process -> [Env f]
 control delta output input setpoint p = go env0
   where
-    env0 = execStep delta (Map.singleton input (val (DoubleValue 0))) (start p)
+    env0 = execStep initial (start p)
+    initial = Map.insert input (val (DoubleValue 0)) (emptyEnv delta)
     go env = envs ++ go (last envs)
       where
         inp = controlled env
         envs = take (ceiling (tick / delta)) (tail (iterate (exec delta inp) env))
-    exec delta x env = fst (runIdentity (execStep delta (Map.insert input (val (DoubleValue x)) env) (step p)))
-    get var env = x
-      where
-        Just (DoubleValue x) = Map.lookup var env
 
-    setpoint = 1
+    exec :: Double -> f Double -> Env f -> Env f
+    exec delta x env = execStep env' (step p)
+      where
+        env' = Map.insert input (vmap DoubleValue x) (Map.insert Delta (val (DoubleValue delta)) env)
+    get var env = vmap doubleValue (fromJust (Map.lookup var env))
+
     tick = 0.6
     speed = 6
     horizon = 8
 
-    unitResponse =
-      get output $
-        foldn horizon (exec tick 1) env0
-
-    controlled :: Valued f => Env f -> Double
+    controlled :: Env f -> f Double
     controlled env =
-      get input env + (reference - freeResponse) / unitResponse
+      vlift (+) (get input env) correction
       where
-        err = setpoint - get output env
-        reference = setpoint - exp (-fromIntegral horizon * tick / speed) * err
+        correction, unitResponse, freeResponse, err :: f Double
+        err = vlift (-) (val setpoint) (get output env)
+        reference err =
+          setpoint - exp (-fromIntegral horizon * tick / speed) * err
         freeResponse =
           get output $
             foldn horizon (exec tick (get input env)) env
+        unitResponse =
+          get output $
+            foldn horizon (exec tick (val 1)) env
+        correction =
+          vlift3
+            (\err freeResponse unitResponse ->
+              (reference err - freeResponse) / unitResponse)
+            err freeResponse unitResponse
