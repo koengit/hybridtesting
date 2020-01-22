@@ -3,8 +3,8 @@
 module Process.Eval where
 
 import Data.Map(Map)
-import qualified Data.Map.Strict as Map
-import qualified Data.Map.Merge.Strict as Merge
+import qualified Data.Map as Map
+import qualified Data.Map.Merge.Lazy as Merge
 import Control.Monad
 import Data.Functor.Identity
 import Process.Language
@@ -17,7 +17,7 @@ import qualified Val
 type Env f = Map Var (f Value)
 
 data Value
-  = DoubleValue{ doubleValue :: Double }
+  = DoubleValue{ doubleValue :: Double}
   | BoolValue{ boolValue :: Bool }
  deriving (Eq, Ord)
 
@@ -37,7 +37,7 @@ class Valued f where
   vlift       :: Ord c => (a -> b -> c) -> f a -> f b -> f c
   vifThenElse :: Ord a => f Bool -> f a -> f a -> f a
   vprune      :: Ord a => f a -> f a
-  vfail       :: String -> f a
+  vfail       :: Ord a => String -> f a
 
 instance Valued Identity where
   val               = return
@@ -62,11 +62,40 @@ instance Valued Val.Val where
   vlift       = Val.liftVal
   vifThenElse = Val.ifThenElse
   vprune      = Val.forget
-  vfail s     = error s
+  vfail s     = Val.mkVal [] -- error s
 
 vlift3 :: (Valued f, Ord a, Ord b, Ord d) => (a -> b -> c -> d) -> f a -> f b -> f c -> f d
 vlift3 f x y z =
   vlift (uncurry f) (vlift (,) x y) z
+
+--------------------------------------------------------------------------------
+
+{-
+data EVal a
+  = Val (Val.Val a)
+  | Err String
+ deriving ( Eq, Ord )
+
+instance Show a => Show (EVal a) where
+  show (Val v) = show v
+  show (Err s) = show s
+
+instance Valued EVal where
+  val            = Val . val
+  vmap f (Val v) = Val (vmap f v)
+  
+  vlift f (Err s) _       = Err s
+  vlift f _       (Err s) = Err s
+  vlift f (Val x) (Val y) = Val (vlift f x y)
+  
+  vifThenElse (Err s) _ _ = Err s
+  vifThenElse (Val b) x y = 
+
+  vprune (Val v) = Val (vprune v)
+  vprune (Err s) = Err s
+  
+  vfail s = Err s
+-}
 
 --------------------------------------------------------------------------------
 
@@ -123,7 +152,7 @@ eval _ e =
 
 --------------------------------------------------------------------------------
 
-execStep :: Valued f => Env f -> Step -> Env f
+execStep :: (Show (f Bool), Valued f) => Env f -> Step -> Env f
 execStep env p = Map.unionWithKey h (go p) env
  where
   go (If e s1 s2)     = iff (boolValue `vmap` eval env e) (go s1) (go s2)
@@ -133,11 +162,15 @@ execStep env p = Map.unionWithKey h (go p) env
     
   iff c =
     Merge.merge (Merge.mapMaybeMissing fxv)
-                (Merge.mapMaybeMissing fyw)
+                (Merge.mapMaybeMissing fxw)
                 (Merge.zipWithMaybeMatched f)
    where
-    fxv x v = Just (vifThenElse c v (env Map.! x))
-    fyw y w = Just (vifThenElse c (env Map.! y) w)
+    fxv x v = Just (case Map.lookup x env of
+                      Just w  -> vifThenElse c v w
+                      Nothing -> v {- !!: x is undefined in this branch -})
+    fxw x w = Just (case Map.lookup x env of
+                      Just v  -> vifThenElse c v w
+                      Nothing -> w {- !!: x is undefined in this branch -})
     f x v w = Just (vifThenElse c v w)
 
   add x v =
@@ -162,7 +195,7 @@ emptyEnv delta =
 
 --------------------------------------------------------------------------------
 
-simulate :: Valued f => Double -> [Env f] -> Process -> [Env f]
+simulate :: (Show (f Bool), Valued f) => Double -> [Env f] -> Process -> [Env f]
 simulate delta inputs process =
   go (execStep (emptyEnv delta) (start process)) inputs
  where
