@@ -142,8 +142,9 @@ eval env (And e1 e2) =
 eval _ (Bool x) =
   val (BoolValue x)
 
+-- TODO: use VBools here! Otherwise the Val stuff won't do anything
 eval env (Positive e) =
-  eval env e `vbind` (BoolValue . (>= 0) . doubleValue) `vmap` 
+  (BoolValue . (>= 0) . doubleValue) `vmap` eval env e
 
 eval env (Zero e) =
   (BoolValue . (== 0) . doubleValue) `vmap` eval env e
