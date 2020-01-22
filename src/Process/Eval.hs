@@ -11,7 +11,6 @@ import Process.Language
 import Process.Pretty()
 import Text.PrettyPrint.HughesPJClass
 import qualified Val
-import VBool
 
 --------------------------------------------------------------------------------
 
@@ -34,7 +33,8 @@ instance Show Value where
 
 class Valued f where
   val         :: a -> f a
-  vbool       :: VBool -> f Bool
+  vpositive   :: f Double -> f Bool
+  vzero       :: f Double -> f Bool
   vmap        :: Ord b => (a -> b) -> f a -> f b
   vlift       :: Ord c => (a -> b -> c) -> f a -> f b -> f c
   vifThenElse :: Ord a => f Bool -> f a -> f a -> f a
@@ -43,7 +43,8 @@ class Valued f where
 
 instance Valued Identity where
   val               = return
-  vbool             = return . isTrue
+  vpositive         = vmap (>= 0)
+  vzero             = vmap (== 0)
   vmap              = fmap
   vlift             = liftM2
   vifThenElse c a b = if runIdentity c then a else b
@@ -52,7 +53,8 @@ instance Valued Identity where
 
 instance Valued Maybe where
   val                      = return
-  vbool                    = return . isTrue
+  vpositive                = vmap (>= 0)
+  vzero                    = vmap (== 0)
   vmap                     = fmap
   vlift                    = liftM2
   vifThenElse (Just c) a b = if c then a else b
@@ -62,7 +64,8 @@ instance Valued Maybe where
 
 instance Valued Val.Val where
   val         = Val.val
-  vbool       = Val.vbool
+  vpositive   = (Val.>=? 0)
+  vzero       = (Val.==? 0)
   vmap        = Val.mapVal
   vlift       = Val.liftVal
   vifThenElse = Val.ifThenElse
@@ -142,12 +145,11 @@ eval env (And e1 e2) =
 eval _ (Bool x) =
   val (BoolValue x)
 
--- TODO: use VBools here! Otherwise the Val stuff won't do anything
 eval env (Positive e) =
-  (BoolValue . (>= 0) . doubleValue) `vmap` eval env e
+  BoolValue `vmap` vpositive (doubleValue `vmap` eval env e)
 
 eval env (Zero e) =
-  (BoolValue . (== 0) . doubleValue) `vmap` eval env e
+  BoolValue `vmap` vzero (doubleValue `vmap` eval env e)
 
 eval _ e =
   vfail $ show $
