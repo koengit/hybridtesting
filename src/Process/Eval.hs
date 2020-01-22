@@ -4,6 +4,7 @@ module Process.Eval where
 
 import Data.Map(Map)
 import qualified Data.Map.Strict as Map
+import qualified Data.Map.Merge.Strict as Merge
 import Control.Monad
 import Data.Functor.Identity
 import Process.Language
@@ -123,18 +124,31 @@ eval _ e =
 --------------------------------------------------------------------------------
 
 execStep :: Valued f => Env f -> Step -> Env f
-execStep env p = Map.union (go p) env
+execStep env p = Map.unionWithKey h (go p) env
  where
-  go (If e s1 s2)     = Map.unionWith (vifThenElse (boolValue `vmap` eval env e))
-                          (go s1)
-                          (go s2)
+  go (If e s1 s2)     = iff (boolValue `vmap` eval env e) (go s1) (go s2)
   go (Update m)       = Map.map (eval env) m
-  go (Assume str e s) = Map.alter (alt e) Pre  (go s)
-  go (Assert str e s) = Map.alter (alt e) Post (go s)
+  go (Assume str e s) = add Pre  (eval env e) (go s)
+  go (Assert str e s) = add Post (eval env e) (go s)
     
-  alt e Nothing  = Just (eval env e)
-  alt e (Just w) = Just (BoolValue `vmap` vlift (&&) (boolValue `vmap` eval env e)
-                                                     (boolValue `vmap` w))
+  iff c =
+    Merge.merge (Merge.mapMaybeMissing fxv)
+                (Merge.mapMaybeMissing fyw)
+                (Merge.zipWithMaybeMatched f)
+   where
+    fxv x v = Just (vifThenElse c v (env Map.! x))
+    fyw y w = Just (vifThenElse c (env Map.! y) w)
+    f x v w = Just (vifThenElse c v w)
+
+  add x v =
+    Map.insertWith (&&&) x v
+
+  h x new old
+    | x == Pre || x == Post = new &&& old
+    | otherwise             = new
+
+  v &&& w =
+    BoolValue `vmap` vlift (&&) (boolValue `vmap` v) (boolValue `vmap` w)
 
 --------------------------------------------------------------------------------
 
