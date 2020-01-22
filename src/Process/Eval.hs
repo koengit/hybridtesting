@@ -11,6 +11,7 @@ import Process.Language
 import Process.Pretty()
 import Text.PrettyPrint.HughesPJClass
 import qualified Val
+import VBool
 
 --------------------------------------------------------------------------------
 
@@ -33,6 +34,7 @@ instance Show Value where
 
 class Valued f where
   val         :: a -> f a
+  vbool       :: VBool -> f Bool
   vmap        :: Ord b => (a -> b) -> f a -> f b
   vlift       :: Ord c => (a -> b -> c) -> f a -> f b -> f c
   vifThenElse :: Ord a => f Bool -> f a -> f a -> f a
@@ -41,6 +43,7 @@ class Valued f where
 
 instance Valued Identity where
   val               = return
+  vbool             = return . isTrue
   vmap              = fmap
   vlift             = liftM2
   vifThenElse c a b = if runIdentity c then a else b
@@ -49,6 +52,7 @@ instance Valued Identity where
 
 instance Valued Maybe where
   val                      = return
+  vbool                    = return . isTrue
   vmap                     = fmap
   vlift                    = liftM2
   vifThenElse (Just c) a b = if c then a else b
@@ -58,6 +62,7 @@ instance Valued Maybe where
 
 instance Valued Val.Val where
   val         = Val.val
+  vbool       = Val.vbool
   vmap        = Val.mapVal
   vlift       = Val.liftVal
   vifThenElse = Val.ifThenElse
@@ -138,7 +143,7 @@ eval _ (Bool x) =
   val (BoolValue x)
 
 eval env (Positive e) =
-  (BoolValue . (>= 0) . doubleValue) `vmap` eval env e
+  eval env e `vbind` (BoolValue . (>= 0) . doubleValue) `vmap` 
 
 eval env (Zero e) =
   (BoolValue . (== 0) . doubleValue) `vmap` eval env e
@@ -152,7 +157,7 @@ eval _ e =
 
 --------------------------------------------------------------------------------
 
-execStep :: (Show (f Bool), Valued f) => Env f -> Step -> Env f
+execStep :: Valued f => Env f -> Step -> Env f
 execStep env p = Map.unionWithKey h (go p) env
  where
   go (If e s1 s2)     = iff (boolValue `vmap` eval env e) (go s1) (go s2)
@@ -195,7 +200,7 @@ emptyEnv delta =
 
 --------------------------------------------------------------------------------
 
-simulate :: (Show (f Bool), Valued f) => Double -> [Env f] -> Process -> [Env f]
+simulate :: Valued f => Double -> [Env f] -> Process -> [Env f]
 simulate delta inputs process =
   go (execStep (emptyEnv delta) (start process)) inputs
  where
