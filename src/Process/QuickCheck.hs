@@ -6,7 +6,7 @@ import Utils
 import Test.QuickCheck
 import System.Random
 import Control.Monad
-import qualified Data.Map.Strict as Map
+import qualified Data.Map as Map
 import Data.Functor.Identity
 
 ----------------------------------------------------------------------
@@ -121,10 +121,11 @@ checkAssertions delta maxdur types p =
       pre   = boolValue $ final Map.! Pre
       post  = boolValue $ final Map.! Post
     in
+      counterexample (show inps) $
       not (null envs') Test.QuickCheck.==>
-      counterexample ("After " ++ show (fromIntegral (length envs') * delta) ++ "s:") $
-      flip (foldr counterexample)
-        [ "  " ++ show x ++ " = " ++ show v | (x, v) <- Map.toList final ] $
-      counterexample "Postcondition failed." $
+      --counterexample ("After " ++ show (fromIntegral (length envs') * delta) ++ "s:") $
+      --flip (foldr counterexample)
+      --  [ "  " ++ show x ++ " = " ++ show v | (x, v) <- Map.toList final ] $
+      --counterexample "Postcondition failed." $
         pre Test.QuickCheck.==> post
 
