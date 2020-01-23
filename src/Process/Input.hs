@@ -1,4 +1,5 @@
 -- Describing the set of test inputs for a system.
+{-# LANGUAGE DeriveGeneric #-}
 module Process.Input where
 
 import Process.Language(Var)
@@ -6,6 +7,8 @@ import Process.Eval
 import qualified Data.Map.Strict as Map
 import Data.Map(Map)
 import Data.List
+import GHC.Generics
+import Data
 
 type Types = Map Var (Time, Type)
 type Duration = Double
@@ -24,12 +27,18 @@ data Type = Real (Double, Double) | Integer (Integer, Integer) | Bool
   deriving (Eq, Show)
 
 type Signal = [(Duration, Piece)]
-data Piece = Linear (Double, Double) | Constant Value deriving Eq
+data Piece = Linear (Double, Double) | Constant Value deriving (Generic, Eq)
+
+instance Data Piece
+
 instance Show Piece where
   show (Linear (x, y)) = show x ++ " -- " ++ show y
   show (Constant x) = show x
 
-data Input = Input Duration (Map Var Signal)
+data Input = Input Duration (Map Var Signal) deriving ( Generic )
+
+instance Data Input
+
 instance Show Input where
   show (Input dur signals) =
     intercalate "\n" $

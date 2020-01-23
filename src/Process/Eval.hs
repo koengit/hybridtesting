@@ -1,5 +1,5 @@
 -- An evaluator. Can be used with Val.
-{-# LANGUAGE DefaultSignatures, TupleSections, FlexibleInstances #-}
+{-# LANGUAGE DefaultSignatures, TupleSections, FlexibleInstances, DeriveGeneric #-}
 module Process.Eval where
 
 import Data.Map(Map)
@@ -11,6 +11,8 @@ import Process.Language
 import Process.Pretty()
 import Text.PrettyPrint.HughesPJClass
 import qualified Val
+import GHC.Generics
+import Data
 
 --------------------------------------------------------------------------------
 
@@ -19,7 +21,9 @@ type Env f = Map Var (f Value)
 data Value
   = DoubleValue{ doubleValue :: Double}
   | BoolValue{ boolValue :: Bool }
- deriving (Eq, Ord)
+ deriving (Eq, Ord, Generic)
+
+instance Data Value
 
 constant :: Value -> Expr
 constant (DoubleValue x) = Double x

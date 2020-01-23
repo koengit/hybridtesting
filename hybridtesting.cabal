@@ -41,8 +41,6 @@ library
        VBool
        Data
        Optimize
---  other-modules:
---      Paths_hybridtesting
   hs-source-dirs:
       src
       examples
@@ -59,4 +57,21 @@ library
       random
   default-language: Haskell2010
 
+executable spaceship
+  main-is: SpaceShip.hs
+  hs-source-dirs:
+      src
+      examples
+  build-depends:
+      base >=4.7 && <5,
+      containers,
+      QuickCheck,
+      uniplate,
+      pretty,
+      reflection,
+      process,
+      directory,
+      filepath,
+      random
+  default-language: Haskell2010
 

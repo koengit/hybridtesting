@@ -26,5 +26,9 @@ test vals = simulate 1 envs (lower stdPrims $ ship & check)
 
 prop_SpaceShip =
 --checkAssertions :: Double -> Duration -> Types -> Process -> Property
-  checkAssertions 0.1 100 (Map.singleton acceleration (Continuous, Real (-5,5))) $
+--checkAssertions 0.1 100 (Map.singleton acceleration (Continuous, Real (-5,5))) $
+  checkAssertionsVal 0.1 100 (Map.singleton acceleration (Continuous, Real (-5,5))) $
     lower stdPrims $ ship & check
+
+main = quickCheck prop_SpaceShip
+
