@@ -90,7 +90,7 @@ minimize box0 p h = go (sort [ pair p | p <- ps0 ])
         go (insert qC xpsI)
       else
         -- shrink
-        go (sort (q0:[ pair (p -*-> (0.15,p0)) | (_,p) <- tail xps ]))
+        go (sort (q0:[ pair (p -*-> (0.5,p0)) | (_,p) <- tail xps ]))
    where
     xpsI       = init xps
     q0@(x0,p0) = head xps
@@ -101,16 +101,18 @@ minimize box0 p h = go (sort [ pair p | p <- ps0 ])
     pO = centroid (map snd xpsI)
 
     -- reflect, expand, contract
-    qR@(xR,_) = pair (pL -*-> (2,   pO))
-    qE@(xE,_) = pair (pL -*-> (3,   pO))
-    qC@(xC,_) = pair (pL -*-> (0.4, pO)) -- not 0.5 to avoid the same point twice
+    qR@(xR,_) = pair (pL -*-> (2,    pO))
+    qE@(xE,_) = pair (pL -*-> (3,    pO))
+    qC@(xC,_) = pair (pL -*-> (0.45, pO)) -- not 0.5 to avoid the same point twice
 
 centroid :: [Point] -> Point
 centroid ps = [ sum [p!!i | p <- ps] / fromIntegral l | i <- [0..l-1] ]
  where
   l = length ps
 
--- generic "towards": reflect (a=2), expand (a=3), contract (a=0.5), shrink (a=0.1)
+-- generic "towards": reflect (a=2), expand (a=3), contract (a=0.5), shrink (a=0.5)
+-- N.B.: these coefficients are not the same as \alpha and \gamma in the Wikipedia page
+-- but the reflect/expand functions are the same!
 (-*->) :: Point -> (Double, Point) -> Point
 p -*-> (a,q) = [ x + a*(y - x) | (x,y) <- p `zip` q ]
 

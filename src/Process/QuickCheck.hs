@@ -8,6 +8,7 @@ import System.Random
 import Control.Monad
 import qualified Data.Map as Map
 import Data.Functor.Identity
+import Optimize
 
 ----------------------------------------------------------------------
 -- Generation.
@@ -128,4 +129,23 @@ checkAssertions delta maxdur types p =
       --  [ "  " ++ show x ++ " = " ++ show v | (x, v) <- Map.toList final ] $
       --counterexample "Postcondition failed." $
         pre Test.QuickCheck.==> post
+
+{-
+checkAssertionsVal :: Double -> Duration -> Types -> Process -> Property
+checkAssertionsVal delta maxdur types p =
+  forAll (genInput maxdur types) $ \input ->
+    let run 
+
+
+    let
+      inps   = sampleInput delta input
+      envs   = simulateVal delta inps p
+      vbools = [ | env <- envs ]
+      prefix = takeUntil (not . isTrue) vbools
+      
+      final = last prefix
+    in
+      counterexample (show inps) $
+        not (null envs) QuickCheck.==>
+-}
 

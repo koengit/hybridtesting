@@ -39,7 +39,8 @@ library
        Utils
        Val
        VBool
-       Helicopter
+       Data
+       Optimize
 --  other-modules:
 --      Paths_hybridtesting
   hs-source-dirs:
