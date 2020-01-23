@@ -19,7 +19,10 @@ infixr 1 ==>%
 data VBool = VFalse Inf | VTrue Inf -- x non-negative
  deriving (Eq, Data)
 instance Ord VBool where
-  compare = comparing howTrue
+  VFalse x `compare` VFalse y = y `compare` x
+  VTrue  x `compare` VTrue  y = x `compare` y
+  VFalse _ `compare` VTrue  _ = LT
+  VTrue  _ `compare` VFalse _ = GT
 
 instance Show VBool where
   show (VFalse v) = "false " ++ show (fromInf v)
@@ -183,11 +186,11 @@ big = 100000
 
 (==>%) :: VBool -> VBool -> VBool
 x ==>% y
-  = (nt x # 10) ||% y
+  = (nt x # 0.01) ||% y
 
 (==>+) :: VBool -> VBool -> VBool
 x ==>+ y
-  = (nt x # 10) ||+ y
+  = (nt x # 0.01) ||+ y
 
   -- | isTrue x  = y
   -- | otherwise = nt x #+ big

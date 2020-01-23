@@ -165,13 +165,17 @@ eval _ e =
 --------------------------------------------------------------------------------
 
 execStep :: Valued f => Env f -> Step -> Env f
-execStep env p = Map.unionWithKey h (go p) env
+execStep env p = Map.insert Post ((env Map.! Post) &&& (env' Map.! post)) env'
  where
+  env' = Map.unionWithKey h (go p) env
+  
   go (If e s1 s2)     = iff (boolValue `vmap` eval env e) (go s1) (go s2)
   go (Update m)       = Map.map (eval env) m
   go (Assume str e s) = add Pre  (eval env e) (go s)
-  go (Assert str e s) = add Post (eval env e) (go s)
-    
+  go (Assert str e s) = add post (eval env e) (go s)
+  
+  post = Global "POST"
+  
   iff c =
     Merge.merge (Merge.mapMaybeMissing fxv)
                 (Merge.mapMaybeMissing fxw)
@@ -203,6 +207,7 @@ emptyEnv delta =
   [ (Delta, val (DoubleValue delta))
   , (Pre,   val (BoolValue True))
   , (Post,  val (BoolValue True))
+  , (Global "POST", val (BoolValue True))
   ]
 
 --------------------------------------------------------------------------------

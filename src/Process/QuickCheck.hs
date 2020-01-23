@@ -99,7 +99,7 @@ shrinkSignal ty xs =
 
 shrinkInput :: Types -> Input -> [Input]
 shrinkInput tys (Input dur xs) =
-  [ Input dur' (Map.map (cut dur') xs) | dur' <- shrink dur ] ++
+  [ Input dur' (Map.map (cut dur') xs) | dur' <- shrink dur ++ [dur-1, dur / 2], dur' > 0, dur' < dur ] ++
   [ Input dur ys | ys <- shr xs, xs /= ys ]
   where
     shr =
@@ -138,19 +138,27 @@ checkAssertionsVal :: Double -> Duration -> Types -> Process -> Property
 checkAssertionsVal delta maxdur types p =
   withBadness $
   forAll (genInput maxdur types) $ \input0 ->
-    let (input', result') = forData input0 $ \input ->
-          let
-            inps   = sampleInput delta input
-            envs   = take 1000 $ simulateVal delta inps p
-            final  = last envs
-            pre    = boolValue `mapVal` (final Map.! Pre)
-            post   = boolValue `mapVal` (final Map.! Post)
-            result
-              | null envs = VBool.true
-              | otherwise = propVal (Val.nott pre ||? post)
-          in
-            result
+    let (input', result') = forData input0 run in
+      forAllShrink (return input') (shrinkInput types) $ \input'' ->
+        let envs  = simulateVal delta (sampleInput delta input'') p
+            envs' = [ Map.map (return . DoubleValue . conv) env | env <- envs ]
+            
+            conv v = case the v of
+                       DoubleValue x -> x
+                       BoolValue _   -> VBool.howTrue (propVal (boolValue `vmap` v))
+         in whenFail (plot "cex" delta envs') $
+              run input''
+ where
+  run input =
+    let
+      inps   = sampleInput delta input
+      envs   = simulateVal delta inps p
+      final  = last envs
+      pre    = boolValue `mapVal` (final Map.! Pre)
+      post   = boolValue `mapVal` (final Map.! Post)
+      result
+        | null envs = VBool.true
+        | otherwise = propVal (Val.nott pre ||? post)
     in
-      counterexample (show (sampleInput delta input' :: [Env Identity])) $
-        VBool.isTrue result'
+      if VBool.isTrue result then VBool.true else VBool.false
 
