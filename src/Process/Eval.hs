@@ -165,9 +165,16 @@ eval _ e =
 --------------------------------------------------------------------------------
 
 execStep :: Valued f => Env f -> Step -> Env f
-execStep env p = Map.insert Post ((env Map.! Post) &&& (env' Map.! post)) env'
+execStep env0 p = Map.insert Post ((env0 Map.! Post) &&& (env' Map.! post)) env'
  where
-  env' = Map.unionWithKey h (go p) env
+  env'  = Map.unionWithKey h (go p) env
+
+  env   = Map.union reset env0
+  reset = Map.fromList
+          [ (Pre,  val (BoolValue True))
+          , (Post, val (BoolValue True))
+          , (post, val (BoolValue True))
+          ]
   
   go (If e s1 s2)     = iff (boolValue `vmap` eval env e) (go s1) (go s2)
   go (Update m)       = Map.map (eval env) m

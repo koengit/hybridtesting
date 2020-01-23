@@ -147,7 +147,7 @@ checkAssertionsVal delta maxdur types p =
                        DoubleValue x -> x
                        BoolValue _   -> VBool.howTrue (propVal (boolValue `vmap` v))
          in whenFail (plot "cex" delta envs') $
-              run input''
+              False -- run input''
  where
   run input =
     let
