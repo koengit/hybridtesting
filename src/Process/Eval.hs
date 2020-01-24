@@ -164,24 +164,21 @@ eval _ e =
 
 --------------------------------------------------------------------------------
 
+-- the semantics of this function has changed, Pre and Post are not accumulative
+-- anymore!
 execStep :: Valued f => Env f -> Step -> Env f
-execStep env0 p = Map.insert Post ((env0 Map.! Post) &&& (env' Map.! post)) env'
+execStep env0 p = Map.union (go p) env
  where
-  env'  = Map.unionWithKey h (go p) env
-
   env   = Map.union reset env0
   reset = Map.fromList
           [ (Pre,  val (BoolValue True))
           , (Post, val (BoolValue True))
-          , (post, val (BoolValue True))
           ]
   
   go (If e s1 s2)     = iff (boolValue `vmap` eval env e) (go s1) (go s2)
   go (Update m)       = Map.map (eval env) m
   go (Assume str e s) = add Pre  (eval env e) (go s)
-  go (Assert str e s) = add post (eval env e) (go s)
-  
-  post = Global "POST"
+  go (Assert str e s) = add Post (eval env e) (go s)
   
   iff c =
     Merge.merge (Merge.mapMaybeMissing fxv)
@@ -199,10 +196,6 @@ execStep env0 p = Map.insert Post ((env0 Map.! Post) &&& (env' Map.! post)) env'
   add x v =
     Map.insertWith (&&&) x v
 
-  h x new old
-    | x == Pre || x == Post = new &&& old
-    | otherwise             = new
-
   v &&& w =
     BoolValue `vmap` vlift (&&) (boolValue `vmap` v) (boolValue `vmap` w)
 
@@ -212,9 +205,6 @@ emptyEnv :: Valued f => Double -> Env f
 emptyEnv delta =
   Map.fromList
   [ (Delta, val (DoubleValue delta))
-  , (Pre,   val (BoolValue True))
-  , (Post,  val (BoolValue True))
-  , (Global "POST", val (BoolValue True))
   ]
 
 --------------------------------------------------------------------------------
