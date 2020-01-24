@@ -143,22 +143,39 @@ checkAssertionsVal delta maxdur types p =
         let envs  = simulateVal delta (sampleInput delta input'') p
             envs' = [ Map.map (return . DoubleValue . conv) env | env <- envs ]
             
-            conv v = case the v of
-                       DoubleValue x -> x
-                       BoolValue _   -> VBool.howTrue (propVal (boolValue `vmap` v))
+            conv v = case (wf v, the v) of
+                       (False, _)         -> 0
+                       (_, DoubleValue x) -> x
+                       (_, BoolValue _)   -> VBool.howTrue (propVal (boolValue `vmap` v))
          in whenFail (plot "cex" delta envs') $
-              False -- run input''
+              run input''
  where
   run input =
     let
-      inps   = sampleInput delta input
-      envs   = simulateVal delta inps p
-      final  = last envs
-      pre    = boolValue `mapVal` (final Map.! Pre)
-      post   = boolValue `mapVal` (final Map.! Post)
-      result
-        | null envs = VBool.true
-        | otherwise = propVal (Val.nott pre ||? post)
+      inps = sampleInput delta input
+      envs = simulateVal delta inps p
+      
+      check pre post [] =
+        --propVal pre VBool.==>% propVal post
+        propVal (Val.nott pre ||? post)
+      
+      check pre post (env:envs)
+        | the pre' == False || the post' == False = propVal (Val.nott pre ||? post)
+        | otherwise                               = check pre' post' envs
+       where
+        pre'  = pre  &&? (boolValue `mapVal` (env Map.! Pre))
+        post' = post &&? (boolValue `mapVal` (env Map.! Post))
     in
-      if VBool.isTrue result then VBool.true else VBool.false
+      check (Val.val True) (Val.val True) envs
+
+  inRange env =
+    foldr (&&?) (Val.val True)
+    [ case ran of
+        Real (x,y)    -> (Val.val x Val.<=? v) &&? (v Val.<=? Val.val y)
+        Integer (a,b) -> (Val.val (fromIntegral a) Val.<=? v) &&? (v Val.<=? Val.val (fromIntegral b))
+        _             -> Val.val True
+    | (x,(_,ran)) <- Map.toList types
+    , Just vv <- [Map.lookup x env]
+    , let v = doubleValue `mapVal` vv
+    ]
 

@@ -19,21 +19,27 @@ import qualified Data.Set as Set
 import Data.Functor.Identity
 
 plot :: FilePath -> Double -> [Env Identity] -> IO ()
+plot name delta [] =
+  Plot.plot name maxBound
+    []
 plot name delta envs@(env:_) =
   Plot.plot name maxBound
-    [[(show x, timed (map (value . runIdentity . Map.findWithDefault undefined x) envs))]
+    [[(show x, xsys)]
     | x <- Map.keys env
     , case x of
-        Local _ -> False
         Delta   -> False
+        --Local _ -> False
         _       -> True
+    , let xsys = timed (map (value . runIdentity . Map.findWithDefault undefined x) envs)
+    , not (null (fst xsys))
     ]
   where
-    times = [0, delta..]
+    times    = [0, delta..]
     timed xs = unzip (filter (isNumber . snd) (zip times xs))
+    
     value (BoolValue False) = 0
-    value (BoolValue True) = 1
-    value (DoubleValue x) = x
+    value (BoolValue True)  = 1
+    value (DoubleValue x)   = x
     
     isNumber x | x `elem` [1/0,(-1)/0] = False
                | otherwise             = True

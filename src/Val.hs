@@ -4,29 +4,28 @@ module Val where
 import qualified Data.Map as M
 import Data.List( sort, sortBy, intercalate )
 import Data.Ord
-import VBool
+import qualified VBool
 --import Data
 import Test.QuickCheck
 import Badness
 import GHC.Generics( Generic )
 
-newtype Val a = Val { vals :: [(a,VBool)] }
+newtype Val a = Val { vals :: [(a,Double{- >=0 -})] }
  deriving ( Eq, Ord, Show )
 
 val :: a -> Val a
-val x = Val [(x,true)]
+val x = Val [(x,0)]
+
+wf :: Val a -> Bool
+wf = any ((==0) . snd) . vals
 
 the :: Val a -> a
-the (Val xs) = head [ x | (x,v) <- xs, isTrue v ]
+the (Val xs) = head ([ x | (x,0) <- xs ] ++ error "the []")
 
-mkVal :: Ord a => [(a,VBool)] -> Val a
-mkVal = Val . M.toList . M.fromListWith (||+)
-
-vbool :: VBool -> Val Bool
-vbool v =
-  Val [ (False, nt v)
-      , (True,  v)
-      ]
+mkVal :: Ord a => [(a,Double)] -> Val a
+mkVal = Val . M.toList . M.fromListWith min -- par
+ where
+  x `par` y = recip (recip x + recip y)
 
 class Choice a where
   ifThenElse :: Val Bool -> a -> a -> a
@@ -38,9 +37,9 @@ instance Choice Double where
 instance Ord a => Choice (Val a) where
   ifThenElse (Val cs) (Val xs) (Val ys) =
     mkVal
-    [ (z,cv &&+ zv)
-    | (c,cv) <- cs
-    , (z,zv) <- if c then xs else ys
+    [ (z,dc + dz)
+    | (c,dc) <- cs
+    , (z,dz) <- if c then xs else ys
     ]
 
 mapVal :: Ord b => (a->b) -> Val a -> Val b
@@ -53,7 +52,7 @@ mapVal f (Val xs) =
 liftVal :: Ord c => (a->b->c) -> Val a -> Val b -> Val c
 liftVal f (Val xs) (Val ys) =
   mkVal
-  [ (f x y, a &&+ b)
+  [ (f x y, a + b)
   | (x,a) <- xs
   , (y,b) <- ys
   ]
@@ -78,16 +77,16 @@ instance (Ord a, Fractional a) => Fractional (Val a) where
   fromRational = val . fromRational
 
 instance (Ord a, Floating a) => Floating (Val a) where
-  pi = val pi
-  exp = mapVal exp
-  log = mapVal log
-  sin = mapVal sin
-  cos = mapVal cos
-  asin = mapVal asin
-  acos = mapVal acos
-  atan = mapVal atan
-  sinh = mapVal sinh
-  cosh = mapVal cosh
+  pi    = val pi
+  exp   = mapVal exp
+  log   = mapVal log
+  sin   = mapVal sin
+  cos   = mapVal cos
+  asin  = mapVal asin
+  acos  = mapVal acos
+  atan  = mapVal atan
+  sinh  = mapVal sinh
+  cosh  = mapVal cosh
   asinh = mapVal asinh
   acosh = mapVal acosh
   atanh = mapVal atanh
@@ -95,16 +94,24 @@ instance (Ord a, Floating a) => Floating (Val a) where
 class VCompare a where
   (==?), (/=?), (>?), (>=?), (<?), (<=?) :: a -> a -> Val Bool
 
-instance VCompare Double where
-  (==?) = compDouble (==%)
-  (/=?) = compDouble (\x y -> nt (x ==% y))
-  (>?)  = compDouble (>%)
-  (>=?) = compDouble (>=%)
-  (<?)  = compDouble (<%)
-  (<=?) = compDouble (<=%)
+  x /=? y = mapVal not (x ==? y)
+  x >=? y = y <=? x
+  x >?  y = y <? x
+  x <?  y = mapVal not (y <=? x)
 
-compDouble op x y =
-  vbool (x `op` y)
+instance VCompare Double where
+  x ==? y = eqZero (y - x)
+  x <=? y = geqZero (y - x)
+
+eqZero :: Double -> Val Bool
+eqZero x
+  | x == 0    = Val [(True,0)] -- makes no sense! (however, this is same case for VBool)
+  | otherwise = Val [(False,0),(True,abs x)]
+
+geqZero :: Double -> Val Bool
+geqZero x
+  | x >= 0    = Val [(True,0),(False,x)]
+  | otherwise = Val [(False,0),(True,-x)]
 
 instance VCompare a => VCompare (Val a) where
   (==?) = compVal (==?)
@@ -120,7 +127,7 @@ compVal op x y =
 smash :: Ord a => Val (Val a) -> Val a -- monadic join
 smash (Val vs) =
   mkVal
-  [ (w, a &&+ b)
+  [ (w, a + b)
   | (Val ws,a) <- vs
   , (w     ,b) <- ws
   ]
@@ -128,15 +135,18 @@ smash (Val vs) =
 --------------------------------------------------------------------------------
 
 forget :: Ord a => Val a -> Val a
-forget (Val xs) = Val (take 100 (reverse (sortBy (comparing best) xs)))
+forget (Val xs) = Val (take 100 (sortBy (comparing best) xs))
  where
   best (_,v) = v
 
-propVal :: Val Bool -> VBool
-propVal (Val bs) = foldr1 (&&+) [ if b then v else nt v | (b,v) <- bs ]
-
-propVal0 :: Val Bool -> VBool
-propVal0 (Val bs) = head [ if isTrue v then good 5 else bad 5 | (True,v) <- bs ]
+propVal :: Val Bool -> VBool.VBool
+propVal v@(Val xs)
+  | the v     = case [ d | (False,d) <- xs ] of
+                  []  -> VBool.true
+                  d:_ -> VBool.good d
+  | otherwise = case [ d | (True,d) <- xs ] of
+                  []  -> VBool.false
+                  d:_ -> VBool.bad d
 
 --------------------------------------------------------------------------------
 
