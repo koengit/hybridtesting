@@ -161,27 +161,29 @@ checkAssertionsVal delta maxdur types p =
       envs = simulateVal delta inps p
       
       check pre post [] =
-        --propVal pre VBool.==>% propVal post
-        propVal (Val.nott pre ||? post)
+        (pre, post)
       
       check pre post (env:envs)
-        | the pre' == False || the post' == False = propVal (Val.nott pre' ||? post')
+        | the pre' == False || the post' == False = (pre', post')
         | otherwise                               = check pre' post' envs
        where
         pre'  = pre  &&? (boolValue `mapVal` (env Map.! Pre))
         post' = post &&? (boolValue `mapVal` (env Map.! Post))
 
-      res = check (Val.val True) (Val.val True) envs
-    in res
+      (pre,post) = check (Val.val True) (Val.val True) envs
+    in propVal (Val.nott (okRange input &&? pre) ||? post)
 
-  inRange env =
-    foldr (&&?) (Val.val True)
-    [ case ran of
-        Real (x,y)    -> (Val.val x Val.<=? v) &&? (v Val.<=? Val.val y)
-        Integer (a,b) -> (Val.val (fromIntegral a) Val.<=? v) &&? (v Val.<=? Val.val (fromIntegral b))
-        _             -> Val.val True
-    | (x,(_,ran)) <- Map.toList types
-    , Just vv <- [Map.lookup x env]
-    , let v = doubleValue `mapVal` vv
+  okRange (Input dur mp) =
+    dur >? 0 &&? foldr (&&?) (Val.val True)
+    [ case types Map.! x of
+        (_, Real (mn,mx))    -> (mn Val.<=? v) &&? (v Val.<=? mx)
+        (_, Integer (mn,mx)) -> (fromIntegral mn Val.<=? v) &&? (v Val.<=? fromIntegral mx)
+        _                    -> Val.val True
+    | (x,ps) <- Map.toList mp
+    , (_,p) <- ps
+    , v <- case p of
+             Linear (a,b)             -> [a,b]
+             Constant (DoubleValue a) -> [a]
+             _                        -> []
     ]
 
