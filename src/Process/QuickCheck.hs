@@ -174,7 +174,9 @@ checkAssertionsVal delta maxdur types p =
     in propVal (Val.nott (okRange input &&? pre) ||? post)
 
   okRange (Input dur mp) =
-    dur >? 0 &&? foldr (&&?) (Val.val True)
+        dur >? 0
+    &&? dur <=? maxdur
+    &&? foldr (&&?) (Val.val True)
     [ case types Map.! x of
         (_, Real (mn,mx))    -> (mn Val.<=? v) &&? (v Val.<=? mx)
         (_, Integer (mn,mx)) -> (fromIntegral mn Val.<=? v) &&? (v Val.<=? fromIntegral mx)
