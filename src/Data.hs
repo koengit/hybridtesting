@@ -121,7 +121,7 @@ forData x h = (fill x ws, ans)
   (ws,ans) = goal   isFalse
            . giveUp 10
            . take   1000
-           . minimize (repeat 15) (vals x)
+           . minimize (repeat 100) (vals x)
            $ h . fill x
 
 -- dummy implementation without NM for comparison

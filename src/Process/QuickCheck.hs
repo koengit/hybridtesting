@@ -13,6 +13,7 @@ import Data
 import Val
 import VBool
 import Badness
+import Debug.Trace
 
 ----------------------------------------------------------------------
 -- Generation.
@@ -119,7 +120,8 @@ checkAssertions delta maxdur types p =
   forAllShrink (genInput maxdur types) (shrinkInput types) $ \input ->
     let
       inps  = sampleInput delta input
-      envs  = map (Map.map runIdentity) (simulateReal delta inps p)
+      envs  = map (Map.map Val.the) (simulateVal delta inps p)
+      --envs  = map (Map.map runIdentity) (simulateReal delta inps p)
       envs' = takeUntil (boolValue . (Map.! Post)) envs
       
       final = last envs'
@@ -138,6 +140,9 @@ checkAssertionsVal :: Double -> Duration -> Types -> Process -> Property
 checkAssertionsVal delta maxdur types p =
   withBadness $
   forAll (genInput maxdur types) $ \input0 ->
+  --let input0 = Input 100 (Map.singleton (Global "acceleration") sig)
+  --    sig    = [(4.5,Constant (DoubleValue 5)),(11,Constant (DoubleValue (-5))),(16,Constant (DoubleValue 5))]
+  --in 
     let (input', result') = forData input0 run in
       forAllShrink (return input') (shrinkInput types) $ \input'' ->
         let envs  = simulateVal delta (sampleInput delta input'') p
@@ -160,13 +165,14 @@ checkAssertionsVal delta maxdur types p =
         propVal (Val.nott pre ||? post)
       
       check pre post (env:envs)
-        | the pre' == False || the post' == False = propVal (Val.nott pre ||? post)
+        | the pre' == False || the post' == False = propVal (Val.nott pre' ||? post')
         | otherwise                               = check pre' post' envs
        where
         pre'  = pre  &&? (boolValue `mapVal` (env Map.! Pre))
         post' = post &&? (boolValue `mapVal` (env Map.! Post))
-    in
-      check (Val.val True) (Val.val True) envs
+
+      res = check (Val.val True) (Val.val True) envs
+    in res
 
   inRange env =
     foldr (&&?) (Val.val True)

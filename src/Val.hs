@@ -5,10 +5,12 @@ import qualified Data.Map as M
 import Data.List( sort, sortBy, intercalate )
 import Data.Ord
 import qualified VBool
---import Data
+import Data( forData )
 import Test.QuickCheck
 import Badness
 import GHC.Generics( Generic )
+import System.Process( system )
+import Debug.Trace
 
 newtype Val a = Val { vals :: [(a,Double{- >=0 -})] }
  deriving ( Eq, Ord, Show )
@@ -110,7 +112,8 @@ eqZero x
 
 geqZero :: Double -> Val Bool
 geqZero x
-  | x >= 0    = Val [(True,0),(False,x)]
+  | x == 0    = Val [(True,0)]
+  | x >  0    = Val [(True,0),(False,x)]
   | otherwise = Val [(False,0),(True,-x)]
 
 instance VCompare a => VCompare (Val a) where
@@ -205,12 +208,12 @@ d = 1
 prop_Basic f x =
   withBadness $
   let (y,b) = forData x (\x -> propVal (f (x :: Double) >=? 0)) in
-    whenFail (print y) (isTrue b)
+    whenFail (print y) (VBool.isTrue b)
 
 prop_Val f x =
   withBadness $
   let (y,b) = forData x (\x -> propVal (f (val x) >=? 0)) in
-    whenFail (print y) (isTrue b)
+    whenFail (print y) (VBool.isTrue b)
 
 plot :: (Double,Double) -> [(String, Double -> Double)] -> IO ()
 plot (xL,xR) fs =
@@ -250,7 +253,7 @@ plot (xL,xR) fs =
 
 plotf f fR = plot (-100,500)
              [ ("f", f)
-             , ("fT", \x -> howTrue (propVal (fR (val x) >=? 0)))
+             , ("fT", \x -> VBool.howTrue (propVal (fR (val x) >=? 0)))
              ]
 
 plot3D :: (Double,Double) -> (Double,Double)
