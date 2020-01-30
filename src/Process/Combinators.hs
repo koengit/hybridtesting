@@ -96,13 +96,20 @@ sequential :: Process -> Expr -> Process -> Process
 sequential p e q =
   name $ \x ->
     combine
-      (\_ _ -> (start p & set x (bool False)))
+      (\_ _ -> (start p & q1 & set x (bool False)))
       (\_ _ ->
         (ite (var x)
           (step q)
-          (ite e (set x (bool True) & start q)
+          (ite e (set x (bool True) & q2)
             (step p))))
       p q
+  where
+    -- Make sure that all variables get initialised in the first time-step
+    q1 = withoutChecks (restrictTo (`Map.notMember` definitions (start p)) (start q))
+    -- Variables written by p must be initialised only once q starts for real
+    -- (Note: no need to check step p because start p is required to
+    -- initialised all variables in p)
+    q2 = restrictTo (`Map.member`    definitions (start p)) (start q)
 
 wait :: Expr -> Process -> Process
 wait e p = sequential skip e p
