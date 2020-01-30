@@ -1,2 +1,6 @@
-.stack-work
+*~
+*.xy
+*.pdf
+*.in
+.stack-work/
 stack.yaml.lock
