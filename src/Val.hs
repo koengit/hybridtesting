@@ -4,10 +4,8 @@ module Val where
 import qualified Data.Map as M
 import Data.List( sort, sortBy, intercalate )
 import Data.Ord
-import qualified VBool
 import Data( forData )
 import Test.QuickCheck
-import Badness
 import GHC.Generics( Generic )
 import System.Process( system )
 import Debug.Trace
@@ -59,8 +57,9 @@ liftVal f (Val xs) (Val ys) =
   , (y,b) <- ys
   ]
 
-(||?), (&&?) :: Val Bool -> Val Bool -> Val Bool
+(||?), (&&?), (=>?) :: Val Bool -> Val Bool -> Val Bool
 (||?) = liftVal (||)
+(=>?) = liftVal (<=) -- this is correct: F<=F, F<=T, T<=T but not(T<=F)
 (&&?) = liftVal (&&)
 nott  = mapVal not
 
@@ -138,18 +137,25 @@ smash (Val vs) =
 --------------------------------------------------------------------------------
 
 forget :: Ord a => Val a -> Val a
-forget (Val xs) = Val (take 100 (sortBy (comparing best) xs))
+forget (Val xs) =
+  (if n > 3 then trace ("(" ++ show n ++ ")") else id) $
+    Val (take 100 (sortBy (comparing best) xs))
  where
+  n = length xs
   best (_,v) = v
 
-propVal :: Val Bool -> VBool.VBool
-propVal v@(Val xs)
+howTrue :: Val Bool -> Double
+howTrue v@(Val xs)
   | the v     = case [ d | (False,d) <- xs ] of
-                  []  -> VBool.true
-                  d:_ -> VBool.good d
+                  []  -> infinity
+                  d:_ -> d + 1
   | otherwise = case [ d | (True,d) <- xs ] of
-                  []  -> VBool.false
-                  d:_ -> VBool.bad d
+                  []  -> -infinity
+                  d:_ -> -d - 1
+
+epsilon, infinity :: Double
+epsilon  = last $ takeWhile (>0) $ iterate (/2) 1
+infinity = 1/0
 
 --------------------------------------------------------------------------------
 

@@ -8,11 +8,7 @@ Varying the data-part of test data by means of expressing them as numerical data
 import Test.QuickCheck
 import Data.List
 import Optimize
-import Badness
-import VBool
 import GHC.Generics
-import Badness
-import Data.Reflection
 import qualified Data.Map as M
 import Debug.Trace( trace )
 
@@ -115,19 +111,19 @@ instance Data a => Data (List a) where
 
 --------------------------------------------------------------------------------
 
-forData :: (Show a, Data a, Given Badness) => a -> (a -> VBool) -> (a, VBool)
+forData :: (Show a, Data a) => a -> (a -> Double) -> (a, Double)
 forData x h = (fill x ws, ans)
  where
-  (ws,ans) = goal   isFalse
+  (ws,ans) = goal   (<= 0)
            . giveUp 10
            . take   1000
            . minimize (repeat 100) (vals x)
            $ h . fill x
 
 -- dummy implementation without NM for comparison
-forData0 :: (Show a, Data a) => a -> (a -> VBool) -> Property
+forData0 :: (Show a, Data a) => a -> (a -> Double) -> Property
 forData0 x h =
-  whenFail (print x) $ isTrue (h x)
+  whenFail (print x) $ (h x > 0)
 
 --------------------------------------------------------------------------------
 

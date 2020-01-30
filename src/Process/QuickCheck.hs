@@ -11,8 +11,6 @@ import Data.Functor.Identity
 import Optimize
 import Data
 import Val
-import VBool
-import Badness
 import Debug.Trace
 
 ----------------------------------------------------------------------
@@ -138,7 +136,6 @@ checkAssertions delta maxdur types p =
 
 checkAssertionsVal :: Double -> Duration -> Types -> Process -> Property
 checkAssertionsVal delta maxdur types p =
-  withBadness $
   forAll (genInput maxdur types) $ \input0 ->
   --let input0 = Input 100 (Map.singleton (Global "acceleration") sig)
   --    sig    = [(4.5,Constant (DoubleValue 5)),(11,Constant (DoubleValue (-5))),(16,Constant (DoubleValue 5))]
@@ -151,9 +148,9 @@ checkAssertionsVal delta maxdur types p =
             conv v = case (wf v, the v) of
                        (False, _)         -> 0
                        (_, DoubleValue x) -> x
-                       (_, BoolValue _)   -> VBool.howTrue (propVal (boolValue `vmap` v))
+                       (_, BoolValue _)   -> howTrue (boolValue `vmap` v)
          in whenFail (plot "cex" delta envs') $
-              run input''
+              run input'' > 0
  where
   run input =
     let
@@ -171,11 +168,13 @@ checkAssertionsVal delta maxdur types p =
         post' = post &&? (boolValue `mapVal` (env Map.! Post))
 
       (pre,post) = check (Val.val True) (Val.val True) envs
-    in propVal (Val.nott (okRange input &&? pre) ||? post)
+      
+      ok = okRange input
+    in if the ok then howTrue ((ok &&? pre) =>? post) else 9999 - howTrue ok
 
   okRange (Input dur mp) =
         dur >? 0
-    &&? dur <=? maxdur
+    &&? (dur Val.<=? maxdur)
     &&? foldr (&&?) (Val.val True)
     [ case types Map.! x of
         (_, Real (mn,mx))    -> (mn Val.<=? v) &&? (v Val.<=? mx)

@@ -27,7 +27,6 @@ source-repository head
 library
   exposed-modules:
        Process
-       Badness
        Plot
        Process.Combinators
        Process.Eval
@@ -38,7 +37,6 @@ library
        Process.Simplify
        Utils
        Val
-       VBool
        Data
        Optimize
   hs-source-dirs:
