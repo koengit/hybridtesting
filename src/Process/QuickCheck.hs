@@ -145,10 +145,9 @@ checkAssertionsVal delta maxdur types p =
         let envs  = simulateVal delta (sampleInput delta input'') p
             envs' = [ Map.map (return . DoubleValue . conv) env | env <- envs ]
             
-            conv v = case (wf v, the v) of
-                       (False, _)         -> 0
-                       (_, DoubleValue x) -> x
-                       (_, BoolValue _)   -> howTrue (boolValue `vmap` v)
+            conv v = case the v of
+                       DoubleValue x -> x
+                       BoolValue _   -> howTrue (boolValue `vmap` v)
          in whenFail (plot "cex" delta envs') $
               run input'' > 0
  where

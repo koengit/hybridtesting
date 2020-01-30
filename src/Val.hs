@@ -4,58 +4,56 @@ module Val where
 import qualified Data.Map as M
 import Data.List( sort, sortBy, intercalate )
 import Data.Ord
-import Data( forData )
-import Test.QuickCheck
-import GHC.Generics( Generic )
 import System.Process( system )
-import Debug.Trace
 
-newtype Val a = Val { vals :: [(a,Double{- >=0 -})] }
+--------------------------------------------------------------------------------
+-- Val keeps track of a value, plus alternatives
+
+data Val a = Val{ the :: a, alts :: [(a,Double{- >=0 -})] }
  deriving ( Eq, Ord, Show )
 
 val :: a -> Val a
-val x = Val [(x,0)]
+val x = Val x []
 
-wf :: Val a -> Bool
-wf = any ((==0) . snd) . vals
-
-the :: Val a -> a
-the (Val xs) = head ([ x | (x,0) <- xs ] ++ error "the []")
-
-mkVal :: Ord a => [(a,Double)] -> Val a
-mkVal = Val . M.toList . M.fromListWith min -- par
+mkVal :: Ord a => a -> [(a,Double)] -> Val a
+mkVal x xs = Val x (M.toList (M.fromListWith op (filter ((x/=).fst) xs)))
  where
+  op = min
+  --op = par
+ 
   x `par` y = recip (recip x + recip y)
 
-class Choice a where
-  ifThenElse :: Val Bool -> a -> a -> a
-
-instance Choice Double where
-  ifThenElse c x y =
-    if the c then x else y -- loses VBool info
-
-instance Ord a => Choice (Val a) where
-  ifThenElse (Val cs) (Val xs) (Val ys) =
-    mkVal
-    [ (z,dc + dz)
-    | (c,dc) <- cs
-    , (z,dz) <- if c then xs else ys
-    ]
+--------------------------------------------------------------------------------
+-- basic lifting
 
 mapVal :: Ord b => (a->b) -> Val a -> Val b
-mapVal f (Val xs) =
-  mkVal
+mapVal f (Val x xs) =
+  mkVal (f x)
   [ (f x, a)
   | (x,a) <- xs
   ]
 
 liftVal :: Ord c => (a->b->c) -> Val a -> Val b -> Val c
-liftVal f (Val xs) (Val ys) =
-  mkVal
+liftVal f (Val x xs) (Val y ys) =
+  mkVal (f x y) $
   [ (f x y, a + b)
   | (x,a) <- xs
   , (y,b) <- ys
-  ]
+  ] ++
+  [ (f x y, a) | (x,a) <- xs ] ++
+  [ (f x y, b) | (y,b) <- ys ]
+
+smashVal :: Ord a => Val (Val a) -> Val a -- monadic join
+smashVal (Val (Val v vs) ws) =
+  mkVal v $
+  [ (z, a + b)
+  | (Val u us,a) <- ws
+  , (z,b) <- (u,0) : us
+  ] ++
+  vs
+
+--------------------------------------------------------------------------------
+-- basic operations
 
 (||?), (&&?), (=>?) :: Val Bool -> Val Bool -> Val Bool
 (||?) = liftVal (||)
@@ -106,14 +104,13 @@ instance VCompare Double where
 
 eqZero :: Double -> Val Bool
 eqZero x
-  | x == 0    = Val [(True,0)] -- makes no sense! (however, this is same case for VBool)
-  | otherwise = Val [(False,0),(True,abs x)]
+  | x == 0    = Val True  [(False,0)]
+  | otherwise = Val False [(True,abs x)]
 
 geqZero :: Double -> Val Bool
 geqZero x
-  | x == 0    = Val [(True,0)]
-  | x >  0    = Val [(True,0),(False,x)]
-  | otherwise = Val [(False,0),(True,-x)]
+  | x >= 0    = Val True  [(False,x)]
+  | otherwise = Val False [(True,-x)]
 
 instance VCompare a => VCompare (Val a) where
   (==?) = compVal (==?)
@@ -124,37 +121,43 @@ instance VCompare a => VCompare (Val a) where
   (<=?) = compVal (<=?)
 
 compVal op x y =
-  smash (liftVal op x y)
+  smashVal (liftVal op x y)
 
-smash :: Ord a => Val (Val a) -> Val a -- monadic join
-smash (Val vs) =
-  mkVal
-  [ (w, a + b)
-  | (Val ws,a) <- vs
-  , (w     ,b) <- ws
-  ]
+--------------------------------------------------------------------------------
+
+class Choice a where
+  ifThenElse :: Val Bool -> a -> a -> a
+
+instance Choice Double where
+  ifThenElse c x y =
+    if the c then x else y -- loses distance info
+
+instance Ord a => Choice (Val a) where
+  ifThenElse (Val c cs) (Val x xs) (Val y ys) =
+    mkVal (if c then x else y) $
+    [ (z,dc + dz)
+    | (c,dc) <- cs
+    , (z,dz) <- if c then (x,0):xs else (y,0):ys
+    ] ++
+    if c then xs else ys
 
 --------------------------------------------------------------------------------
 
 forget :: Ord a => Val a -> Val a
-forget (Val xs) =
-  (if n > 3 then trace ("(" ++ show n ++ ")") else id) $
-    Val (take 100 (sortBy (comparing best) xs))
+forget (Val x xs) =
+--  (if n >= 2 then trace ("(alts:" ++ show n ++ ")") else id) $
+    Val x (take 100 (sortBy (comparing best) xs))
  where
   n = length xs
   best (_,v) = v
 
 howTrue :: Val Bool -> Double
-howTrue v@(Val xs)
-  | the v     = case [ d | (False,d) <- xs ] of
-                  []  -> infinity
-                  d:_ -> d + 1
-  | otherwise = case [ d | (True,d) <- xs ] of
-                  []  -> -infinity
-                  d:_ -> -d - 1
+howTrue (Val True  [])          = infinity
+howTrue (Val True  [(False,d)]) = d + 1
+howTrue (Val False [])          = -infinity
+howTrue (Val False [(True,d)])  = -d - 1
 
-epsilon, infinity :: Double
-epsilon  = last $ takeWhile (>0) $ iterate (/2) 1
+infinity :: Double
 infinity = 1/0
 
 --------------------------------------------------------------------------------

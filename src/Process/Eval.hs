@@ -74,7 +74,7 @@ instance Valued Val.Val where
   vlift       = Val.liftVal
   vifThenElse = Val.ifThenElse
   vprune      = Val.forget
-  vfail s     = Val.mkVal [] -- error s
+  vfail s     = error s
 
 vlift3 :: (Valued f, Ord a, Ord b, Ord d) => (a -> b -> c -> d) -> f a -> f b -> f c -> f d
 vlift3 f x y z =
