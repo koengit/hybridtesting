@@ -52,11 +52,11 @@ instance Pretty Expr where
   pPrintPrec _ p = ppExp p
 
 instance Pretty Var where
-  pPrint (Global x) = text x
-  pPrint (Local n) = text "x" <#> pPrint n
-  pPrint Delta     = text "dt"
-  pPrint Pre       = text "pre_"
-  pPrint Post      = text "post_"
+  pPrint (Global x)  = text x
+  pPrint (Local s n) = text s <#> pPrint n
+  pPrint Delta       = text "dt"
+  pPrint Pre         = text "pre_"
+  pPrint Post        = text "post_"
 
 instance Pretty Doc where
   pPrint = id

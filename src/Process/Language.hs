@@ -60,7 +60,7 @@ data PrimitiveKind = Functional | Temporal
 
 data Var =
     Global String
-  | Local Int
+  | Local String Int
   | Delta
   | Pre
   | Post
@@ -145,7 +145,7 @@ combine startf stepf p q =
     -- (shifting p rather than q makes foldr combine take linear time)
     p' = rename shift p
     -- The guard here is necessary for the 'name' function to work
-    shift (Local x) | x < locals p = Local (locals q+x)
+    shift (Local s x) | x < locals p = Local s (locals q+x)
     shift x = x
 
 -- Map a function over steps

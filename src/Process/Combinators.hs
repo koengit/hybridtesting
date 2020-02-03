@@ -62,11 +62,11 @@ instance Par Process where
   (&) = combine (&) (&)
 
 -- Generate a local name
-name :: (Var -> Process) -> Process
-name f = p{locals = locals p + 1}
+name :: String -> (Var -> Process) -> Process
+name s f = p{locals = locals p + 1}
   where
     p = f n
-    n = Local (locals p)
+    n = Local s (locals p)
 
 -- Update a variable
 set :: Var -> Expr -> Step
@@ -94,7 +94,7 @@ switch cond p1 p2 =
 -- Sequential composition
 sequential :: Process -> Expr -> Process -> Process
 sequential p e q =
-  name $ \x ->
+  name "b" $ \x ->
     combine
       (\_ _ -> (start p & q1 & set x (bool False)))
       (\_ _ ->
@@ -209,14 +209,14 @@ stdPrims =
       k ((e - old 0 e) * old 0 (1 / delta))),
    ("integral",
     \[e, reset] k ->
-      name $ \x ->
+      name "x" $ \x ->
         let e' = cond reset 0 (var x + delta * e) in
         continuous x 0 e' &
         -- x is the *old* value of the integral, so e' is the current value
         k e'),
    ("old",
     \[initial, e] k ->
-      name $ \x ->
+      name "w" $ \x ->
         -- Works because all updates are done simultaneously
         continuous x initial e & k (Var x)),
    ("min",
