@@ -16,8 +16,10 @@ val :: a -> Val a
 val x = Val x []
 
 mkVal :: Ord a => a -> [(a,Double)] -> Val a
-mkVal x xs = Val x (M.toList (M.fromListWith op (filter ((x/=).fst) xs)))
+mkVal x xs = xs' `seq` Val x xs'
  where
+  xs' = M.toList (M.fromListWith op (filter ((x/=).fst) xs))
+ 
   op = min
   --op = par
  
