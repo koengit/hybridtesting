@@ -10,7 +10,6 @@ import Data.List
 import Optimize
 import GHC.Generics
 import qualified Data.Map as M
-import Debug.Trace( trace )
 
 --------------------------------------------------------------------------------
 
@@ -111,19 +110,14 @@ instance Data a => Data (List a) where
 
 --------------------------------------------------------------------------------
 
-forData :: (Show a, Data a) => a -> (a -> Double) -> (a, Double)
-forData x h = (fill x ws, ans)
+forData :: (Show a, Data a) => a -> (a -> Double) -> (a, Int, Double)
+forData x h = (fill x ws, n, ans)
  where
-  (ws,ans) = goal   (<= 0)
-           . giveUp 10
-           . take   1000
-           . minimize (repeat 100) (vals x)
-           $ h . fill x
-
--- dummy implementation without NM for comparison
-forData0 :: (Show a, Data a) => a -> (a -> Double) -> Property
-forData0 x h =
-  whenFail (print x) $ (h x > 0)
+  (ws,ans,n) = goal (<= 0)
+             . giveUp 10
+             . take   1000
+             . minimize (repeat 100) (vals x)
+             $ h . fill x
 
 --------------------------------------------------------------------------------
 

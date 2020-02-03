@@ -31,11 +31,13 @@ Here:
 -}
 
 -- helpers
-goal :: (a -> Bool) -> [(Point,a,a)] -> (Point,a)
-goal p ((vs,x,_):qs)
-  | null qs || p x = (vs,x)
-  | otherwise      = goal p qs
-goal p []          = error "goal []"
+goal :: (a -> Bool) -> [(Point,a,a)] -> (Point,a,Int)
+goal p [] = error "goal []"
+goal p qs = go 1 qs
+ where
+  go n ((vs,x,_):qs)
+    | null qs || p x = (vs,x,n)
+    | otherwise      = let n'=n+1 in n' `seq` go n' qs
 
 giveUp :: Ord a => Int -> [(Point,a,a)] -> [(Point,a,a)]
 giveUp n = go n
