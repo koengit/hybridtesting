@@ -37,7 +37,9 @@ instance Show Piece where
 
 data Input = Input Duration (Map Var Signal) deriving ( Generic )
 
-instance Data Input
+instance Data Input {- where
+  vals (Input dur mp)    = vals mp
+  fill (Input dur mp) xs = Input dur (fill mp xs) -}
 
 instance Show Input where
   show (Input dur signals) =
