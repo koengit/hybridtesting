@@ -44,6 +44,7 @@ class Valued f where
   vifThenElse :: Ord a => f Bool -> f a -> f a -> f a
   vprune      :: Ord a => f a -> f a
   vfail       :: Ord a => String -> f a
+  vplot       :: f Value -> Double
 
 instance Valued Identity where
   val               = return
@@ -54,6 +55,9 @@ instance Valued Identity where
   vifThenElse c a b = if runIdentity c then a else b
   vprune            = id
   vfail s           = error s
+  vplot v           = case runIdentity v of
+                        DoubleValue x -> x
+                        BoolValue b   -> if b then 1 else 0
 
 instance Valued Maybe where
   val                      = return
@@ -65,6 +69,8 @@ instance Valued Maybe where
   vifThenElse Nothing  a b = Nothing
   vprune                   = id
   vfail _s                 = Nothing
+  vplot Nothing            = 0
+  vplot (Just x)           = vplot (return x :: Identity Value)
 
 instance Valued Val.Val where
   val         = Val.val
@@ -75,6 +81,9 @@ instance Valued Val.Val where
   vifThenElse = Val.ifThenElse
   vprune      = Val.forget
   vfail s     = error s
+  vplot v     = case Val.the v of
+                  DoubleValue x -> x
+                  BoolValue _   -> Val.howTrue (boolValue `vmap` v)
 
 vlift3 :: (Valued f, Ord a, Ord b, Ord d) => (a -> b -> c -> d) -> f a -> f b -> f c -> f d
 vlift3 f x y z =

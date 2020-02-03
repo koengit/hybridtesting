@@ -27,7 +27,7 @@ source-repository head
 library
   exposed-modules:
        Process
-       Plot
+       Process.Plot
        Process.Combinators
        Process.Eval
        Process.Input

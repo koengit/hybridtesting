@@ -137,19 +137,11 @@ checkAssertions delta maxdur types p =
 checkAssertionsVal :: Double -> Duration -> Types -> Process -> Property
 checkAssertionsVal delta maxdur types p =
   forAll (genInput maxdur types) $ \input0 ->
-  --let input0 = Input 100 (Map.singleton (Global "acceleration") sig)
-  --    sig    = [(4.5,Constant (DoubleValue 5)),(11,Constant (DoubleValue (-5))),(16,Constant (DoubleValue 5))]
-  --in 
     let (input', result') = forData input0 run in
       forAllShrink (return input') (shrinkInput types) $ \input'' ->
-        let envs  = simulateVal delta (sampleInput delta input'') p
-            envs' = [ Map.map (return . DoubleValue . conv) env | env <- envs ]
-            
-            conv v = case the v of
-                       DoubleValue x -> x
-                       BoolValue _   -> howTrue (boolValue `vmap` v)
-         in whenFail (plot "cex" delta envs') $
-              run input'' > 0
+        let envs  = simulateVal delta (sampleInput delta input'') p in
+          whenFail (plot "cex" delta envs) $
+            run input'' > 0
  where
   run input =
     let
@@ -169,7 +161,7 @@ checkAssertionsVal delta maxdur types p =
       (pre,post) = check (Val.val True) (Val.val True) envs
       
       ok = okRange input
-    in if the ok then howTrue ((ok &&? pre) =>? post) else 9999 - howTrue ok
+    in howTrue ((ok &&? pre) =>? post)
 
   okRange (Input dur mp) =
         dur >? 0
