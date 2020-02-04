@@ -20,7 +20,7 @@ data Shape
   | Parameter   -- keeps its value during the entire execution _______
  deriving (Eq, Ord, Show, Generic)
 
-instance Data Double Shape
+instance Data Shape
 
 data Type
   = Real    (Double,  Double)
@@ -40,7 +40,7 @@ data Signal
   | End Value
  deriving (Eq, Ord, Generic)
 
-instance Data Double Signal where
+instance Data Signal where
   vals (Point v d s) = vals v ++ vals d ++ vals s
   vals (End v)       = vals v
   
@@ -99,7 +99,7 @@ instance Show Input where
     | (v,(_,s)) <- Map.toList signals
     ]
 
-instance Data Double Input where
+instance Data Input where
   vals (Input dur mp)    = vals mp
   fill (Input dur mp) xs = Input dur (fill mp xs)
 
