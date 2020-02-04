@@ -42,7 +42,6 @@ class Valued f where
   vmap        :: Ord b => (a -> b) -> f a -> f b
   vlift       :: Ord c => (a -> b -> c) -> f a -> f b -> f c
   vifThenElse :: Ord a => f Bool -> f a -> f a -> f a
-  vprune      :: Ord a => f a -> f a
   vfail       :: Ord a => String -> f a
   vplot       :: f Value -> Double
 
@@ -53,7 +52,6 @@ instance Valued Identity where
   vmap              = fmap
   vlift             = liftM2
   vifThenElse c a b = if runIdentity c then a else b
-  vprune            = id
   vfail s           = error s
   vplot v           = case runIdentity v of
                         DoubleValue x -> x
@@ -67,7 +65,6 @@ instance Valued Maybe where
   vlift                    = liftM2
   vifThenElse (Just c) a b = if c then a else b
   vifThenElse Nothing  a b = Nothing
-  vprune                   = id
   vfail _s                 = Nothing
   vplot Nothing            = 0
   vplot (Just x)           = vplot (return x :: Identity Value)
@@ -79,7 +76,6 @@ instance Valued Val.Val where
   vmap        = Val.mapVal
   vlift       = Val.liftVal
   vifThenElse = Val.ifThenElse
-  vprune      = id 
   vfail s     = error s
   vplot v     = case Val.the v of
                   DoubleValue x -> x
@@ -112,9 +108,6 @@ instance Valued EVal where
   vifThenElse (Err s) _ _ = Err s
   vifThenElse (Val b) x y = 
 
-  vprune (Val v) = Val (vprune v)
-  vprune (Err s) = Err s
-  
   vfail s = Err s
 -}
 
@@ -223,7 +216,7 @@ simulate delta inputs process =
   go (execStep (emptyEnv delta) (start process)) inputs
  where
   go state []         = []
-  go state (inp:inps) = state' : go (Map.map vprune state') inps
+  go state (inp:inps) = state' : go state' inps
    where
     state' = execStep (Map.union inp state) (step process)
 
