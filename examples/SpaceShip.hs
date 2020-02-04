@@ -9,27 +9,30 @@ acceleration = Global "acceleration"
 position :: Var
 position = Global "position"
 
-ship :: Process
-ship = continuous position 0 (integral (integral (var acceleration)))
+gravity :: Var
+gravity = Global "gravity"
 
-check :: Process
-check =
-  sequential skip (var position >=? 100) $
-  sequential skip (var position <=? -100) $
+ship :: Process
+ship =
+  continuous position 0 (integral (integral (var gravity*var acceleration)))
+
+check :: (Double, Double, Double) -> Process
+check (g1, g2, g3) =
+  sequential (first (set gravity (double g1))) (var position >=? 100) $
+  sequential (first (set gravity (double g2))) (var position <=? -100) $
   --process skip $ assert "reached destination" (var position <=? 100)
-  sequential skip (var position >=? 100) $
+  sequential (first (set gravity (double g3))) (var position >=? 100) $
     first (assert "reached destination" false)
 
-test :: (Show (f Bool), Valued f) => [Double] -> [Env f]
-test vals = simulate 0.1 envs (lower stdPrims $ ship & check)
+test :: (Show (f Bool), Valued f) => (Double, Double, Double) -> [Double] -> [Env f]
+test g vals = simulate 0.1 envs (lower stdPrims $ ship & check g)
   where
     envs = [Map.singleton acceleration (val (DoubleValue x)) | x <- vals]
 
-prop_SpaceShip =
+prop_SpaceShip g =
 --checkAssertions :: Double -> Duration -> Types -> Process -> Property
   --checkAssertions 0.1 1000 (Map.singleton acceleration (Continuous, Real (-10,10))) $
   checkAssertionsVal 0.1 100 (Map.singleton acceleration (Continuous, Real (-5,5))) $
-    lower stdPrims $ ship & check
+    lower stdPrims $ simplify $ ship & check g
 
-main = quickCheckWith stdArgs{ maxSuccess = 100000 } prop_SpaceShip
-
+main = quickCheckWith stdArgs{ maxSuccess = 100000 } (prop_SpaceShip (1, 2, 0.5))
