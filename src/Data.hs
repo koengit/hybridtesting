@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, DefaultSignatures, TypeOperators #-}
+{-# LANGUAGE FlexibleContexts, DefaultSignatures, TypeOperators, FlexibleInstances, MultiParamTypeClasses #-}
 module Data where
 
 {-

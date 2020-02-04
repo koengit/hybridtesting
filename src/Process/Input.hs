@@ -1,5 +1,5 @@
 -- Describing the set of test inputs for a system.
-{-# LANGUAGE DeriveGeneric, TupleSections #-}
+{-# LANGUAGE DeriveGeneric, TupleSections, MultiParamTypeClasses #-}
 module Process.Input where
 
 import Process.Language(Var)
@@ -20,7 +20,7 @@ data Shape
   | Parameter   -- keeps its value during the entire execution _______
  deriving (Eq, Ord, Show, Generic)
 
-instance Data Shape
+instance Data Double Shape
 
 data Type
   = Real    (Double,  Double)
@@ -40,12 +40,12 @@ data Signal
   | End Value
  deriving (Eq, Ord, Generic)
 
-instance Data Signal where
+instance Data Double Signal where
   vals (Point v d s) = vals v ++ vals d ++ vals s
   vals (End v)       = vals v
   
   fill (Point v d s) xs = Point (fill v xs) (0 `max` fill d (drop k xs))
-                                (fill s (drop (k+1) xs)) where k = length (vals v)
+                                (fill s (drop (k+1) xs)) where k = length (vals v :: [Double])
   fill (End v)       xs = End (fill v xs)
 
 instance Show Signal where
@@ -99,7 +99,7 @@ instance Show Input where
     | (v,(_,s)) <- Map.toList signals
     ]
 
-instance Data Input where
+instance Data Double Input where
   vals (Input dur mp)    = vals mp
   fill (Input dur mp) xs = Input dur (fill mp xs)
 

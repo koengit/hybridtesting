@@ -3,8 +3,8 @@ module Optimize where
 import Data.List
 import qualified Debug.Trace as T
 
---progress = True
-progress = False
+progress = True
+--progress = False
 
 trace s x | progress  = T.trace s x
           | otherwise = x

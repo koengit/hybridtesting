@@ -21,7 +21,7 @@ val :: a -> Val a
 val x = Val [(x, 0)]
 
 mkVal :: Ord a => [(a,Double)] -> Val a
-mkVal xs = Val (take 2 (ordNubOn fst xs))
+mkVal xs = Val (take 5 (ordNubOn fst xs))
 
 merge :: [(a, Double)] -> [(a, Double)] -> [(a, Double)]
 merge xs [] = xs
@@ -157,9 +157,9 @@ instance Ord a => Choice (Val a) where
 
 howTrue :: Val Bool -> Double
 howTrue (Val [(True,0)])             = infinity
-howTrue (Val [(True,0),  (False,d)]) = d + 1
+howTrue (Val ((True,0):(False,d):_)) = d + 1
 howTrue (Val [(False,0)])            = -infinity
-howTrue (Val [(False,0), (True,d)])  = -d - 1
+howTrue (Val ((False,0):(True,d):_)) = -d - 1
 
 infinity :: Double
 infinity = 1/0
