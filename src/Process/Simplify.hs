@@ -90,7 +90,7 @@ propagateBool cond val = descendBi (propagate cond val)
     propagate cond True e  | implies cond e = Bool True
     propagate cond False e | implies e cond = Bool False
     -- Don't descend into temporal operators - it's not sound
-    propagate _ _ e@(Primitive Temporal _ _) = e
+    propagate _ _ e@(Primitive Temporal _ _ _) = e
     propagate cond val e = descend (propagate cond val) e
 
     -- This is pretty crappy but helps with abs somewhat
@@ -118,11 +118,11 @@ eliminatePrims :: [(String, Prim)] -> Process -> Process
 eliminatePrims prims =
   fixpoint $ \p ->
     case [ (e, f)
-         | e@(Primitive _ name _) <- universeBi p,
+         | e@(Primitive _ name _ _) <- universeBi p,
            Just f <- [lookup name prims] ] of
       [] -> p
-      (e@(Primitive _ _ es), f):_ ->
-        f es (\e' -> replaceGlobal e e' p)
+      (e@(Primitive _ _ ps es), f):_ ->
+        f ps es (\e' -> replaceGlobal e e' p)
       _ -> error "unreachable"
 
 eliminateCond :: Process -> Process

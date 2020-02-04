@@ -121,15 +121,21 @@ ppExp n (Cond e1 e2 e3) =
   maybeParens (n > 0) $
     -- else-branch must be atomic to avoid ambiguity
     ppIfThenElse (ppExp 0 e1) (ppExp 0 e2) (ppExp 9 e3)
-ppExp _ (Primitive _ name es) =
-  ppFunction name es
+ppExp _ (Primitive _ name ps es) =
+  ppFunction name ps es
 
-ppFunction :: String -> [Expr] -> Doc
-ppFunction op es =
+ppFunction :: String -> [Param] -> [Expr] -> Doc
+ppFunction op ps es =
   cat [
     text op,
-    nest 2 $ parens $
+    nest 2 $ maybeBrackets (not (null ps)) $
+      sep (punctuate comma (map ppParam ps)),
+    nest 2 $ maybeParens (not (null es)) $
       sep (punctuate comma (map (ppExp 0) es))]
+
+ppParam :: Param -> Doc
+ppParam (Scalar e) = ppExp 0 (Double e)
+ppParam (Array ps) = braces (sep (punctuate comma (map ppParam ps)))
 
 ppUnary :: Rational -> String -> Rational -> Expr -> Doc
 ppUnary n op p e =

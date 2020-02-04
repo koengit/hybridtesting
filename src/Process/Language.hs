@@ -50,8 +50,13 @@ data Expr =
  | Zero Expr     -- e == 0
  | Cond Expr Expr Expr -- can be lowered with eliminateCond
    -- Primitive which must be lowered before evaluation
- | Primitive PrimitiveKind String [Expr]
+ | Primitive PrimitiveKind String [Param] [Expr]
  deriving (Eq, Ord, Typeable, Data)
+
+data Param =
+    Scalar Double
+  | Array [Param]
+  deriving (Eq, Ord, Typeable, Data)
 
 -- Functional primitives are a function of the current value of their arguments.
 -- Temporal primitives take the whole history of the program into account.
@@ -67,7 +72,7 @@ data Var =
   deriving (Eq, Ord, Typeable, Data)
 
 -- The definition of a primitive
-type Prim = [Expr] -> (Expr -> Process) -> Process
+type Prim = [Param] -> [Expr] -> (Expr -> Process) -> Process
 
 instance Num Expr where
   fromInteger = Double . fromInteger
@@ -112,7 +117,7 @@ functionalExprs = concatMap f . childrenBi
     f e =
       e:
       case e of
-        Primitive Temporal _ _ -> []
+        Primitive Temporal _ _ _ -> []
         _ -> concatMap functionalExprs (children e)
 
 -- Replaces an expression with another everywhere.
@@ -121,7 +126,7 @@ replaceLocal :: Data a => Expr -> Expr -> a -> a
 replaceLocal e1 e2 = descendBi f
   where
     f e | e == e1 = e2
-    f e@(Primitive Temporal _ _) = e
+    f e@(Primitive Temporal _ _ _) = e
     f e = descend f e
 
 -- Replaces an expression with another everywhere,

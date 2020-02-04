@@ -160,21 +160,21 @@ cond :: Expr -> Expr -> Expr -> Expr
 cond = Cond
 
 -- Primitive functions
-primitive :: PrimitiveKind -> String -> [Expr] -> Expr
+primitive :: PrimitiveKind -> String -> [Param] -> [Expr] -> Expr
 primitive = Primitive
 
 minn, maxx :: Expr -> Expr -> Expr
-minn x y = primitive Functional "min" [x, y]
-maxx x y = primitive Functional "max" [x, y]
+minn x y = primitive Functional "min" [] [x, y]
+maxx x y = primitive Functional "max" [] [x, y]
 
 old :: Expr -> Expr -> Expr
-old initial x = primitive Temporal "old" [initial, x]
+old initial x = primitive Temporal "old" [] [initial, x]
 
 clampedIntegral :: Expr -> Expr -> Expr -> Expr
-clampedIntegral e lo hi = primitive Temporal "clampedIntegral" [e, lo, hi]
+clampedIntegral e lo hi = primitive Temporal "clampedIntegral" [] [e, lo, hi]
 
 integralReset :: Expr -> Expr -> Expr
-integralReset e reset = primitive Temporal "integral" [e, reset]
+integralReset e reset = primitive Temporal "integral" [] [e, reset]
 
 integral :: Expr -> Expr
 integral e = integralReset e false
@@ -182,18 +182,18 @@ integral e = integralReset e false
 smartIntegral :: Expr -> Expr
 smartIntegral = linear f
   where
-    f (Primitive Temporal "deriv" [e]) = e
+    f (Primitive Temporal "deriv" [] [e]) = e
     f e = integral e
 
 deriv :: Expr -> Expr
-deriv e = primitive Temporal "deriv" [e]
+deriv e = primitive Temporal "deriv" [] [e]
 
 derivDegree :: Var -> Expr -> Int
 derivDegree x e =
   maximum (mapMaybe deg (universeBi e))
   where
     deg (Var y) | x == y = Just 0
-    deg (Primitive Temporal "deriv" [e]) = fmap succ (deg e)
+    deg (Primitive Temporal "deriv" [] [e]) = fmap succ (deg e)
     deg _ = Nothing
 
 linear :: (Expr -> Expr) -> Expr -> Expr
@@ -207,31 +207,31 @@ linear f e = f e
 stdPrims :: [(String, Prim)]
 stdPrims =
   [("deriv",
-    \[e] k ->
+    \_ [e] k ->
       -- old delta is the time difference from the previous state to this
       k ((e - old 0 e) * old 0 (1 / delta))),
    ("integral",
-    \[e, reset] k ->
+    \_ [e, reset] k ->
       name "x" $ \x ->
         let e' = cond reset 0 (var x + delta * e) in
         continuous x 0 e' &
         -- x is the *old* value of the integral, so e' is the current value
         k e'),
    ("clampedIntegral",
-    \[e, lo, hi] k ->
+    \_ [e, lo, hi] k ->
       name "x" $ \x ->
         let e' = clamp lo hi (var x + delta * e) in
         continuous x 0 e' &
         k e'),
    ("old",
-    \[initial, e] k ->
+    \_ [initial, e] k ->
       name "w" $ \x ->
         -- Works because all updates are done simultaneously
         continuous x initial e & k (Var x)),
    ("min",
-    \[x, y] k -> k (Cond (x <=? y) x y)),
+    \_ [x, y] k -> k (Cond (x <=? y) x y)),
    ("max",
-    \[x, y] k -> k (Cond (x >=? y) x y))]
+    \_ [x, y] k -> k (Cond (x >=? y) x y))]
 
 -- Clamp a value to a range
 clamp :: Expr -> Expr -> Expr -> Expr
@@ -275,8 +275,29 @@ inverseLaplace s = simplifyExpr . linear eliminate . expand . simplifyExpr
       where
         (k, es) = factors e
 
-interpolate2d :: [Expr] -> [Expr] -> [[Expr]] -> (Expr, Expr) -> Expr
+interpolate2d :: [Double] -> [Double] -> [[Double]] -> (Expr, Expr) -> Expr
 interpolate2d xs ys pss (x, y) =
+  primitive Functional "interpolate2d"
+    [Array (map Scalar xs),
+     Array (map Scalar ys),
+     Array (map Array (map (map Scalar) pss))]
+    [x, y]
+
+interpolatePrim :: [(String, Prim)]
+interpolatePrim =
+   [("interpolate2d",
+    \[xs, ys, pss] [x, y] k ->
+      let
+        unArray (Array xs) = xs
+        unScalar (Scalar x) = Double x
+        xs'  = map unScalar (unArray xs)
+        ys'  = map unScalar (unArray ys)
+        pss' = map (map unScalar) (map unArray (unArray pss))
+      in 
+        k (evalInterpolate2d xs' ys' pss' (x, y)))]
+
+evalInterpolate2d :: [Expr] -> [Expr] -> [[Expr]] -> (Expr, Expr) -> Expr
+evalInterpolate2d xs ys pss (x, y) =
   findPair (zip xs pss) x $ \(x1, ps) (x2, qs) ->
   findPair (zip ys (zip ps qs)) y $ \(y1,  (z11, z21)) (y2, (z12, z22)) ->
     (z11*(x2-x)*(y2-y) + z21*(x-x1)*(y2-y) + z12*(x2-x)*(y-y1) + z22*(x-x1)*(y-y1))/((x2-x1)*(y2-y1))
