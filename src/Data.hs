@@ -63,7 +63,7 @@ instance (GData f, GData g) => GData (f :*: g) where
     k = length (gvals x)
 
 instance (GData f, GData g) => GData (f :+: g) where
-   gvals (L1 x)  = gvals x
+   gvals (L1 x) = gvals x
    gvals (R1 y) = gvals y
 
    gfill (L1 x) = L1 . gfill x

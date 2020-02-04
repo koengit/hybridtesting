@@ -12,7 +12,7 @@ import Process.Combinators
 import Process.Eval(Value(..), Env, Valued(..), simulate, simulateReal, simulateVal)
 import qualified Process.Eval
 import Process.Simplify(lower, simplify)
-import Process.Input(Types, Duration, Time(..), Type(..))
+import Process.Input(Types, Duration, Shape(..), Type(..))
 import Process.Pretty()
 import Process.Plot(plot)
 
