@@ -18,12 +18,12 @@ plot file delta envs =
 
      -- creating the gnuplot script
      writeFile (file ++ ".in") $ unlines $
-       [ "set terminal pdf enhanced font 'Times,18' lw 1"
+       [ "set terminal pdf enhanced font 'Times,18' lw 2"
        , "set grid"
+       , "set xzeroaxis lt 3 lw 1"
        , "set output '" ++ file ++ ".pdf'"
        ] ++
-       [ "plot 0 linewidth 1 linecolor black title '', "
-      ++ "'" ++ file ++ "-" ++ name ++ ".xy' with lines title '" ++ name ++ "'"
+       [ "plot '" ++ file ++ "-" ++ name ++ ".xy' with lines title '" ++ name ++ "'"
        | (name,_) <- tabs
        ]
 
