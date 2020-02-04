@@ -205,7 +205,10 @@ linear f e = f e
 
 -- Desugarings for the primitives
 stdPrims :: [(String, Prim)]
-stdPrims =
+stdPrims = temporalPrims ++ functionalPrims
+
+temporalPrims :: [(String, Prim)]
+temporalPrims =
   [("deriv",
     \_ [e] k ->
       -- old delta is the time difference from the previous state to this
@@ -227,11 +230,24 @@ stdPrims =
     \_ [initial, e] k ->
       name "w" $ \x ->
         -- Works because all updates are done simultaneously
-        continuous x initial e & k (Var x)),
-   ("min",
+        continuous x initial e & k (Var x))]
+
+functionalPrims :: [(String, Prim)]
+functionalPrims =
+  [("min",
     \_ [x, y] k -> k (Cond (x <=? y) x y)),
    ("max",
-    \_ [x, y] k -> k (Cond (x >=? y) x y))]
+    \_ [x, y] k -> k (Cond (x >=? y) x y)),
+   ("interpolate2d",
+    \[xs, ys, pss] [x, y] k ->
+      let
+        unArray (Array xs) = xs
+        unScalar (Scalar x) = Double x
+        xs'  = map unScalar (unArray xs)
+        ys'  = map unScalar (unArray ys)
+        pss' = map (map unScalar) (map unArray (unArray pss))
+      in 
+        k (evalInterpolate2d xs' ys' pss' (x, y)))]
 
 -- Clamp a value to a range
 clamp :: Expr -> Expr -> Expr -> Expr
@@ -282,19 +298,6 @@ interpolate2d xs ys pss (x, y) =
      Array (map Scalar ys),
      Array (map Array (map (map Scalar) pss))]
     [x, y]
-
-interpolatePrim :: [(String, Prim)]
-interpolatePrim =
-   [("interpolate2d",
-    \[xs, ys, pss] [x, y] k ->
-      let
-        unArray (Array xs) = xs
-        unScalar (Scalar x) = Double x
-        xs'  = map unScalar (unArray xs)
-        ys'  = map unScalar (unArray ys)
-        pss' = map (map unScalar) (map unArray (unArray pss))
-      in 
-        k (evalInterpolate2d xs' ys' pss' (x, y)))]
 
 evalInterpolate2d :: [Expr] -> [Expr] -> [[Expr]] -> (Expr, Expr) -> Expr
 evalInterpolate2d xs ys pss (x, y) =
