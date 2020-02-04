@@ -1,6 +1,13 @@
 module Optimize where
 
 import Data.List
+import qualified Debug.Trace as T
+
+--progress = True
+progress = False
+
+trace s x | progress  = T.trace s x
+          | otherwise = x
 
 type Point = [Double]
 
@@ -50,7 +57,7 @@ giveUp n = go n
 
 -- produces a possibly infinite list of (point,best-result,worst-result)
 minimize :: Ord a => Point -> Point -> (Point -> a) -> [(Point,a,a)]
-minimize _  [] h = [([],x,x)] where x = h []
+minimize _   [] h = [([],x,x)] where x = h []
 minimize box0 p h = go (sort [ pair p | p <- ps0 ])
  where
   -- trim box
@@ -82,17 +89,17 @@ minimize box0 p h = go (sort [ pair p | p <- ps0 ])
     if xR < xN then
       if x0 <= xR || xR <= xE then
         -- reflect
-        go (insert qR xpsI)
+        trace ">" $ go (insert qR xpsI)
       else
         -- expand
-        go (insert qE xpsI)
+        trace "!" $ go (insert qE xpsI)
     else
       if xC < xL then
         -- contract
-        go (insert qC xpsI)
+        trace "~" $ go (insert qC xpsI)
       else
         -- shrink
-        go (sort (q0:[ pair (p -*-> (0.5,p0)) | (_,p) <- tail xps ]))
+        trace "<" $ go (sort (q0:[ pair (p -*-> (0.5,p0)) | (_,p) <- tail xps ]))
    where
     xpsI       = init xps
     q0@(x0,p0) = head xps
