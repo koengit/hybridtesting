@@ -108,7 +108,9 @@ mkInput dur sigs = Input (max 0 dur) (Map.map (\(sh,sig) -> (sh, cut 0 sig)) sig
  where
   cut t sig | t >= dur  = End (head (values sig))
   cut t (End v)         = End v
-  cut t (Point v d sig) = Point v d (cut (t+d) sig)
+  cut t (Point v d sig)
+    | t + d >= dur = End v
+    | otherwise = Point v d (cut (t+d) sig)
 
 sampleInput :: Valued f => Double -> Input -> [Env f]
 sampleInput delta (Input dur sigs) =
@@ -148,8 +150,9 @@ genInput :: Duration -> Types -> Gen Input
 genInput maxdur types =
   do --dur <- sized $ \n -> choose (0, maxdur*fromIntegral n/100)
      let dur = maxdur
-     let genDur = (^2) <$> choose (0, sqrt dur)
-     mkInput dur <$> mapM (\(sh,ty) -> (sh,) <$> genSignal genDur (genValue ty)) types
+     let genDur Parameter = return (1/0)
+         genDur _ = (^2) <$> choose (0, sqrt dur)
+     mkInput dur <$> mapM (\(sh,ty) -> (sh,) <$> genSignal (genDur sh) (genValue ty)) types
 
 -- shrinking
 
