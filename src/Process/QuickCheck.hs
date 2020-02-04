@@ -19,12 +19,12 @@ import Val
 checkAssertionsVal :: Double -> Duration -> Types -> Process -> Property
 checkAssertionsVal delta maxdur types p =
   forAll (genInput maxdur types) $ \input0 ->
-    let (input', tries, result') = forData input0 run in
+    let (input', tries, result') = forData input0 (howTrue . run) in
       forAllShrink (return input') shrinkInput $ \input'' ->
         let envs  = simulateVal delta (sampleInput delta input'') p in
           whenFail (do plot "cex" delta envs
                        putStrLn ("used " ++ show tries ++ " steps in NM")) $
-            run input'' > 0
+            the (run input'')
  where
   run input =
     let
@@ -44,7 +44,7 @@ checkAssertionsVal delta maxdur types p =
       (pre,post) = check (Val.val True) (Val.val True) envs
       
       ok = okRange input
-    in howTrue ((ok &&? pre) =>? post)
+    in (ok &&? pre) =>? post
 
   okRange (Input dur mp) =
     foldr (&&?) (Val.val True) $
