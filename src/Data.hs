@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, DefaultSignatures, TypeOperators, FlexibleInstances, MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleContexts, DefaultSignatures, TypeOperators, MultiParamTypeClasses, FlexibleInstances #-}
 module Data where
 
 {-
@@ -10,36 +10,35 @@ import Data.List
 import Optimize
 import GHC.Generics
 import qualified Data.Map as M
-import Data.Proxy
 
 --------------------------------------------------------------------------------
 
-class RealFrac d => Data d a where
-  vals :: a -> [d]
-  fill :: a -> [d] -> a
+class Data a where
+  vals :: a -> [Double]
+  fill :: a -> [Double] -> a
 
-  default vals :: (Generic a, GData d (Rep a)) => a -> [d]
+  default vals :: (Generic a, GData (Rep a)) => a -> [Double]
   vals = genericVals
 
-  default fill :: (Generic a, GData d (Rep a)) => a -> [d] -> a
+  default fill :: (Generic a, GData (Rep a)) => a -> [Double] -> a
   fill = genericFill
 
-instance RealFrac d => Data d ()
-instance (Data d a, Data d b) => Data d (a, b)
-instance (Data d a, Data d b) => Data d (Either a b)
-instance Data d a => Data d [a]
+instance Data ()
+instance (Data a, Data b) => Data (a,b)
+instance (Data a, Data b) => Data (Either a b)
+instance Data a => Data [a]
 
-instance RealFrac d => Data d Bool
+instance Data Bool
 
-instance RealFrac d => Data d d where
+instance Data Double where
   vals x       = [x]
   fill _ (v:_) = v
 
-instance RealFrac d => Data d Int where
+instance Data Int where
   vals n       = [fromIntegral n]
   fill _ (v:_) = round v
 
-instance (Ord a, Data d b) => Data d (M.Map a b) where
+instance (Ord a, Data b) => Data (M.Map a b) where
   vals m    = [ x | (_,y) <- M.toList m, x <- vals y ]
   fill m vs = M.fromList (xs `zip` fill ys vs)
    where
@@ -47,40 +46,40 @@ instance (Ord a, Data d b) => Data d (M.Map a b) where
 
 --------------------------------------------------------------------------------
 
-genericVals :: (Generic a, GData d (Rep a)) => a -> [d]
-genericVals = gvals undefined . from
+genericVals :: (Generic a, GData (Rep a)) => a -> [Double]
+genericVals = gvals . from
 
-genericFill :: (Generic a, GData d (Rep a)) => a -> [d] -> a
-genericFill x xs = to (gfill undefined (from x) xs)
+genericFill :: (Generic a, GData (Rep a)) => a -> [Double] -> a
+genericFill x xs = to (gfill (from x) xs)
 
-class GData d f where
-  gvals :: proxy d -> f a -> [d]
-  gfill :: proxy d -> f a -> [d] -> f a
+class GData f where
+  gvals :: f a -> [Double]
+  gfill :: f a -> [Double] -> f a
 
-instance (GData d f, GData d g) => GData d (f :*: g) where
-  gvals p (x :*: y)    = gvals p x ++ gvals p y
-  gfill p (x :*: y) vs = gfill p x (take k vs) :*: gfill p y (drop k vs)
+instance (GData f, GData g) => GData (f :*: g) where
+  gvals (x :*: y)    = gvals x ++ gvals y
+  gfill (x :*: y) vs = gfill x (take k vs) :*: gfill y (drop k vs)
    where
-    k = length (gvals p x)
+    k = length (gvals x)
 
 instance (GData d f, GData d g) => GData d (f :+: g) where
-   gvals p (L1 x) = gvals p x
+   gvals p (L1 x)  = gvals p x
    gvals p (R1 y) = gvals p y
 
-   gfill p (L1 x) = L1 . gfill p x
-   gfill p (R1 y) = R1 . gfill p y
+   gfill (L1 x) = L1 . gfill x
+   gfill (R1 y) = R1 . gfill y
 
-instance GData d f => GData d (M1 i c f) where
-  gvals p (M1 x) = gvals p x
-  gfill p (M1 x) = M1 . gfill p x
+instance GData f => GData (M1 i c f) where
+  gvals (M1 x) = gvals x
+  gfill (M1 x) = M1 . gfill x
 
-instance Data d a => GData d (K1 i a) where
-  gvals _ (K1 x) = vals x
-  gfill _ (K1 x) = K1 . fill x
+instance Data a => GData (K1 i a) where
+  gvals (K1 x) = vals x
+  gfill (K1 x) = K1 . fill x
 
-instance GData d U1 where
-  gvals _ _   = []
-  gfill _ _ _ = U1
+instance GData U1 where
+  gvals _   = []
+  gfill _ _ = U1
 
 --------------------------------------------------------------------------------
 
@@ -105,13 +104,13 @@ instance Arbitrary a => Arbitrary (List a) where
     , x' <- shrink (xs!!i)
     ]
 
-instance Data d a => Data d (List a) where
+instance Data a => Data (List a) where
   vals (List _ n xs)    = vals n ++ vals xs
   fill (List _ n xs) vs = list (fill n (take 1 vs)) (fill xs (drop 1 vs))
 
 --------------------------------------------------------------------------------
 
-forData :: (Show a, Data Double a) => a -> (a -> Double) -> (a, Int, Double)
+forData :: (Show a, Data a) => a -> (a -> Double) -> (a, Int, Double)
 forData x h = (fill x ws, n, ans)
  where
   (ws,ans,n) = goal (<= 0)
