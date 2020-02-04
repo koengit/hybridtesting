@@ -170,6 +170,9 @@ maxx x y = primitive Functional "max" [x, y]
 old :: Expr -> Expr -> Expr
 old initial x = primitive Temporal "old" [initial, x]
 
+clampedIntegral :: Expr -> Expr -> Expr -> Expr
+clampedIntegral e lo hi = primitive Temporal "clampedIntegral" [e, lo, hi]
+
 integralReset :: Expr -> Expr -> Expr
 integralReset e reset = primitive Temporal "integral" [e, reset]
 
@@ -213,6 +216,12 @@ stdPrims =
         let e' = cond reset 0 (var x + delta * e) in
         continuous x 0 e' &
         -- x is the *old* value of the integral, so e' is the current value
+        k e'),
+   ("clampedIntegral",
+    \[e, lo, hi] k ->
+      name "x" $ \x ->
+        let e' = clamp lo hi (var x + delta * e) in
+        continuous x 0 e' &
         k e'),
    ("old",
     \[initial, e] k ->
@@ -265,3 +274,17 @@ inverseLaplace s = simplifyExpr . linear eliminate . expand . simplifyExpr
       | otherwise = error "couldn't eliminate s from Laplace transform"
       where
         (k, es) = factors e
+
+interpolate2d :: [Expr] -> [Expr] -> [[Expr]] -> (Expr, Expr) -> Expr
+interpolate2d xs ys pss (x, y) =
+  findPair (zip xs pss) x $ \(x1, ps) (x2, qs) ->
+  findPair (zip ys (zip ps qs)) y $ \(y1,  (z11, z21)) (y2, (z12, z22)) ->
+    (z11*(x2-x)*(y2-y) + z21*(x-x1)*(y2-y) + z12*(x2-x)*(y-y1) + z22*(x-x1)*(y-y1))/((x2-x1)*(y2-y1))
+
+  where
+    findPair :: [(Expr, a)] -> Expr -> ((Expr, a) -> (Expr, a) -> Expr) -> Expr
+    findPair [p1, p2] x k = k p1 p2
+    findPair (p1:p2:ps) x k =
+      cond (x <=? fst p2)
+        (k p1 p2)
+        (findPair (p2:ps) x k)
