@@ -3,6 +3,7 @@ module Utils where
 import Control.Arrow((&&&))
 import Data.List(groupBy, sortBy)
 import Data.Ord(comparing)
+import qualified Data.Set as Set
 
 partitionBy :: Ord b => (a -> b) -> [a] -> [[a]]
 partitionBy value =
@@ -21,6 +22,17 @@ isSorted xs = and (zipWith (<=) xs (tail xs))
 
 isSortedBy :: Ord b => (a -> b) -> [a] -> Bool
 isSortedBy f xs = isSorted (map f xs)
+
+ordNub :: Ord a => [a] -> [a]
+ordNub = ordNubOn id
+
+ordNubOn :: Ord b => (a -> b) -> [a] -> [a]
+ordNubOn f = from Set.empty
+  where
+    from _ [] = []
+    from s (x:xs)
+      | f x `Set.member` s = from s xs
+      | otherwise = x:from (Set.insert (f x) s) xs
 
 usort :: Ord a => [a] -> [a]
 usort = usortBy compare

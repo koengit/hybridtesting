@@ -79,7 +79,7 @@ instance Valued Val.Val where
   vmap        = Val.mapVal
   vlift       = Val.liftVal
   vifThenElse = Val.ifThenElse
-  vprune      = Val.forget
+  vprune      = id 
   vfail s     = error s
   vplot v     = case Val.the v of
                   DoubleValue x -> x
