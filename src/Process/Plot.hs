@@ -18,11 +18,12 @@ plot file delta envs =
 
      -- creating the gnuplot script
      writeFile (file ++ ".in") $ unlines $
-       [ "set terminal pdf enhanced font 'Times,18' lw 3"
+       [ "set terminal pdf enhanced font 'Times,18' lw 1"
        , "set grid"
        , "set output '" ++ file ++ ".pdf'"
        ] ++
-       [ "plot '" ++ file ++ "-" ++ name ++ ".xy' with lines title '" ++ name ++ "'"
+       [ "plot 0 linewidth 1 linecolor black title '', "
+      ++ "'" ++ file ++ "-" ++ name ++ ".xy' with lines title '" ++ name ++ "'"
        | (name,_) <- tabs
        ]
 
@@ -49,56 +50,6 @@ plot file delta envs =
 
    isNumber x | x `elem` [1/0,(-1)/0] = False
               | otherwise             = True
-
-{-
-plot name delta envs@(env:_) =
-  Plot.plot name maxBound
-    [[(show x, xsys)]
-    | x <- Map.keys env
-    , case x of
-        Delta   -> False
-        --Local _ -> False
-        _       -> True
-    , let xsys = timed (map (value . runIdentity . Map.findWithDefault undefined x) envs)
-    , not (null (fst xsys))
-    ]
-  where
-    times    = [0, delta..]
-    timed xs = unzip (filter (isNumber . snd) (zip times xs))
-    
-    value (BoolValue False) = 0
-    value (BoolValue True)  = 1
-    value (DoubleValue x)   = x
-    
-    isNumber x | x `elem` [1/0,(-1)/0] = False
-               | otherwise             = True
-
-plot :: FilePath -> Int -> [[(String,(S Double,S Double))]] -> IO ()
-plot file n xyss0 =
-  do let xyss :: [[(String,(S Double,S Double))]]
-         xyss = map (map (id *** (take n *** take n))) xyss0
-     dir <- getCurrentDirectory
-     sequence_
-       [ writeFile (dir </> file ++ "_" ++ name ++ "_.xy") $ unlines $
-           [ show x ++ " " ++ show y
-           | (x,y) <- take n (uncurry zip xy)
-           ]
-       | xys <- xyss,
-         (name,xy) <- xys
-       ]
-     writeFile (dir </> file ++ "_gnuplot_.in") $ unlines $
-       [ "set terminal pdf enhanced font 'Times,18' lw 3"
-       , "set grid"
-       , if any (< 0) (concatMap (snd . snd) . concat $ xyss) then "" else "set yrange [0:]"
-       , "set output '" ++ file ++ "_plot_.pdf'" ] ++
-       [ "plot " ++
-         intercalate ","
-           [ "'" ++ file ++ "_" ++ name ++ "_.xy' with lines title '" ++ name ++ "'"
-           | (name, xy) <- xys ]
-       | xys <- xyss ]
-     system ("gnuplot < \"" ++ (dir </> file ++ "_gnuplot_.in\""))
-     return ()
--}
 
 --------------------------------------------------------------------------------
 
