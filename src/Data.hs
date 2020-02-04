@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, DefaultSignatures, TypeOperators, MultiParamTypeClasses, FlexibleInstances #-}
+{-# LANGUAGE FlexibleContexts, DefaultSignatures, TypeOperators #-}
 module Data where
 
 {-
@@ -64,7 +64,7 @@ instance (GData d f, GData d g) => GData d (f :*: g) where
     k = length (gvals p x)
 
 instance (GData d f, GData d g) => GData d (f :+: g) where
-   gvals p (L1 x)  = gvals p x
+   gvals p (L1 x) = gvals p x
    gvals p (R1 y) = gvals p y
 
    gfill p (L1 x) = L1 . gfill p x
