@@ -1,5 +1,5 @@
 -- An evaluator. Can be used with Val.
-{-# LANGUAGE DefaultSignatures, TupleSections, FlexibleInstances, DeriveGeneric #-}
+{-# LANGUAGE DefaultSignatures, TupleSections, FlexibleInstances, DeriveGeneric, MultiParamTypeClasses #-}
 module Process.Eval where
 
 import Data.Map(Map)
@@ -23,7 +23,7 @@ data Value
   | BoolValue{ boolValue :: Bool }
  deriving (Eq, Ord, Generic)
 
-instance Data Value
+instance Data Double Value
 
 constant :: Value -> Expr
 constant (DoubleValue x) = Double x

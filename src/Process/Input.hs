@@ -1,5 +1,5 @@
 -- Describing the set of test inputs for a system.
-{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveGeneric, MultiParamTypeClasses #-}
 module Process.Input where
 
 import Process.Language(Var)
@@ -29,7 +29,7 @@ data Type = Real (Double, Double) | Integer (Integer, Integer) | Bool
 type Signal = [(Duration, Piece)]
 data Piece = Linear (Double, Double) | Constant Value deriving (Generic, Eq)
 
-instance Data Piece
+instance Data Double Piece
 
 instance Show Piece where
   show (Linear (x, y)) = show x ++ " -- " ++ show y
@@ -37,7 +37,7 @@ instance Show Piece where
 
 data Input = Input Duration (Map Var Signal) deriving ( Generic )
 
-instance Data Input {- where
+instance Data Double Input {- where
   vals (Input dur mp)    = vals mp
   fill (Input dur mp) xs = Input dur (fill mp xs) -}
 
