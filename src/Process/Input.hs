@@ -158,8 +158,8 @@ genInput maxdur types =
 shrinkDur :: Duration -> [Duration]
 shrinkDur d =
   [ d'
-  | d' <- [d/2,fromIntegral (truncate d),d-1]
-  , 0 <= d'
+  | d' <- [fromIntegral (truncate d)] ++ [d - p | p <- tail (iterate (/2) d), p >= 1]
+  , 0 < d'
   , d' < d
   ]
 
