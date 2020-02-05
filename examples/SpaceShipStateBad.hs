@@ -24,10 +24,10 @@ gravity (g1, g2, g3) =
 check :: Process
 check =
   (continuous state 1 $
-    cond (var state ==? 1 &&& var position >=? 100) 2 $
-    cond (var state ==? 2 &&& var position <=? -100) 3 $
-    var state) &
-  loop (assert "reached destination" (var state /=? 3 ||| var position <=? 100))
+    cond (var state ==? 1) (cond (var position >=? 100)  2 1) $
+    cond (var state ==? 2) (cond (var position <=? -100) 3 2) $
+    cond (var position >=? 100) 4 3) &
+  loop (assert "reached destination" (var state /=? 4))
 
 test :: (Show (f Bool), Valued f) => (Double, Double, Double) -> [Double] -> [Env f]
 test g vals = simulate 0.1 envs (lower stdPrims $ ship g & check)
