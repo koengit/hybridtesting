@@ -14,7 +14,7 @@ import Process.Language
 instance Show Process where
   show = show . pPrint
 
-instance Show Step where
+instance Show Stream where
   show = show . pPrint
 
 instance Show Expr where
@@ -25,28 +25,18 @@ instance Show Var where
 
 instance Pretty Process where
   pPrint p =
-    vcat $
-      [ hang (text "initial") 2 (pPrint (start p)) | nonempty (start p) ] ++
-      [ hang (text "timestep") 2 (pPrint (step p)) | nonempty (step p) ]
+    vcat [
+      hang (text "initial") 2 (ppVars (processStart p)),
+      hang (text "timestep") 2 (ppVars (processStep p))]
     where
-      nonempty (Update m) = Map.size m > 0
-      nonempty _ = True
+      ppVars = vcat . map ppVar . Map.toList
+      ppVar (x, e) = pPrint x <+> text "<-" <+> pPrint e
 
-instance Pretty Step where
-  pPrint (If e s1 s2) =
-    ppIfThenElse (pPrint e) (pPrint s1) (pPrint s2)
-  pPrint (Assume msg e s) =
-    hang (text "assume" <+> text (show msg)) 2 (pPrint e) $$
-    pPrint s
-  pPrint (Assert msg e s) =
-    hang (text "assert" <+> text (show msg)) 2 (pPrint e) $$
-    pPrint s
-  pPrint (Update m)
-    | Map.null m = text "skip"
-    | otherwise =
-      vcat
-        [ hang (pPrint x <+> text "<-") 2 (pPrint e)
-        | (x, e) <- Map.toList m ]
+instance Pretty Stream where
+  pPrint s =
+    vcat $
+      [ hang (text "initial") 2 (pPrint (start s)) ] ++
+      [ hang (text "timestep") 2 (pPrint (step s)) ]
 
 instance Pretty Expr where
   pPrintPrec _ p = ppExp p

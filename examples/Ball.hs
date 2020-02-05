@@ -14,26 +14,26 @@ collisions = Global "collisions"
 
 ball :: Process
 ball =
-  continuous x (-20) (xIn 1) &
-  continuous y 0 (yIn 1) &
-  process (set yv (var yv0) & set xv (var xv0) & set collisions 0) updateVelocity
+  define x (continuous 0 (var x + delta * xv')) &
+  define y (continuous 0 (var y + delta * yv')) &
+  define xv (continuous (var xv0) (cond xColl (var xv) (- var xv))) &
+  define yv (continuous (var yv0) (cond yColl (var yv) (- var yv))) &
+  define collisions (continuous 0 (cond (xColl ||| yColl) (var collisions + 1) (var collisions)))
   where
-    xIn k = var x + var xv * delta * k
-    yIn k = var y + var yv * delta * k
-    updateVelocity =
-      ite (yIn 2 <=? -5 ||| yIn 2 >=? 5)
-        (set yv (-var yv) & set collisions (var collisions+1))
-        (ite (xIn 2 >=? 9 &&& xIn 2 <=? 10 &&& (yIn 2 <=? 1 ||| yIn 2 >=? 2))
-          (set xv (-var xv) & set collisions (var collisions+1))
-          skip)
+    xv' = cond xColl (var xv) (- var xv)
+    yv' = cond yColl (var yv) (- var yv)
+    x' = var x + delta * var xv
+    y' = var x + delta * var yv
+
+    yColl = nott (y' `between` (-5, 5))
+    xColl = x' `between` (9, 10) &&& nott (y' `between` (1, 2))
 
 check :: Process
 check =
-  process skip $
   assume "ball bounced through too soon"
-    (nott (var collisions <=? 4 &&& var x >=? 15)) &
+    (continuous true (nott (var collisions <=? 4 &&& var x >=? 15))) &
   assert "ball made it through after 5 collisions"
-    (nott (var x >=? 15))
+    (continuous true (nott (var x >=? 15)))
   
 test :: (Show (f Bool), Valued f) => [(Double, Double)] -> [Env f]
 test vals = simulate 0.1 envs (lower stdPrims $ ball & check)

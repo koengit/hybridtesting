@@ -12,25 +12,10 @@ import Data.List
 
 -- Do algebraic simplifications and similar
 simplify :: Process -> Process
-simplify = fixpoint (both simplifyStep)
+simplify p = p { streams = fmap simplifyStream (streams p) }
 
-simplifyStep :: Step -> Step
-simplifyStep =
-  fixpoint $
-    transformBi simpStep .
-    transformBi simplifyExpr
-  where
-    simpStep (If (Not e) s1 s2) = If e s2 s1
-    simpStep (If (Bool True) e _) = e
-    simpStep (If (Bool False) _ e) = e
-    simpStep (If _ s s') | s == s' = s
-    simpStep (If e s1 s2) =
-      If e
-        (propagateBool e True s1)
-        (propagateBool e False s2)
-    simpStep (Assume _ (Bool True) s) = s
-    simpStep (Assert _ (Bool True) s) = s
-    simpStep s = s
+simplifyStream :: Stream -> Stream
+simplifyStream = both simplifyExpr
 
 simplifyExpr :: Expr -> Expr
 simplifyExpr = fixpoint (transformBi simp)
@@ -112,7 +97,7 @@ propagateBool cond val = descendBi (propagate cond val)
 
 -- Eliminate difficult constructs
 lower :: [(String, Prim)] -> Process -> Process
-lower prims = fixpoint (eliminatePrims prims . eliminateCond . simplify)
+lower prims = fixpoint (eliminatePrims prims . simplify)
 
 eliminatePrims :: [(String, Prim)] -> Process -> Process
 eliminatePrims prims =
@@ -124,45 +109,6 @@ eliminatePrims prims =
       (e@(Primitive _ _ ps es), f):_ ->
         f ps es (\e' -> replaceGlobal e e' p)
       _ -> error "unreachable"
-
-eliminateCond :: Process -> Process
-eliminateCond =
-  fixpoint (both (transformBi f . transformBi introBool . simplifyStep))
-  where
-    -- Idea: replace
-    --   ... Cond cond e1 e2 ...
-    -- with
-    --   if cond then [... Cond cond e1 e2 ...] else [... Cond cond e1 e2 ...]
-    -- and then use propagateBool to get rid of the Cond in each branch
-    f s =
-      case findConds s of
-        [] -> s
-        cond:_ ->
-          If cond
-            (propagateBool cond True s)
-            (propagateBool cond False s)
-    -- If Cond is the argument to a predicate (And, Not, Zero, Positive),
-    -- encode it using Boolean connectives:
-    --   P(Cond e1 e2 e3) = (e1 && P(e2)) || (not e1 && P(e3))
-    -- Actually, we produce:
-    --   (e1 && P(Cond e1 e2 e3)) || (not e1 && P(Cond e1 e2 e3))
-    -- and leave it to propagateBool to simplify.
-    introBool e
-      | isBool e, cond:_ <- findConds e =
-         orr
-           (And cond (propagateBool cond True e))
-           (And (Not cond) (propagateBool cond False e))
-      | otherwise = e
-      where
-        orr x y = Not (And (Not x) (Not y))
-
-    isBool And{} = True
-    isBool Not{} = True
-    isBool Zero{} = True
-    isBool Positive{} = True
-    isBool _ = False
-
-    findConds e = [cond | Cond cond _ _ <- functionalExprs e]
 
 -- Expand out multiplication.
 expand :: Expr -> Expr

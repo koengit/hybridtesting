@@ -14,19 +14,6 @@ import Utils
 -- Combinators for building processes.
 ----------------------------------------------------------------------
 
--- Make a simple process
-process :: Step -> Step -> Process
-process start step =
-  Process {
-    locals = 0,
-    start = start,
-    step = step }
-
--- Do something only on the first step, or only after the first step
-first, loop :: Step -> Process
-first p = process p skip
-loop p = process skip p
-
 -- Parallel composition
 class Par a where
   -- A process that does nothing
@@ -40,26 +27,15 @@ infixr 5 &
 par :: Par a => [a] -> a
 par = foldr (&) skip
 
-instance Par Step where
-  skip = Update Map.empty
-
-  If e s1 s2 & s3 =
-    If e (s1 & s3) (s2 & s3)
-  Assume str e s1 & s2 =
-    Assume str e (s1 & s2)
-  Assert str e s1 & s2 =
-    Assert str e (s1 & s2)
-  Update m1 & Update m2 =
-    Update (Map.unionWith f m1 m2)
+instance Par Process where
+  skip = Process 0 Map.empty
+  (&) = combine (Map.unionWithKey f)
     where
-      f x y
+      f Pre x y  = Stream (start x &&& start y) (step x &&& step y)
+      f Post x y = Stream (start x &&& start y) (step x &&& step y)
+      f _ x y
         | x == y = x
         | otherwise = error "Step.&: incoherent state update"
-  s1@Update{} & s2 = s2 & s1
-
-instance Par Process where
-  skip = process skip skip
-  (&) = combine (&) (&)
 
 -- Generate a local name
 name :: String -> (Var -> Process) -> Process
@@ -69,50 +45,17 @@ name s f = p{locals = locals p + 1}
     n = Local s (locals p)
 
 -- Update a variable
-set :: Var -> Expr -> Step
-set x e = Update (Map.singleton x e)
-
--- If-then-else
-ite :: Expr -> Step -> Step -> Step
-ite = If
+define :: Var -> Stream -> Process
+define x s = Process 0 (Map.singleton x s)
 
 -- Assumptions and assertions
-assume, assert :: String -> Expr -> Step
-assume str e = Assume str e skip
-assert str e = Assert str e skip
+assume, assert :: String -> Stream -> Process
+assume _ = define Pre
+assert _ = define Post
 
 -- Define a variable whose value changes with every step
-continuous :: Var -> Expr -> Expr -> Process
-continuous x start step =
-  process (set x start) (set x step)
-
--- Choose between two processes. Initial state executes both
-switch :: Expr -> Process -> Process -> Process
-switch cond p1 p2 =
-  combine (&) (If cond) p1 p2
-
--- Sequential composition
-sequential :: Process -> Expr -> Process -> Process
-sequential p e q =
-  name "b" $ \x ->
-    combine
-      (\_ _ -> (start p & q1 & set x (bool False)))
-      (\_ _ ->
-        (ite (var x)
-          (step q)
-          (ite e (set x (bool True) & q2)
-            (step p))))
-      p q
-  where
-    -- Make sure that all variables get initialised in the first time-step
-    q1 = withoutChecks (restrictTo (`Map.notMember` definitions (start p)) (start q))
-    -- Variables written by p must be initialised only once q starts for real
-    -- (Note: no need to check step p because start p is required to
-    -- initialised all variables in p)
-    q2 = restrictTo (`Map.member`    definitions (start p)) (start q)
-
-wait :: Expr -> Process -> Process
-wait e p = sequential skip e p
+continuous :: Expr -> Expr -> Stream
+continuous start step = Stream start step
 
 ----------------------------------------------------------------------
 -- Combinators for building expressions
@@ -167,6 +110,9 @@ minn, maxx :: Expr -> Expr -> Expr
 minn x y = primitive Functional "min" [] [x, y]
 maxx x y = primitive Functional "max" [] [x, y]
 
+between :: Expr -> (Expr, Expr) -> Expr
+between e (min, max) = e >=? min &&& e <=? max
+
 old :: Expr -> Expr -> Expr
 old initial x = primitive Temporal "old" [] [initial, x]
 
@@ -217,20 +163,20 @@ temporalPrims =
     \_ [e, reset] k ->
       name "x" $ \x ->
         let e' = cond reset 0 (var x + delta * e) in
-        continuous x 0 e' &
+        define x (continuous 0 e') &
         -- x is the *old* value of the integral, so e' is the current value
         k e'),
    ("clampedIntegral",
     \_ [e, lo, hi] k ->
       name "x" $ \x ->
         let e' = clamp lo hi (var x + delta * e) in
-        continuous x 0 e' &
+        define x (continuous 0 e') &
         k e'),
    ("old",
     \_ [initial, e] k ->
       name "w" $ \x ->
         -- Works because all updates are done simultaneously
-        continuous x initial e & k (Var x))]
+        define x (continuous initial e) & k (Var x))]
 
 functionalPrims :: [(String, Prim)]
 functionalPrims =
@@ -256,7 +202,7 @@ clamp lo hi x = maxx lo (minn hi x)
 -- Define a variable by means of a differential equation in t.
 differentialEquation :: Var -> Expr -> Expr -> Process
 differentialEquation x initial e =
-  continuous x initial (solve (Var x) (foldn (derivDegree x e) smartIntegral e))
+  define x (continuous initial (solve (Var x) (foldn (derivDegree x e) smartIntegral e)))
 
 -- Given e = L(y)/L(x),
 -- transferFunction y x s e finds the differential equation defining y.

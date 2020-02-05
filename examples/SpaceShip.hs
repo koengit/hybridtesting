@@ -9,23 +9,28 @@ acceleration = Global "acceleration"
 position :: Var
 position = Global "position"
 
-gravity :: Var
-gravity = Global "gravity"
+state :: Var
+state = Global "state"
 
-ship :: Process
-ship =
-  continuous position 0 (integral (integral (var gravity*var acceleration)))
+ship :: (Double, Double, Double) -> Process
+ship g =
+  define position (continuous 0 (integral (integral (gravity g*var acceleration))))
 
-check :: (Double, Double, Double) -> Process
-check (g1, g2, g3) =
-  sequential (first (set gravity (double g1))) (var position >=? 100) $
-  sequential (first (set gravity (double g2))) (var position <=? -100) $
-  --process skip $ assert "reached destination" (var position <=? 100)
-  sequential (first (set gravity (double g3))) (var position >=? 100) $
-    first (assert "reached destination" false)
+gravity :: (Double, Double, Double) -> Expr
+gravity (g1, g2, g3) =
+  cond (var state ==? 1) (double g1) $
+  cond (var state ==? 2) (double g2) (double g3)
+
+check :: Process
+check =
+  (define state $ continuous 1 $
+    cond (var state ==? 1) (cond (var position >=? 100)  2 1) $
+    cond (var state ==? 2) (cond (var position <=? -100) 3 2) $
+    cond (var position >=? 100) 4 3) &
+  assert "reached destination" (continuous true (var state /=? 4))
 
 test :: (Show (f Bool), Valued f) => (Double, Double, Double) -> [Double] -> [Env f]
-test g vals = simulate 0.1 envs (lower stdPrims $ ship & check g)
+test g vals = simulate 0.1 envs (lower stdPrims $ ship g & check)
   where
     envs = [Map.singleton acceleration (val (DoubleValue x)) | x <- vals]
 
@@ -33,6 +38,6 @@ prop_SpaceShip g =
 --checkAssertions :: Double -> Duration -> Types -> Process -> Property
   --checkAssertions 0.1 1000 (Map.singleton acceleration (Continuous, Real (-10,10))) $
   checkAssertionsVal 0.1 100 (Map.singleton acceleration (Continuous, Real (-5,5))) $
-    lower stdPrims $ simplify $ ship & check g
+    lower stdPrims $ simplify $ ship g & check
 
 main = quickCheckWith stdArgs{ maxSuccess = 100000 } (prop_SpaceShip (1, 2, 0.5))

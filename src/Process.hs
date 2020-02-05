@@ -7,7 +7,7 @@ module Process(
   module Process.Simplify,
   module Process.Input) where
 
-import Process.Language(Process, Step, Expr, PrimitiveKind(..), Var(..), vars)
+import Process.Language(Process, Stream, Expr, PrimitiveKind(..), Var(..), vars)
 import Process.Combinators
 import Process.Eval(Value(..), Env, Valued(..), simulate, simulateReal, simulateVal)
 import qualified Process.Eval
