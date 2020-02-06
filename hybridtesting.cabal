@@ -35,6 +35,9 @@ library
        Process.Pretty
        Process.QuickCheck
        Process.Simplify
+       Flowstar.Lex
+       Flowstar.Parse
+       Flowstar.Model
        Utils
        Val
        Data
@@ -52,7 +55,10 @@ library
       process,
       directory,
       filepath,
-      random
+      random,
+      array,
+      parsec,
+      Glob
   ghc-options: -O2
   default-language: Haskell2010
 
