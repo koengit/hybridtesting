@@ -74,6 +74,10 @@ smashVal (Val vs) =
 (&&?) = liftVal (&&)
 nott  = mapVal not
 
+(==>?) :: Val Bool -> Val Bool -> Val Bool
+a ==>? b | the a     = b
+         | otherwise = Val [ (b, if b then v else v+99999) | (b,v) <- vals a ]
+
 instance (Ord a, Num a) => Num (Val a) where
   (+)         = liftVal (+)
   (-)         = liftVal (-)
