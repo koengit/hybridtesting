@@ -24,9 +24,9 @@ gravity (g1, g2, g3) =
 check :: Process
 check =
   (continuous state 1 $
-    cond (var state ==? 1) (cond (var position >=? 100)  2 1) $
-    cond (var state ==? 2) (cond (var position <=? -100) 3 2) $
-    cond (var position >=? 100) 4 3) &
+    cond (var state ==? 1) (cond (var position >=? 100)  2 (var state)) $
+    cond (var state ==? 2) (cond (var position <=? -100) 3 (var state)) $
+    cond (var position >=? 100) 4 (var state)) &
   loop (assert "reached destination" (var state /=? 4))
 
 test :: (Show (f Bool), Valued f) => (Double, Double, Double) -> [Double] -> [Env f]
@@ -41,3 +41,8 @@ prop_SpaceShip g =
     lower stdPrims $ simplify $ ship g & check
 
 main = quickCheckWith stdArgs{ maxSuccess = 100000 } (prop_SpaceShip (1, 2, 0.5))
+
+main' =
+  checkAssertionsIO 0.1 100 (Map.singleton acceleration (Continuous, Real (-5,5))) $
+    lower stdPrims $ simplify $ ship (1, 2, 0.5) & check
+

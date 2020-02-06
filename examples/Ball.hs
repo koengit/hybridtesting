@@ -45,3 +45,8 @@ prop_ball =
     lower stdPrims $ simplify $ ball & check
 
 main = quickCheckWith stdArgs{ maxSuccess = 100000 } prop_ball
+
+main' =
+  checkAssertionsIO 0.1 100 (Map.fromList [(xv0, (Parameter, Real (-200,200))), (yv0, (Parameter, Real (-200,200)))]) $
+    lower stdPrims $ simplify $ ball & check
+

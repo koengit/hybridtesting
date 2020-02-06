@@ -74,6 +74,10 @@ smashVal (Val vs) =
 (&&?) = liftVal (&&)
 nott  = mapVal not
 
+(==>?) :: Val Bool -> Val Bool -> Val Bool
+a ==>? b | the a     = b
+         | otherwise = Val [ (b, if b then v else v+99999) | (b,v) <- vals a ]
+
 instance (Ord a, Num a) => Num (Val a) where
   (+)         = liftVal (+)
   (-)         = liftVal (-)
@@ -160,6 +164,11 @@ howTrue (Val [(True,0)])             = infinity
 howTrue (Val ((True,0):(False,d):_)) = d + 1
 howTrue (Val [(False,0)])            = -infinity
 howTrue (Val ((False,0):(True,d):_)) = -d - 1
+
+falsify :: Val Bool -> Maybe Double
+falsify (Val [(True,0)])             = Just infinity
+falsify (Val ((True,0):(False,d):_)) = Just d
+falsify _                            = Nothing
 
 infinity :: Double
 infinity = 1/0
