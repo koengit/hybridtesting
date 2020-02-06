@@ -81,7 +81,7 @@ ppExp _ (Double x) = text (shortest (show x) (printf "%.5f" x))
 ppExp n (Plus e1 e2) =
   maybeParens (n > 4) $
     fsep $
-      (case e1 of Negate{} -> ppTerm "-" e1; _ -> ppExp 4 e1):
+      (case e1 of Negate e1' -> ppTerm "-" e1'; _ -> ppExp 4 e1):
       map (ppTerm "+") pos ++
       map (ppTerm "-") neg
   where

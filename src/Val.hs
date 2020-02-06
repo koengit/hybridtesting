@@ -117,8 +117,8 @@ instance VCompare Double where
 
 eqZero :: Double -> Val Bool
 eqZero x
-  | x == 0    = Val [(True,0),  (False,0)]
-  | otherwise = Val [(False,0), (True,abs x)]
+  | x == 0    = Val [(True,0)]
+  | otherwise = Val [(False,0)]
 
 geqZero :: Double -> Val Bool
 geqZero x

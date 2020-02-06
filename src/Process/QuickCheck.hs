@@ -19,9 +19,21 @@ import OptimizeNew
 -- checking the assertions in a process
 
 checkAssertionsVal :: Double -> Duration -> Types -> Process -> Property
-checkAssertionsVal delta maxdur types p =
+checkAssertionsVal =
+  checkAssertionsWith $ \input p ->
+    let (input', tries, _) = forData input p in
+    (input', tries)
+
+checkAssertionsRandom :: Double -> Duration -> Types -> Process -> Property
+checkAssertionsRandom =
+  checkAssertionsWith (\input _ -> (input, 0))
+
+checkAssertionsWith ::
+  (Input -> (Input -> Double) -> (Input, Int)) ->
+  Double -> Duration -> Types -> Process -> Property
+checkAssertionsWith optimiser delta maxdur types p =
   forAll (genInput maxdur types) $ \input0 ->
-    let (input', tries, result') = forData input0 (howTrue . run) in
+    let (input', tries) = optimiser input0 (howTrue . run) in
       forAllShrink (return input') shrinkInput $ \input'' ->
         let envs  = simulateVal delta (sampleInput delta input'') p in
           whenFail (do plot "cex" delta envs
