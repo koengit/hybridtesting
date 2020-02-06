@@ -39,6 +39,7 @@ library
        Val
        Data
        Optimize
+       OptimizeNew
   hs-source-dirs:
       src
       examples
