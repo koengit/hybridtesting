@@ -21,7 +21,7 @@ val :: a -> Val a
 val x = Val [(x, 0)]
 
 mkVal :: Ord a => [(a,Double)] -> Val a
-mkVal xs = Val (take 5 (ordNubOn fst xs))
+mkVal xs = Val (take 4 (ordNubOn fst xs))
 
 merge :: [(a, Double)] -> [(a, Double)] -> [(a, Double)]
 merge xs [] = xs
