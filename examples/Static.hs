@@ -34,3 +34,8 @@ test thresh (x, y) = last $ simulate 1 envs (lower stdPrims $ system thresh & ch
 prop_Static thresh =
   checkAssertionsVal 1 1 types $
     lower stdPrims $ system thresh & check
+
+main' thresh =
+  checkAssertionsIO 1 1 types $
+    lower stdPrims $ system thresh & check
+

@@ -41,3 +41,8 @@ prop_SpaceShip g =
     lower stdPrims $ simplify $ ship g & check
 
 main = quickCheckWith stdArgs{ maxSuccess = 100000 } (prop_SpaceShip (1, 2, 0.5))
+
+main' =
+  checkAssertionsIO 0.1 100 (Map.singleton acceleration (Continuous, Real (-5,5))) $
+    lower stdPrims $ simplify $ ship (1,2,0.5) & check
+
