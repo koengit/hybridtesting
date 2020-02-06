@@ -59,18 +59,15 @@ minimizeBox rnd f xsLR = go 0 rnd xs0 a0
 
   go n rnd xs a = (xs,a) : go (n+1) rnd' (h z) a'
    where
-    -- generate a random point ys in the box
-    (ys,rnd') = generate rnd xsLR
+    -- generate a random point the box [-1,1]
+    (cs,rnd') = generate rnd xsLR
      where
       generate rnd []         = ([],  rnd)
-      generate rnd (xLR:xsLR) = (y:ys,rnd2)
+      generate rnd (xLR:xsLR) = (c:cs,rnd2)
        where
-        (y, rnd1) = randomR xLR rnd
-        (ys,rnd2) = generate rnd1 xsLR
+        (c, rnd1) = randomR (-1, 1 :: Double) rnd
+        (cs,rnd2) = generate rnd1 xsLR
 
-    -- coefficients so that z=0->xs, z=1->ys    
-    cs = zipWith (-) ys xs
-    
     -- minimizing over the line through xs and ys
     h z      = zipWith3 (\x c (xL,xR) -> xL `max` (xR `min` (x + z*c))) xs cs xsLR
     (z,a')   = minimizeLine (f . h) maxTries zL (0,a) zR
