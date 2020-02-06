@@ -38,6 +38,7 @@ library
        Flowstar.Lex
        Flowstar.Parse
        Flowstar.Model
+       Flowstar.Translate
        Utils
        Val
        Data

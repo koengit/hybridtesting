@@ -11,6 +11,8 @@ data Model =
   Model {
     -- The state variables
     vars :: Set Var,
+    -- The model parameters
+    params :: Map Var Double,
     -- The modes
     modes :: Map ModeName Mode,
     -- The initial mode
@@ -40,7 +42,7 @@ data Jump =
     target :: ModeName,
     -- Constraints which must be satisfied in order to make the jump
     condition :: [Constraint],
-    -- The new values of the *derivatives* of the variables.
+    -- The new values of the variables.
     -- This map need not contain every variable
     reset :: Map Var Expr }
   deriving Show

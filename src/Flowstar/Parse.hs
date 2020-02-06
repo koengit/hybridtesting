@@ -271,9 +271,9 @@ assemble () vars_ params_ modes_ jumps_ (initialMode_, initialVars_) unsafe_
     Right model
   where
     model =
-      substModel params_ $
       Model {
         vars = vars_,
+        params = params_,
         modes = Map.mapWithKey toMode modes_,
         initialMode = initialMode_,
         initialVars = initialVars_ }
@@ -311,35 +311,6 @@ assemble () vars_ params_ modes_ jumps_ (initialMode_, initialVars_) unsafe_
     varsExpr (Negate e) = varsExpr e
     varsExpr (Sin e) = varsExpr e
     varsExpr (Interval x y) = []
-
-    substModel sub m =
-      m {
-        modes = Map.map (substMode sub) (modes m),
-        initialVars = map (substConstraint sub) (initialVars m) }
-    substMode sub m =
-      m {
-        invariant = map (substConstraint sub) (invariant m),
-        derivatives = Map.map (subst sub) (derivatives m),
-        jumps = map (substJump sub) (jumps m),
-        unsafe = map (substConstraint sub) (unsafe m) }
-    substJump sub j =
-      j {
-        condition = map (substConstraint sub) (condition j),
-        reset = Map.map (subst sub) (reset j) }
-    substConstraint sub (Zero e) = Zero (subst sub e)
-    substConstraint sub (Positive e) = Positive (subst sub e)
-    substConstraint sub (e `In` range) = subst sub e `In` range
-    subst sub (Var x) =
-      case Map.lookup x sub of
-        Just y -> Const y
-        Nothing -> Var x
-    subst sub (Const x) = Const x
-    subst sub (Plus e1 e2) = Plus (subst sub e1) (subst sub e2)
-    subst sub (Times e1 e2) = Times (subst sub e1) (subst sub e2)
-    subst sub (Power e1 e2) = Power (subst sub e1) (subst sub e2)
-    subst sub (Negate e) = Negate (subst sub e)
-    subst sub (Sin e) = Sin (subst sub e)
-    subst sub (Interval x y) = Interval x y
 
 parseFlow :: FilePath -> String -> Either ParseError Model
 parseFlow file contents =

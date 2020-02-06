@@ -12,6 +12,7 @@ import Utils
 import Data.Data
 import Control.Monad
 import Data.Either
+import Data.Maybe
 
 ----------------------------------------------------------------------
 -- Processes
@@ -134,6 +135,11 @@ replaceLocal e1 e2 = descendBi f
 replaceGlobal :: Data a => Expr -> Expr -> a -> a
 replaceGlobal e1 e2 = transformBi (\e -> if e == e1 then e2 else e)
 
+-- Substitute variables for values.
+substitute :: Data a => [(Var, Expr)] -> a -> a
+substitute sub =
+  foldr (.) id $ [replaceGlobal (Var x) e | (x, e) <- sub]
+
 ----------------------------------------------------------------------
 -- Helper functions for the implementation
 ----------------------------------------------------------------------
@@ -187,6 +193,7 @@ terms' e = (k, pos', neg')
     -- e.g. 3x^2 and 4x^2, collect them together
     collectLikeTerms =
       partitionEithers .
+      catMaybes .
       map toTerm .
       map addFactors .
       partitionBy (sort . snd)
@@ -194,8 +201,9 @@ terms' e = (k, pos', neg')
         addFactors es@((_, fs):_) =
           (sum (map fst es), fs)
         toTerm (k, es)
-          | k < 0 = Right (Double (negate k) * product es)
-          | otherwise = Left (Double k * product es)
+          | k < 0     = Just (Right (Double (negate k) * product es))
+          | k == 0    = Nothing
+          | otherwise = Just (Left (Double k * product es))
 
 -- Separates a product into constant and non-constant parts
 factors :: Expr -> (Double, [Expr])
