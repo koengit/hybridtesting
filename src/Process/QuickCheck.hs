@@ -76,15 +76,16 @@ checkAssertionsIO delta maxdur types p =
 
      let go ((xs,r):xsrs) =
            do putStrLn (show inp ++ " --> " ++ show r)
-              if r < 0 then
-                do quickCheck $ forAllShrink (return inp) shrinkInput $ \inp' ->
-                     let envs = simulateVal delta (sampleInput delta inp') p in
-                       whenFail (plot "cex" delta envs) $
-                         the (run inp')
-               else
-                do let envs = simulateVal delta (sampleInput delta inp) p
-                   plot "cex" delta envs
-                   go xsrs
+              case r of
+                Nothing ->
+                  do quickCheck $ forAllShrink (return inp) shrinkInput $ \inp' ->
+                       let envs = simulateVal delta (sampleInput delta inp') p in
+                         whenFail (plot "cex" delta envs) $
+                           the (run inp')
+                Just r ->
+                  do let envs = simulateVal delta (sampleInput delta inp) p
+                     plot "cex" delta envs
+                     go xsrs
           where
            inp = input xs
      
@@ -92,7 +93,7 @@ checkAssertionsIO delta maxdur types p =
  where
   k = 5 -- max #points per signal
 
-  optis rnd = minimizeBox rnd (howTrue . run . input) xsLR
+  optis rnd = minimizeBox rnd (falsify . run . input) xsLR
    where
     xsLR = concat
            [ concat (replicate k [pt,dur]) ++ [pt]

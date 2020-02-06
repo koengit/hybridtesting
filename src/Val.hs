@@ -21,7 +21,7 @@ val :: a -> Val a
 val x = Val [(x, 0)]
 
 mkVal :: Ord a => [(a,Double)] -> Val a
-mkVal xs = Val (take 4 (ordNubOn fst xs))
+mkVal xs = Val (take 5 (ordNubOn fst xs))
 
 merge :: [(a, Double)] -> [(a, Double)] -> [(a, Double)]
 merge xs [] = xs
@@ -164,6 +164,11 @@ howTrue (Val [(True,0)])             = infinity
 howTrue (Val ((True,0):(False,d):_)) = d + 1
 howTrue (Val [(False,0)])            = -infinity
 howTrue (Val ((False,0):(True,d):_)) = -d - 1
+
+falsify :: Val Bool -> Maybe Double
+falsify (Val [(True,0)])             = Just infinity
+falsify (Val ((True,0):(False,d):_)) = Just d
+falsify _                            = Nothing
 
 infinity :: Double
 infinity = 1/0
