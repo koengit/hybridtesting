@@ -114,7 +114,7 @@ forData :: (Show a, Data a) => a -> (a -> Double) -> (a, Int, Double)
 forData x h = (fill x ws, n, ans)
  where
   (ws,ans,n) = goal (<= 0)
-             . giveUp 10
+             . giveUp 50
              . take   1000
              . minimize (repeat 100) (vals x)
              $ h . fill x
