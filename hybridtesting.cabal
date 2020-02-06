@@ -35,6 +35,7 @@ library
        Process.Pretty
        Process.QuickCheck
        Process.Simplify
+       Flowstar
        Flowstar.Lex
        Flowstar.Parse
        Flowstar.Model
