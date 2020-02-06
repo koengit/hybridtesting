@@ -13,6 +13,7 @@ import qualified Data.Map.Strict as Map
 import Control.Monad
 import System.FilePath.Glob
 import Data.Either
+import Data.Maybe
 
 type Parser = Parsec [Lex.Token] ()
 
@@ -90,11 +91,14 @@ parseModel = ((continuous <|> hybrid) <* eof) >>= check
         <||> parseDerivatives
         <|?> ([], parseInvariant)
         <|?> ([], section "init" parseConstraints)
-      x <- option [] (symbol "unsafe" *> symbol "set" *> braces parseConstraints)
+      x <- option Nothing (symbol "unsafe" *> symbol "set" *> braces (Just <$> parseConstraints))
       return (f x)
 
     assembleContinuous settings vars params derivatives invariant constraints unsafe =
-      assemble settings vars params (Map.singleton "" (derivatives, invariant)) [] ("", constraints) (Map.singleton "" unsafe)
+      assemble settings vars params (Map.singleton "" (derivatives, invariant)) [] ("", constraints) $
+      case unsafe of
+        Nothing -> Map.empty
+        Just unsafe -> Map.singleton "" unsafe
 
     hybrid = do
       symbol "hybrid"
@@ -282,7 +286,7 @@ assemble () vars_ params_ modes_ jumps_ (initialMode_, initialVars_) unsafe_
         invariant = invariant,
         derivatives = derivatives,
         jumps = [jump | (mode', jump) <- jumps_, mode == mode'],
-        unsafe = Map.findWithDefault [] mode unsafe_ }
+        unsafe = Map.lookup mode unsafe_ }
 
     varsModel m =
       concatMap varsMode (Map.elems (modes m)) ++
@@ -292,7 +296,7 @@ assemble () vars_ params_ modes_ jumps_ (initialMode_, initialVars_) unsafe_
       Map.keys (derivatives m) ++
       concatMap varsExpr (Map.elems (derivatives m)) ++
       concatMap varsJump (jumps m) ++
-      concatMap varsConstraint (unsafe m)
+      concatMap varsConstraint (fromMaybe [] (unsafe m))
     varsJump m =
       concatMap varsConstraint (condition m) ++
       Map.keys (reset m) ++

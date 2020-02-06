@@ -127,11 +127,17 @@ mode jump F.Mode{..} =
   -- *current* state (this makes the bouncing ball example work and
   -- doesn't hurt the other examples).
   P.par [assumption c | c <- invariant] P.&
-  P.par [assertion c  | c <- unsafe ] P.&
+  isSafe P.&
   foldr addJump (update next) jumps
     where
       assumption c = P.assume "invariant" (constraint c)
-      assertion c  = P.assert "unsafe"    (P.nott (robustConstraint c invariant))
+      isSafe =
+        case unsafe of
+          Nothing -> P.skip
+          Just unsafe ->
+            P.assert "unsafe" $ P.nott $
+              foldr (P.&&&) P.true $
+              [robustConstraint c invariant | c <- unsafe]
 
       addJump F.Jump{..} p =
         P.ite

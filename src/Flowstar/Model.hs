@@ -32,7 +32,7 @@ data Mode =
     -- Discrete state changes
     jumps :: [Jump],
     -- States which must not be entered. Conjunction of constraints
-    unsafe :: [Constraint] }
+    unsafe :: Maybe [Constraint] }
   deriving Show
 
 -- A single jump
