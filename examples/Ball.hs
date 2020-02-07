@@ -41,12 +41,12 @@ test vals = simulate 0.1 envs (lower stdPrims $ ball & check)
     envs = [Map.fromList [(xv0, val (DoubleValue x)), (yv0, val (DoubleValue y))] | (x, y) <- vals]
 
 prop_ball =
-  checkAssertionsVal 0.1 100 (Map.fromList [(xv0, (Parameter, Real (-20,20))), (yv0, (Parameter, Real (-20,20)))]) $
+  checkAssertionsVal 0.1 10 (Map.fromList [(xv0, (Parameter, Real (-20,20))), (yv0, (Parameter, Real (-20,20)))]) $
     lower stdPrims $ simplify $ ball & check
 
 main = quickCheckWith stdArgs{ maxSuccess = 100000 } prop_ball
 
 main' =
-  checkAssertionsIO 0.1 100 (Map.fromList [(xv0, (Parameter, Real (-200,200))), (yv0, (Parameter, Real (-200,200)))]) $
+  checkAssertionsIO 0.1 10 (Map.fromList [(xv0, (Parameter, Real (-200,200))), (yv0, (Parameter, Real (-200,200)))]) $
     lower stdPrims $ simplify $ ball & check
 

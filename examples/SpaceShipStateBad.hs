@@ -30,19 +30,19 @@ check =
   loop (assert "reached destination" (var state /=? 4))
 
 test :: (Show (f Bool), Valued f, Ord (f Value)) => (Double, Double, Double) -> [Double] -> [Env f]
-test g vals = simulate 0.1 envs (lower stdPrims $ ship g & check)
+test g vals = simulate 1 envs (lower stdPrims $ ship g & check)
   where
     envs = [Map.singleton acceleration (val (DoubleValue x)) | x <- vals]
 
 prop_SpaceShip g =
 --checkAssertions :: Double -> Duration -> Types -> Process -> Property
-  --checkAssertions 0.1 1000 (Map.singleton acceleration (Continuous, Real (-10,10))) $
-  checkAssertionsVal 0.1 100 (Map.singleton acceleration (Continuous, Real (-5,5))) $
+  --checkAssertions 1 1000 (Map.singleton acceleration (Continuous, Real (-10,10))) $
+  checkAssertionsVal 1 100 (Map.singleton acceleration (Continuous, Real (-5,5))) $
     lower stdPrims $ simplify $ ship g & check
 
 main = quickCheckWith stdArgs{ maxSuccess = 100000 } (prop_SpaceShip (1, 2, 0.5))
 
 main' =
-  checkAssertionsIO 0.1 100 (Map.singleton acceleration (Continuous, Real (-5,5))) $
+  checkAssertionsIO 1 100 (Map.singleton acceleration (Continuous, Real (-5,5))) $
     lower stdPrims $ simplify $ ship (1, 2, 0.5) & check
 
