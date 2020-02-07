@@ -223,8 +223,8 @@ simulate :: Valued f => Double -> [Env f] -> Process -> [Env f]
 simulate delta inputs process =
   go (execStep (emptyEnv delta `Map.union` head inputs) (start process)) inputs
  where
-  go state []         = []
-  go state (inp:inps) = state' : go state' inps
+  go state []         = [state]
+  go state (inp:inps) = state : go state' inps
    where
     state' = execStep (Map.union inp state) (step process)
 
