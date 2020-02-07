@@ -101,10 +101,15 @@ model F.Model{..} =
       modeNums = Map.fromList (zip (Map.keys modes) (map P.double [1..]))
       modeNum x = Map.findWithDefault undefined x modeNums
       start =
-        P.set state (modeNum initialMode) P.&
+        (if length modes > 1 then P.set state (modeNum initialMode) else P.skip) P.&
         P.par [P.set x e | (x, e) <- subst] P.&
         P.par [P.assume "initial constraint" (P.substitute subst (constraint c)) | c <- initialVars]
-      step = foldr modeIte (P.assert "invalid mode" P.false) (Map.toList modes)
+      step =
+        case Map.elems modes of
+          [val] ->
+            mode (const P.skip) val
+          _ ->
+            foldr modeIte (P.assert "invalid mode" P.false) (Map.toList modes)
       modeIte (name, val) rest =
         P.ite (P.var state P.==? modeNum name)
           (mode (\name -> P.set state (modeNum name)) val)
