@@ -83,6 +83,18 @@ bindVal x f = smashVal (mapVal f x)
 (&&?) = liftVal (&&)
 nott  = mapVal not
 
+(&&+) :: Val Bool -> Val Bool -> Val Bool
+x &&+ y = 
+  case (falsify' x, falsify' y) of
+    (Left a, Left b) ->
+      Val [(True, 0), (False, 1/(1/a+1/b))]
+    (Left _, Right b) ->
+      Val [(False, 0), (True, b)]
+    (Right a, Left _) ->
+      Val [(False, 0), (True, a)]
+    (Right a, Right b) ->
+      Val [(False, 0), (True, a+b)]
+
 (==>?) :: Val Bool -> Val Bool -> Val Bool
 a ==>? b | the a     = b
          | otherwise = Val (sortBy (comparing snd) [ (not b, if b then v+99999 else v) | (b,v) <- vals a ])
@@ -178,6 +190,12 @@ falsify :: Val Bool -> Maybe Double
 falsify (Val [(True,0)])             = Just infinity
 falsify (Val ((True,0):(False,d):_)) = Just d
 falsify _                            = Nothing
+
+falsify' :: Val Bool -> Either Double Double
+falsify' (Val [(True,0)])             = Left infinity
+falsify' (Val ((True,0):(False,d):_)) = Left d
+falsify' (Val [(False,0)])            = Right infinity
+falsify' (Val ((False,0):(True,d):_)) = Right d
 
 infinity :: Double
 infinity = 1/0

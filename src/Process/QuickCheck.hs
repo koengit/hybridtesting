@@ -52,8 +52,8 @@ checkAssertionsWith optimiser delta maxdur types p =
         | the pre' == False || the post' == False = (pre', post')
         | otherwise                               = check pre' post' envs
        where
-        pre'  = pre  &&? (boolValue `mapVal` (env Map.! Pre))
-        post' = post &&? (boolValue `mapVal` (env Map.! Post))
+        pre'  = pre  &&+ (boolValue `mapVal` (env Map.! Pre))
+        post' = post &&+ (boolValue `mapVal` (env Map.! Post))
 
       (pre,post) = check (Val.val True) (Val.val True) envs
       
@@ -133,8 +133,8 @@ checkAssertionsIO delta maxdur types p =
         | the pre' == False || the post' == False = (pre', post')
         | otherwise                               = check pre' post' envs
        where
-        pre'  = pre  &&? (boolValue `mapVal` (env Map.! Pre))
-        post' = post &&? (boolValue `mapVal` (env Map.! Post))
+        pre'  = pre  &&+ (boolValue `mapVal` (env Map.! Pre))
+        post' = post &&+ (boolValue `mapVal` (env Map.! Post))
 
       (pre,post) = check (Val.val True) (Val.val True) envs
     in pre =>? post
