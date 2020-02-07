@@ -100,6 +100,9 @@ hybrid reachability
   guard {x = 510 }
   reset { c2' := 0 }
   parallelotope aggregation {}
+
+  norod -> shutdown
+  guard {x = 550 c1 <= 20 c2 <= 20 }
  }
 
  init
