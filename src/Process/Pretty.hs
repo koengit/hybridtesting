@@ -26,27 +26,14 @@ instance Show Var where
 instance Pretty Process where
   pPrint p =
     vcat $
-      [ hang (text "initial") 2 (pPrint (start p)) | nonempty (start p) ] ++
-      [ hang (text "timestep") 2 (pPrint (step p)) | nonempty (step p) ]
-    where
-      nonempty (Update m) = Map.size m > 0
-      nonempty _ = True
+      [ hang (text "initial") 2 (pPrint (start p)) ] ++
+      [ hang (text "timestep") 2 (pPrint (step p)) ]
 
 instance Pretty Step where
-  pPrint (If e s1 s2) =
-    ppIfThenElse (pPrint e) (pPrint s1) (pPrint s2)
-  pPrint (Assume msg e s) =
-    hang (text "assume" <+> text (show msg)) 2 (pPrint e) $$
-    pPrint s
-  pPrint (Assert msg e s) =
-    hang (text "assert" <+> text (show msg)) 2 (pPrint e) $$
-    pPrint s
-  pPrint (Update m)
-    | Map.null m = text "skip"
-    | otherwise =
-      vcat
-        [ hang (pPrint x <+> text "<-") 2 (pPrint e)
-        | (x, e) <- Map.toList m ]
+  pPrint (Step m) =
+    vcat
+      [ hang (pPrint x <+> text "<-") 2 (pPrint e)
+      | (x, e) <- Map.toList m ]
 
 instance Pretty Expr where
   pPrintPrec _ p = ppExp p

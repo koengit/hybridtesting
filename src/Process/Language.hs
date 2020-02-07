@@ -28,11 +28,7 @@ data Process =
     step :: Step   -- loop step
   } deriving (Eq, Typeable, Data)
 
-data Step =
-   If Expr Step Step       -- if-then-else
- | Assume String Expr Step -- check precondition
- | Assert String Expr Step -- check postcondition
- | Update (Map Var Expr)   -- update variables
+newtype Step = Step { updates :: Map Var Expr }
  deriving (Eq, Typeable, Data)
 
 data Expr =
@@ -258,35 +254,3 @@ conjuncts e = do
     conj (Bool True) = return ([], [])
     conj (Bool False) = Nothing
     conj e = return ([e], [])
-
--- Finds each variable defined in a Step and how it's defined.
--- Variables defined using if-then-else are translate to Cond.
-definitions :: Step -> Map Var Expr
-definitions (If cond e1 e2) =
-  Map.mergeWithKey f g h (definitions e1) (definitions e2)
-  where
-    f _ e1 e2 = Just (Cond cond e1 e2)
-    g = Map.mapWithKey (\x e1 -> Cond cond e1 (Var x))
-    h = Map.mapWithKey (\x e2 -> Cond cond (Var x) e2)
-definitions (Assume _ _ s) = definitions s
-definitions (Assert _ _ s) = definitions s
-definitions (Update m) = m
-
--- Restrict a Step to updating a particular subset of variables.
-restrictTo :: (Var -> Bool) -> Step -> Step
-restrictTo p (If cond e1 e2)
-  | e1' == e2' = Update Map.empty
-  | otherwise = If cond e1' e2'
-  where
-    e1' = restrictTo p e1
-    e2' = restrictTo p e2
-restrictTo p (Assume cond msg s) = Assume cond msg (restrictTo p s)
-restrictTo p (Assert cond msg s) = Assert cond msg (restrictTo p s)
-restrictTo p (Update m) = Update (Map.filterWithKey (\k _ -> p k) m)
-
--- Remove Assume and Assert from a Step.
-withoutChecks :: Step -> Step
-withoutChecks (If cond e1 e2) = If cond (withoutChecks e1) (withoutChecks e2)
-withoutChecks (Assume _ _ s) = withoutChecks s
-withoutChecks (Assert _ _ s) = withoutChecks s
-withoutChecks (Update m) = Update m

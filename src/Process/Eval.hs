@@ -165,6 +165,9 @@ eval env (Positive e) =
 eval env (Zero e) =
   BoolValue `vmap` vzero (doubleValue `vmap` eval env e)
 
+eval env (Cond c e1 e2) =
+  vifThenElse (boolValue `vmap` eval env c) (eval env e1) (eval env e2)
+  
 eval _ e =
   vfail $ show $
     sep [
@@ -177,7 +180,8 @@ eval _ e =
 -- the semantics of this function has changed, Pre and Post are not accumulative
 -- anymore!
 execStep :: Valued f => Env f -> Step -> Env f
-execStep env0 p = Map.map (vforget 5) $ Map.union (go p) env
+execStep env0 (Step p) =
+  Map.map (vforget 5) $ Map.union (Map.map (eval env) p) env
  where
   env   = Map.union reset env0
   reset = Map.fromList
@@ -185,30 +189,6 @@ execStep env0 p = Map.map (vforget 5) $ Map.union (go p) env
           , (Post, val (BoolValue True))
           ]
   
-  go (If e s1 s2)     = iff (boolValue `vmap` eval env e) (go s1) (go s2)
-  go (Update m)       = Map.map (eval env) m
-  go (Assume str e s) = add Pre  (eval env e) (go s)
-  go (Assert str e s) = add Post (eval env e) (go s)
-  
-  iff c =
-    Merge.merge (Merge.mapMaybeMissing fxv)
-                (Merge.mapMaybeMissing fxw)
-                (Merge.zipWithMaybeMatched f)
-   where
-    fxv x v = Just (case Map.lookup x env of
-                      Just w  -> vifThenElse c v w
-                      Nothing -> v {- !!: x is undefined in this branch -})
-    fxw x w = Just (case Map.lookup x env of
-                      Just v  -> vifThenElse c v w
-                      Nothing -> w {- !!: x is undefined in this branch -})
-    f x v w = Just (vifThenElse c v w)
-
-  add x v =
-    Map.insertWith (&&&) x v
-
-  v &&& w =
-    BoolValue `vmap` vlift (&&) (boolValue `vmap` v) (boolValue `vmap` w)
-
 --------------------------------------------------------------------------------
 
 emptyEnv :: Valued f => Double -> Env f

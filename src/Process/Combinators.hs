@@ -41,25 +41,38 @@ par :: Par a => [a] -> a
 par = foldr (&) skip
 
 instance Par Step where
-  skip = Update Map.empty
+  skip = Step Map.empty
 
-  If e s1 s2 & s3 =
-    If e (s1 & s3) (s2 & s3)
-  Assume str e s1 & s2 =
-    Assume str e (s1 & s2)
-  Assert str e s1 & s2 =
-    Assert str e (s1 & s2)
-  Update m1 & Update m2 =
-    Update (Map.unionWith f m1 m2)
+  Step m1 & Step m2 =
+    Step (Map.unionWithKey f m1 m2)
     where
-      f x y
+      f Pre x y = x &&& y
+      f Post x y = x &&& y
+      f _ x y
         | x == y = x
         | otherwise = error "Step.&: incoherent state update"
-  s1@Update{} & s2 = s2 & s1
 
 instance Par Process where
   skip = process skip skip
   (&) = combine (&) (&)
+
+-- Combining two alternatives with if-then-else
+class Ite a where
+  ite :: Expr -> a -> a -> a
+
+instance Ite Expr where
+  ite = Cond
+
+instance Ite Step where
+  ite c (Step m1) (Step m2) =
+    Step (Map.mergeWithKey f g h m1 m2)
+    where
+      f _ e1 e2 = Just (Cond c e1 e2)
+      g = Map.mapWithKey (\x e1 -> Cond c e1 (Var x))
+      h = Map.mapWithKey (\x e2 -> Cond c (Var x) e2)
+
+instance Ite Process where
+  ite c = combine (ite c) (ite c)
 
 -- Generate a local name
 name :: String -> (Var -> Process) -> Process
@@ -70,16 +83,12 @@ name s f = p{locals = locals p + 1}
 
 -- Update a variable
 set :: Var -> Expr -> Step
-set x e = Update (Map.singleton x e)
-
--- If-then-else
-ite :: Expr -> Step -> Step -> Step
-ite = If
+set x e = Step (Map.singleton x e)
 
 -- Assumptions and assertions
 assume, assert :: String -> Expr -> Step
-assume str e = Assume str e skip
-assert str e = Assert str e skip
+assume str e = set Pre e
+assert str e = set Post e
 
 -- Define a variable whose value changes with every step
 continuous :: Var -> Expr -> Expr -> Process
@@ -89,7 +98,7 @@ continuous x start step =
 -- Choose between two processes. Initial state executes both
 switch :: Expr -> Process -> Process -> Process
 switch cond p1 p2 =
-  combine (&) (If cond) p1 p2
+  combine (&) (ite cond) p1 p2
 
 -- Sequential composition
 sequential :: Process -> Expr -> Process -> Process
@@ -105,11 +114,19 @@ sequential p e q =
       p q
   where
     -- Make sure that all variables get initialised in the first time-step
-    q1 = withoutChecks (restrictTo (`Map.notMember` definitions (start p)) (start q))
+    q1 =
+      Step $
+      Map.filterWithKey
+        (\x _ -> x `notElem` [Pre, Post] ++ Map.keys (updates (start p)))
+        (updates (start q))
+    
     -- Variables written by p must be initialised only once q starts for real
     -- (Note: no need to check step p because start p is required to
     -- initialised all variables in p)
-    q2 = restrictTo (`Map.member`    definitions (start p)) (start q)
+    q2 =
+      Step $
+      Map.filterWithKey (\x _ -> x `Map.member` updates (start p))
+        (updates (start q))
 
 wait :: Expr -> Process -> Process
 wait e p = sequential skip e p
