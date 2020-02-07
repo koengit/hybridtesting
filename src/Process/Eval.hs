@@ -211,7 +211,7 @@ execStep env0 (Step p) =
   forgetIt val =
     case vthe val of
       Just (BoolValue _) -> vforget 2 val
-      _ -> vforget 3 val
+      _ -> vforget 5 val
   
 --------------------------------------------------------------------------------
 
