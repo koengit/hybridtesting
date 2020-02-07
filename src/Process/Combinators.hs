@@ -184,6 +184,9 @@ minn, maxx :: Expr -> Expr -> Expr
 minn x y = primitive Functional "min" [] [x, y]
 maxx x y = primitive Functional "max" [] [x, y]
 
+between :: Expr -> (Expr, Expr) -> Expr
+e `between` (x, y) = x <=? e &&& e <=? y
+
 old :: Expr -> Expr -> Expr
 old initial x = primitive Temporal "old" [] [initial, x]
 
