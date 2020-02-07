@@ -3,8 +3,8 @@ import qualified Data.Map as Map
 import Process.QuickCheck
 import Test.QuickCheck
 
-acceleration :: Var
-acceleration = Global "acceleration"
+thrust :: Var
+thrust = Global "thrust"
 
 position :: Var
 position = Global "position"
@@ -14,10 +14,10 @@ state = Global "state"
 
 ship :: (Double, Double, Double) -> Process
 ship g =
-  continuous position 0 (integral (integral (gravity g*var acceleration)))
+  continuous position 0 (integral (integral (var thrust/mass g)))
 
-gravity :: (Double, Double, Double) -> Expr
-gravity (g1, g2, g3) =
+mass :: (Double, Double, Double) -> Expr
+mass (g1, g2, g3) =
   cond (var state ==? 1) (double g1) $
   cond (var state ==? 2) (double g2) (double g3)
 
@@ -32,17 +32,17 @@ check =
 test :: (Show (f Bool), Valued f, Ord (f Value)) => (Double, Double, Double) -> [Double] -> [Env f]
 test g vals = simulate 1 envs (lower stdPrims $ ship g & check)
   where
-    envs = [Map.singleton acceleration (val (DoubleValue x)) | x <- vals]
+    envs = [Map.singleton thrust (val (DoubleValue x)) | x <- vals]
 
 prop_SpaceShip g =
 --checkAssertions :: Double -> Duration -> Types -> Process -> Property
-  --checkAssertions 1 1000 (Map.singleton acceleration (Continuous, Real (-10,10))) $
-  checkAssertionsVal 1 100 (Map.singleton acceleration (Continuous, Real (-5,5))) $
+  --checkAssertions 1 1000 (Map.singleton thrust (Continuous, Real (-10,10))) $
+  checkAssertionsVal 1 100 (Map.singleton thrust (Continuous, Real (-5,5))) $
     lower stdPrims $ simplify $ ship g & check
 
 main = quickCheckWith stdArgs{ maxSuccess = 100000 } (prop_SpaceShip (1, 2, 0.5))
 
 main' =
-  checkAssertionsIO 1 100 (Map.singleton acceleration (Continuous, Real (-5,5))) $
-    lower stdPrims $ simplify $ ship (1, 2, 0.5) & check
+  checkAssertionsIO 1 100 (Map.singleton thrust (Continuous, Real (-5,5))) $
+    lower stdPrims $ simplify $ ship (1, 0.5, 2) & check
 
