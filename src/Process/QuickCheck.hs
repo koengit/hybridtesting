@@ -76,16 +76,17 @@ checkAssertionsIO delta maxdur types p =
 
      let go ((xs,r):xsrs) =
            do putStrLn (show inp ++ " --> " ++ show r)
+              let envs = simulateVal delta (sampleInput delta inp) p
+              plot "cex" delta envs
               case r of
                 Nothing ->
                   do quickCheck $ forAllShrink (return inp) shrinkInput $ \inp' ->
                        let envs = simulateVal delta (sampleInput delta inp') p in
                          whenFail (plot "cex" delta envs) $
                            the (run inp')
-                Just r ->
-                  do let envs = simulateVal delta (sampleInput delta inp) p
-                     plot "cex" delta envs
-                     go xsrs
+
+                Just _ ->
+                  do go xsrs
           where
            inp = input xs
      
