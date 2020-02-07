@@ -152,9 +152,11 @@ mode jump F.Mode{..} =
             (foldr (P.&&&) P.true [robustConstraint c invariant | c <- condition]))
           (jump target P.&
            (update $
-             [(P.Global x, expr e) | (x, e) <- Map.toList reset] ++
-             [(P.Global x, e) | (P.Global x, e) <- next, x `Map.notMember` reset]))
+             reset' ++
+             [(P.Global x, P.substitute reset' e) | (P.Global x, e) <- next, x `Map.notMember` reset]))
           p
+        where
+          reset' = [(P.Global x, expr e) | (x, e) <- Map.toList reset]
 
       update xs = P.par [P.set x e | (x, e) <- xs]
 
