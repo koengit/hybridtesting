@@ -41,6 +41,7 @@ class Valued f where
   vzero       :: f Double -> f Bool
   vmap        :: Ord b => (a -> b) -> f a -> f b
   vlift       :: Ord c => (a -> b -> c) -> f a -> f b -> f c
+  vbind       :: Ord b => f a -> (a -> f b) -> f b
   vifThenElse :: Ord a => f Bool -> f a -> f a -> f a
   vshare      :: f a -> f (f a)
   vfail       :: Ord a => String -> f a
@@ -53,6 +54,7 @@ instance Valued Identity where
   vzero             = vmap (== 0)
   vmap              = fmap
   vlift             = liftM2
+  vbind             = (>>=)
   vifThenElse c a b = if runIdentity c then a else b
   vshare            = return
   vfail s           = error s
@@ -67,6 +69,7 @@ instance Valued Maybe where
   vzero                    = vmap (== 0)
   vmap                     = fmap
   vlift                    = liftM2
+  vbind                    = (>>=)
   vifThenElse (Just c) a b = if c then a else b
   vifThenElse Nothing  a b = Nothing
   vshare                   = return
@@ -81,6 +84,7 @@ instance Valued Val.Val where
   vzero       = (Val.==? 0)
   vmap        = Val.mapVal
   vlift       = Val.liftVal
+  vbind       = Val.bindVal
   vifThenElse = Val.ifThenElse
   vshare      = Val.share
   vfail s     = error s
@@ -92,6 +96,10 @@ instance Valued Val.Val where
 vlift3 :: (Valued f, Ord a, Ord b, Ord d) => (a -> b -> c -> d) -> f a -> f b -> f c -> f d
 vlift3 f x y z =
   vlift (uncurry f) (vlift (,) x y) z
+
+vmapM :: (Valued f, Ord b) => (a -> f b) -> [a] -> f [b]
+vmapM _ [] = val []
+vmapM f (x:xs) = vlift (:) (f x) (vmapM f xs)
 
 --------------------------------------------------------------------------------
 
@@ -179,15 +187,23 @@ eval _ e =
 
 -- the semantics of this function has changed, Pre and Post are not accumulative
 -- anymore!
-execStep :: Valued f => Env f -> Step -> Env f
+execStep :: (Valued f, Ord (f Value)) => Env f -> Step -> Env f
 execStep env0 (Step p) =
-  Map.map (vforget 5) $ Map.union (Map.map (eval env) p) env
+  Map.map (vforget 5) $ Map.union (Map.map (evalShared env) p) env
  where
   env   = Map.union reset env0
   reset = Map.fromList
           [ (Pre,  val (BoolValue True))
           , (Post, val (BoolValue True))
           ]
+  evalShared env e =
+    shareEnv env e `vbind` flip eval e
+  shareEnv env e =
+    vmap Map.fromList (vmapM sharePair (Map.toList (Map.filterWithKey p env)))
+    where
+      p x _ = x `elem` vars e
+  sharePair (x, v) =
+    vmap (x,) (vshare v)
   
 --------------------------------------------------------------------------------
 
@@ -199,7 +215,7 @@ emptyEnv delta =
 
 --------------------------------------------------------------------------------
 
-simulate :: Valued f => Double -> [Env f] -> Process -> [Env f]
+simulate :: (Valued f, Ord (f Value)) => Double -> [Env f] -> Process -> [Env f]
 simulate delta inputs process =
   go (execStep (emptyEnv delta `Map.union` head inputs) (start process)) inputs
  where

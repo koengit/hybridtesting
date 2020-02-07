@@ -71,6 +71,9 @@ smashVal (Val vs) =
     | (Val zs,a) <- vs
     ]
 
+bindVal :: Ord b => Val a -> (a -> Val b) -> Val b
+bindVal x f = smashVal (mapVal f x)
+
 --------------------------------------------------------------------------------
 -- basic operations
 

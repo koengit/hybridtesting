@@ -35,7 +35,7 @@ check =
   assert "ball made it through after 5 collisions"
     (nott (var x >=? 15))
   
-test :: (Show (f Bool), Valued f) => [(Double, Double)] -> [Env f]
+test :: (Show (f Bool), Valued f, Ord (f Value)) => [(Double, Double)] -> [Env f]
 test vals = simulate 0.1 envs (lower stdPrims $ ball & check)
   where
     envs = [Map.fromList [(xv0, val (DoubleValue x)), (yv0, val (DoubleValue y))] | (x, y) <- vals]

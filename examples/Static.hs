@@ -26,7 +26,7 @@ check :: Process
 check =
   loop (assert "y >= 0" (var y >=? 0))
 
-test :: (Show (f Bool), Valued f) => Double -> (Double, Double) -> Env f
+test :: (Show (f Bool), Valued f, Ord (f Value)) => Double -> (Double, Double) -> Env f
 test thresh (x, y) = last $ simulate 1 envs (lower stdPrims $ system thresh & check)
   where
     envs = [Map.fromList [(u1, val (DoubleValue x)), (u2, val (DoubleValue y))]]

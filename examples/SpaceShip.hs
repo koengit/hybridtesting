@@ -24,7 +24,7 @@ check (g1, g2, g3) =
   sequential (first (set gravity (double g3))) (var position >=? 100) $
     first (assert "reached destination" false)
 
-test :: (Show (f Bool), Valued f) => (Double, Double, Double) -> [Double] -> [Env f]
+test :: (Show (f Bool), Valued f, Ord (f Value)) => (Double, Double, Double) -> [Double] -> [Env f]
 test g vals = simulate 0.1 envs (lower stdPrims $ ship & check g)
   where
     envs = [Map.singleton acceleration (val (DoubleValue x)) | x <- vals]

@@ -29,7 +29,7 @@ check =
     cond (var position >=? 100) 4 (var state)) &
   loop (assert "reached destination" (var state /=? 4))
 
-test :: (Show (f Bool), Valued f) => (Double, Double, Double) -> [Double] -> [Env f]
+test :: (Show (f Bool), Valued f, Ord (f Value)) => (Double, Double, Double) -> [Double] -> [Env f]
 test g vals = simulate 0.1 envs (lower stdPrims $ ship g & check)
   where
     envs = [Map.singleton acceleration (val (DoubleValue x)) | x <- vals]
