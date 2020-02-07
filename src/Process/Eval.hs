@@ -43,6 +43,7 @@ class Valued f where
   vlift       :: Ord c => (a -> b -> c) -> f a -> f b -> f c
   vifThenElse :: Ord a => f Bool -> f a -> f a -> f a
   vfail       :: Ord a => String -> f a
+  vforget     :: Int -> f a -> f a
   vplot       :: f Value -> Double
 
 instance Valued Identity where
@@ -53,6 +54,7 @@ instance Valued Identity where
   vlift             = liftM2
   vifThenElse c a b = if runIdentity c then a else b
   vfail s           = error s
+  vforget _         = id
   vplot v           = case runIdentity v of
                         DoubleValue x -> x
                         BoolValue b   -> if b then 1 else 0
@@ -66,6 +68,7 @@ instance Valued Maybe where
   vifThenElse (Just c) a b = if c then a else b
   vifThenElse Nothing  a b = Nothing
   vfail _s                 = Nothing
+  vforget _                = id
   vplot Nothing            = 0
   vplot (Just x)           = vplot (return x :: Identity Value)
 
@@ -77,6 +80,7 @@ instance Valued Val.Val where
   vlift       = Val.liftVal
   vifThenElse = Val.ifThenElse
   vfail s     = error s
+  vforget     = Val.forget
   vplot v     = case Val.the v of
                   DoubleValue x -> x
                   BoolValue _   -> Val.howTrue (boolValue `vmap` v)
@@ -169,7 +173,7 @@ eval _ e =
 -- the semantics of this function has changed, Pre and Post are not accumulative
 -- anymore!
 execStep :: Valued f => Env f -> Step -> Env f
-execStep env0 p = Map.union (go p) env
+execStep env0 p = Map.map (vforget 5) $ Map.union (go p) env
  where
   env   = Map.union reset env0
   reset = Map.fromList
