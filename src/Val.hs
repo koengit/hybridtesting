@@ -26,6 +26,9 @@ mkVal xs = Val (ordNubOn fst xs)
 forget :: Int -> Val a -> Val a
 forget n (Val xs) = Val (take n xs)
 
+share :: Val a -> Val (Val a)
+share (Val xs) = Val [(Val [x], 0) | x <- xs]
+
 merge :: [(a, Double)] -> [(a, Double)] -> [(a, Double)]
 merge xs [] = xs
 merge [] ys = ys

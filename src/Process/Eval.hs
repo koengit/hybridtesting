@@ -42,6 +42,7 @@ class Valued f where
   vmap        :: Ord b => (a -> b) -> f a -> f b
   vlift       :: Ord c => (a -> b -> c) -> f a -> f b -> f c
   vifThenElse :: Ord a => f Bool -> f a -> f a -> f a
+  vshare      :: f a -> f (f a)
   vfail       :: Ord a => String -> f a
   vforget     :: Int -> f a -> f a
   vplot       :: f Value -> Double
@@ -53,6 +54,7 @@ instance Valued Identity where
   vmap              = fmap
   vlift             = liftM2
   vifThenElse c a b = if runIdentity c then a else b
+  vshare            = return
   vfail s           = error s
   vforget _         = id
   vplot v           = case runIdentity v of
@@ -67,6 +69,7 @@ instance Valued Maybe where
   vlift                    = liftM2
   vifThenElse (Just c) a b = if c then a else b
   vifThenElse Nothing  a b = Nothing
+  vshare                   = return
   vfail _s                 = Nothing
   vforget _                = id
   vplot Nothing            = 0
@@ -79,6 +82,7 @@ instance Valued Val.Val where
   vmap        = Val.mapVal
   vlift       = Val.liftVal
   vifThenElse = Val.ifThenElse
+  vshare      = Val.share
   vfail s     = error s
   vforget     = Val.forget
   vplot v     = case Val.the v of
