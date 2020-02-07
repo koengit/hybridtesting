@@ -85,7 +85,7 @@ nott  = mapVal not
 
 (==>?) :: Val Bool -> Val Bool -> Val Bool
 a ==>? b | the a     = b
-         | otherwise = mapVal not a -- ? Val [ (b, if b then v else v+99999) | (b,v) <- vals a ]
+         | otherwise = Val (sortBy (comparing snd) [ (not b, if b then v+99999 else v) | (b,v) <- vals a ])
 
 instance (Ord a, Num a) => Num (Val a) where
   (+)         = liftVal (+)

@@ -58,7 +58,7 @@ checkAssertionsWith optimiser delta maxdur types p =
       (pre,post) = check (Val.val True) (Val.val True) envs
       
       ok = okRange input
-    in ok ==>? (pre =>? post)
+    in ok ==>? (pre ==>? post)
 
   okRange (Input dur mp) =
     foldr (&&?) (Val.val True) $
