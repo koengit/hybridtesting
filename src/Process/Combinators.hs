@@ -125,7 +125,7 @@ sequential p e q =
     -- initialised all variables in p)
     q2 =
       Step $
-      Map.filterWithKey (\x _ -> x `Map.member` updates (start p))
+      Map.filterWithKey (\x _ -> x `elem` [Pre, Post] || x `Map.member` updates (start p))
         (updates (start q))
 
 wait :: Expr -> Process -> Process
