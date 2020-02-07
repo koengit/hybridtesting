@@ -101,14 +101,21 @@ model F.Model{..} =
       modeNums = Map.fromList (zip (Map.keys modes) (map P.double [1..]))
       modeNum x = Map.findWithDefault undefined x modeNums
       start =
-        P.set state (modeNum initialMode) P.&
-        P.par [P.set (P.Global x) (P.var (P.Global ("init_" ++ x))) | x <- Set.toList vars] P.&
-        P.par [P.assume "initial constraint" (constraint c) | c <- initialVars]
-      step = foldr modeIte (P.assert "invalid mode" P.false) (Map.toList modes)
+        (if length modes > 1 then P.set state (modeNum initialMode) else P.skip) P.&
+        P.par [P.set x e | (x, e) <- subst] P.&
+        P.par [P.assume "initial constraint" (P.substitute subst (constraint c)) | c <- initialVars]
+      step =
+        case Map.elems modes of
+          [val] ->
+            mode (const P.skip) val
+          _ ->
+            foldr modeIte (P.assert "invalid mode" P.false) (Map.toList modes)
       modeIte (name, val) rest =
         P.ite (P.var state P.==? modeNum name)
           (mode (\name -> P.set state (modeNum name)) val)
           rest
+      subst =
+        [(P.Global x, P.var (P.Global ("init_" ++ x))) | x <- Set.toList vars]
     in P.process start step
 
 mode :: (F.ModeName -> P.Step) -> F.Mode -> P.Step
@@ -145,9 +152,11 @@ mode jump F.Mode{..} =
             (foldr (P.&&&) P.true [robustConstraint c invariant | c <- condition]))
           (jump target P.&
            (update $
-             [(P.Global x, expr e) | (x, e) <- Map.toList reset] ++
-             [(P.Global x, e) | (P.Global x, e) <- next, x `Map.notMember` reset]))
+             reset' ++
+             [(P.Global x, P.substitute reset' e) | (P.Global x, e) <- next, x `Map.notMember` reset]))
           p
+        where
+          reset' = [(P.Global x, expr e) | (x, e) <- Map.toList reset]
 
       update xs = P.par [P.set x e | (x, e) <- xs]
 

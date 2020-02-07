@@ -37,6 +37,7 @@ instance Show Value where
 
 class Valued f where
   val         :: a -> f a
+  vthe        :: f a -> Maybe a
   vpositive   :: f Double -> f Bool
   vzero       :: f Double -> f Bool
   vmap        :: Ord b => (a -> b) -> f a -> f b
@@ -50,6 +51,7 @@ class Valued f where
 
 instance Valued Identity where
   val               = return
+  vthe              = Just . runIdentity
   vpositive         = vmap (>= 0)
   vzero             = vmap (== 0)
   vmap              = fmap
@@ -65,6 +67,7 @@ instance Valued Identity where
 
 instance Valued Maybe where
   val                      = return
+  vthe                     = id
   vpositive                = vmap (>= 0)
   vzero                    = vmap (== 0)
   vmap                     = fmap
@@ -80,6 +83,7 @@ instance Valued Maybe where
 
 instance Valued Val.Val where
   val         = Val.val
+  vthe        = Just . Val.the
   vpositive   = (Val.>=? 0)
   vzero       = (Val.==? 0)
   vmap        = Val.mapVal
@@ -189,7 +193,7 @@ eval _ e =
 -- anymore!
 execStep :: (Valued f, Ord (f Value)) => Env f -> Step -> Env f
 execStep env0 (Step p) =
-  Map.map (vforget 5) $ Map.union (Map.map (evalShared env) p) env
+  Map.map forgetIt $ Map.union (Map.map (evalShared env) p) env
  where
   env   = Map.union reset env0
   reset = Map.fromList
@@ -204,6 +208,10 @@ execStep env0 (Step p) =
       p x _ = x `elem` vars e
   sharePair (x, v) =
     vmap (x,) (vshare v)
+  forgetIt val =
+    case vthe val of
+      Just (BoolValue _) -> vforget 2 val
+      _ -> vforget 5 val
   
 --------------------------------------------------------------------------------
 
