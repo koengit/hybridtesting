@@ -137,7 +137,7 @@ checkAssertionsIO delta maxdur types p =
         post' = post &&+ (boolValue `mapVal` (env Map.! Post))
 
       (pre,post) = check (Val.val True) (Val.val True) envs
-    in pre =>? post
+    in pre ==>? post
 
 --------------------------------------------------------------------------------
 
