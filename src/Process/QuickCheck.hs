@@ -12,8 +12,7 @@ import Optimize
 import Data
 import Val
 import System.Random
-import OptimizeNew
---import Debug.Trace
+import OptimizeNew as O1
 
 --------------------------------------------------------------------------------
 -- checking the assertions in a process
@@ -94,7 +93,7 @@ checkAssertionsIO delta maxdur types p =
  where
   k = 5 -- max #points per signal
 
-  optis rnd = minimizeBox rnd (falsify . run . input) xsLR
+  optis rnd = progress $ O1.minimizeBox rnd (falsify . run . input) xsLR
    where
     xsLR = concat
            [ concat (replicate k [pt,dur]) ++ [pt]
@@ -105,6 +104,9 @@ checkAssertionsIO delta maxdur types p =
                          Bool          -> (0,1)
                  dur = (0,maxdur)
            ]
+
+  progress []           = []
+  progress ((xs,r):xrs) = (xs,r) : progress (dropWhile ((>=r).snd) xrs)
 
   input xs = Input maxdur sigs
    where
