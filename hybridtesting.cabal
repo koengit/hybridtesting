@@ -45,6 +45,8 @@ library
        Data
        Optimize
        OptimizeNew
+       Optimize2
+       Optimize3
   hs-source-dirs:
       src
       examples
