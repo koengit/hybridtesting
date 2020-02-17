@@ -4,8 +4,8 @@ import Data.List
 import qualified System.IO.Unsafe as U
 import qualified System.IO as IO
 
-showProgress = True
---showProgress = False
+--showProgress = True
+showProgress = False
 
 trace s x
   | showProgress = U.unsafePerformIO $ do putStr s; IO.hFlush IO.stdout; return x

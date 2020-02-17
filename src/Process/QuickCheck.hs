@@ -12,8 +12,8 @@ import Optimize
 import Data
 import Val
 import System.Random
-import OptimizeNew
---import Debug.Trace
+import OptimizeNew as O1
+import Falsify
 
 --------------------------------------------------------------------------------
 -- checking the assertions in a process
@@ -78,14 +78,13 @@ checkAssertionsIO delta maxdur types p =
            do putStrLn (show inp ++ " --> " ++ show r)
               let envs = simulateVal delta (sampleInput delta inp) p
               plot "cex" delta envs
-              case r of
-                Nothing ->
+              if r < 0 then
                   do quickCheck $ forAllShrink (return inp) shrinkInput $ \inp' ->
                        let envs = simulateVal delta (sampleInput delta inp') p in
                          whenFail (plot "cex" delta envs) $
                            the (run inp')
 
-                Just _ ->
+                else
                   do go xsrs
           where
            inp = input xs
@@ -94,7 +93,12 @@ checkAssertionsIO delta maxdur types p =
  where
   k = 5 -- max #points per signal
 
-  optis rnd = minimizeBox rnd (falsify . run . input) xsLR
+  maybe Nothing  = (-1)
+  maybe (Just x) = x + eps
+
+  eps = head . takeWhile (>0) . iterate (/2) $ 1
+
+  optis rnd = progress $ falsifyBox {- O1.minimizeBox -} rnd (maybe . falsify . run . input) xsLR
    where
     xsLR = concat
            [ concat (replicate k [pt,dur]) ++ [pt]
@@ -105,6 +109,9 @@ checkAssertionsIO delta maxdur types p =
                          Bool          -> (0,1)
                  dur = (0,maxdur)
            ]
+
+  progress []           = []
+  progress ((xs,r):xrs) = (xs,r) : progress (dropWhile ((>=r).snd) xrs)
 
   input xs = Input maxdur sigs
    where

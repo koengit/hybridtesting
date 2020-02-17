@@ -2,5 +2,7 @@
 *.xy
 *.pdf
 *.in
+*.hi
+*.o
 .stack-work/
 stack.yaml.lock

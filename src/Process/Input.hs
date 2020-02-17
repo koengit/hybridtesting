@@ -77,7 +77,7 @@ sampleSignal delta shape     sig = segments 0 sig
     tvs = [ (t,v)
           | t <- takeWhile (<= dur) [off,off+delta..]
           , let v = case shape of
-                      Discrete   -> v
+                      Discrete   -> v0
                       Continuous -> DoubleValue (doubleValue v0 + t * a)
                 
                 a | dur > 0   = (doubleValue v1 - doubleValue v0) / dur
