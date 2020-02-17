@@ -47,6 +47,7 @@ library
        OptimizeNew
        Optimize2
        Optimize3
+       Falsify
   hs-source-dirs:
       src
       examples
