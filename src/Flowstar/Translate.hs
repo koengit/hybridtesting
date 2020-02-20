@@ -131,7 +131,7 @@ mode jump F.Mode{..} =
   -- state has invariant x >= 1).
   --
   -- As a last tweak, reset variables take their values from the
-  -- *current* state (this makes the bouncing ball example work and
+  -- current state (this makes the bouncing ball example work and
   -- doesn't hurt the other examples).
   P.par [assumption c | c <- invariant] P.&
   isSafe P.&
