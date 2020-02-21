@@ -35,10 +35,11 @@ testCase =
 test = simulateReal 0.01 (concat [replicate 60 (Map.singleton angle (val (DoubleValue (x/10000)))) | x <- testCase]) (lower stdPrims helicopter)
 plotIt = plot "helicopter" 0.01 test
 
+test' :: [Env Identity]
 test' = take 6000 (control 0.01 speed angle 1 (lower stdPrims helicopter))
 plotIt' = plot "helicopter" 0.01 test'
 
-control :: forall f. Valued f => Double -> Var -> Var -> Double -> Process -> [Env f]
+control :: forall f. (Valued f, Ord (f Value)) => Double -> Var -> Var -> Double -> Process -> [Env f]
 control delta output input setpoint p = go env0
   where
     env0 = execStep initial (start p)
