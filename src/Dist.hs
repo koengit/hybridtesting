@@ -70,17 +70,18 @@ distMul = lift2 pieceMul
 
     squareRootPiece' l1 l2
       | 0 <= z1 && z1 < z2 =
-        concatMap (mapDistance (\d -> 2*d + l1 `at` z1 + l2 `at` z2)) (squareRootApprox (z1^2) (z2^2))
+        concatMap (mapDistance (\d -> 2*d + l1 `at` z1 + l2 `at` z2)) (squareRootApprox z1 z2)
       | otherwise = []
       where
         z1 = value (start l1) `max` value (start l2)
         z2 = value (end l1)   `min` value (end l2)
 
+    -- approximate sqrt function between a^2 and c^2
     squareRootApprox :: Double -> Double -> [Piece]
     squareRootApprox a c =
-      segments [(a, sqrt a), (b, sqrt b), (c, sqrt c)]
+      segments [(a^2, a), (b^2, b), (c^2, c)]
       where
-        b = sqrt(a*c)/2 + (a+c)/4 -- minimises absolute error
+        b = (a+c)/2 -- minimises absolute error
 
 scale :: Double -> Piece -> Piece
 scale x = mapValue (* x)
