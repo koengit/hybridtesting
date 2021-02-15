@@ -48,6 +48,7 @@ library
        Optimize2
        Optimize3
        Falsify
+       Dist
   hs-source-dirs:
       src
       examples
