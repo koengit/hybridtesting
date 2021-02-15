@@ -1,0 +1,58 @@
+# Hyst v1.17
+# Hybrid Automaton in Flow*
+# Converted from: examples/coupled_vanderpol/coupled_vanderpol.xml
+# Using command line arguments: examples/coupled_vanderpol/coupled_vanderpol.xml -flowstar -o examples/coupled_vanderpol/coupled_vanderpol.model
+
+
+hybrid reachability
+{
+  # Vars
+  state var x, y, u, v
+
+  setting
+  {
+    fixed steps .01
+    time 3
+    remainder estimation 1e-4
+    identity precondition
+    gnuplot octagon u,v
+    adaptive orders { min 3, max 8 } 
+    cutoff 1e-15
+    precision 53
+    output out
+    max jumps 99999999
+    print on
+  }
+
+  modes
+  {
+    running
+    {
+      poly ode 2
+      {
+        x' = y
+        y' = y - x - x * x * y
+        u' = v
+        v' = v - u - u * u * v + y - v
+      }
+      inv
+      {
+      }
+    }
+  }
+
+  jumps
+  {
+  }
+
+  init
+  {
+    running
+    {
+      u in [2.1, 2.4]
+      v in [3.35, 3.45]
+      x in [1.25, 1.25]
+      y in [2.4, 2.4]
+    }
+  }
+}

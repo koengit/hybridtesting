@@ -28,7 +28,7 @@ plot file delta envs =
        ]
 
      -- running gnuplot
-     system ("gnuplot < '" ++ file ++ ".in'")
+     system ("gnuplot < '" ++ file ++ ".in' 2>/dev/null")
      return ()
   where
    times = [0, delta..]

@@ -1,0 +1,95 @@
+# Hyst v1.17
+# Hybrid Automaton in Flow*
+# Converted from: examples/heaterLygeros/heaterLygeros.xml
+# Using command line arguments: examples/heaterLygeros/heaterLygeros.xml -flowstar -o examples/heaterLygeros/heaterLygeros.model
+
+
+hybrid reachability
+{
+  # Vars
+  state var x, t
+
+  setting
+  {
+    fixed steps .001
+    time 25
+    remainder estimation 1e-4
+    QR precondition
+    gnuplot octagon t,x
+    adaptive orders { min 3, max 8 } 
+    cutoff 1e-15
+    precision 53
+    output out
+    max jumps 99999999
+    print on
+  }
+
+  modes
+  {
+    off
+    {
+      linear ode
+      {
+        x' = -0.1 * x
+        t' = 1.0
+      }
+      inv
+      {
+        # Original invariant: x >= 18.0 & 0.0 <= t & t <= 50.0
+
+        x >= 18.0   0.0 - (t)<=0   t <= 50.0
+      }
+    }
+
+    on
+    {
+      poly ode 1
+      {
+        x' = -0.1 * (x - 37.0)
+        t' = 1.0
+      }
+      inv
+      {
+        # Original invariant: x <= 29.0 & 0.0 <= t & t <= 50.0
+
+        x <= 29.0   0.0 - (t)<=0   t <= 50.0
+      }
+    }
+  }
+
+  jumps
+  {
+    off -> on
+    guard
+    {
+      # Original guard: x <= 18.1
+
+      x <= 18.1
+    }
+    reset
+    {
+    }
+    parallelotope aggregation {}
+
+    on -> off
+    guard
+    {
+      # Original guard: x >= 29.0
+
+      x >= 29.0
+    }
+    reset
+    {
+    }
+    parallelotope aggregation {}
+  }
+
+  init
+  {
+    off
+    {
+      t in [0, 0]
+      x in [18.2, 18.2]
+    }
+  }
+}

@@ -1,0 +1,113 @@
+# Hyst v1.17
+# Hybrid Automaton in Flow*
+# Converted from: 2017/AFF/Platoon/SpaceEx/PLAA01-BND.xml
+# Using command line arguments: 2017/AFF/Platoon/SpaceEx/PLAA01-BND.xml -flowstar -o 2017/AFF/Platoon/SpaceEx/PLAA01-BND.model
+
+
+hybrid reachability
+{
+  # Vars
+  state var e1, v1, a1, e2, v2, a2, e3, v3, a3, aL
+
+  setting
+  {
+    fixed steps 1
+    time 5
+    remainder estimation 1e-4
+    identity precondition
+    gnuplot octagon e1,e2
+    adaptive orders { min 3, max 8 } 
+    cutoff 1e-15
+    precision 53
+    output out
+    max jumps 99999999
+    print on
+  }
+
+  modes
+  {
+    communication
+    {
+      linear ode
+      {
+        e1' = v1
+        v1' = -a1 + aL
+        a1' = 1.605 * e1 + 4.868 * v1 - 3.5754 * a1 - 0.8198 * e2 + 0.427 * v2 - 0.045 * a2 - 0.1942 * e3 + 0.3626 * v3 - 0.0946 * a3
+        e2' = v2
+        v2' = a1 - a2
+        a2' = 0.8718 * e1 + 3.814 * v1 - 0.0754 * a1 + 1.1936 * e2 + 3.6258 * v2 - 3.2396 * a2 - 0.595 * e3 + 0.1294 * v3 - 0.0796 * a3
+        e3' = v3
+        v3' = a2 - a3
+        a3' = 0.7132 * e1 + 3.573 * v1 - 0.0964 * a1 + 0.8472 * e2 + 3.2568 * v2 - 0.0876 * a2 + 1.2726 * e3 + 3.072 * v3 - 3.1356 * a3
+      }
+      inv
+      {
+        # Original invariant: -9.0 <= aL & aL <= 1.0
+
+        -9.0 - (aL)<=0   aL <= 1.0
+      }
+    }
+
+    no_communication
+    {
+      linear ode
+      {
+        e1' = v1
+        v1' = -a1 + aL
+        a1' = 1.605 * e1 + 4.868 * v1 - 3.5754 * a1
+        e2' = v2
+        v2' = a1 - a2
+        a2' = 1.1936 * e2 + 3.6258 * v2 - 3.2396 * a2
+        e3' = v3
+        v3' = a2 - a3
+        a3' = 0.7132 * e1 + 3.573 * v1 - 0.0964 * a1 + 0.8472 * e2 + 3.2568 * v2 - 0.0876 * a2 + 1.2726 * e3 + 3.072 * v3 - 3.1356 * a3
+      }
+      inv
+      {
+        # Original invariant: -9.0 <= aL & aL <= 1.0
+
+        -9.0 - (aL)<=0   aL <= 1.0
+      }
+    }
+  }
+
+  jumps
+  {
+    communication -> no_communication
+    guard
+    {
+    }
+    reset
+    {
+      aL' := 0.0 + [-9.0, 1.0]
+    }
+    parallelotope aggregation {}
+
+    no_communication -> communication
+    guard
+    {
+    }
+    reset
+    {
+      aL' := 0.0 + [-9.0, 1.0]
+    }
+    parallelotope aggregation {}
+  }
+
+  init
+  {
+    communication
+    {
+      a1 in [0, 0]
+      a2 in [0, 0]
+      a3 in [0, 0]
+      aL in [-9, 1]
+      e1 in [0, 0]
+      e2 in [0, 0]
+      e3 in [0, 0]
+      v1 in [0, 0]
+      v2 in [0, 0]
+      v3 in [0, 0]
+    }
+  }
+}

@@ -101,7 +101,7 @@ checkAssertionsIO delta maxdur types p =
   optis rnd = progress $ falsifyBox {- O1.minimizeBox -} rnd (maybe . falsify . run . input) xsLR
    where
     xsLR = concat
-           [ concat (replicate k [pt,dur]) ++ [pt]
+           [ concat (replicate (points sh) [pt,dur]) ++ [pt]
            | (v,(sh,ty)) <- Map.toList types
            , let pt  = case ty of
                          Real (a,b)    -> (a,b)
@@ -110,6 +110,10 @@ checkAssertionsIO delta maxdur types p =
                  dur = (0,maxdur)
            ]
 
+
+  points Parameter = 0
+  points _ = k
+
   progress []           = []
   progress ((xs,r):xrs) = (xs,r) : progress (dropWhile ((>=r).snd) xrs)
 
@@ -117,10 +121,12 @@ checkAssertionsIO delta maxdur types p =
    where
     group n = takeWhile (not . null) . map (take n) . iterate (drop n)
    
-    sigs = Map.fromList
-           [ (v,(sh,sig ty xs))
-           | ((v,(sh,ty)),xs) <- Map.toList types `zip` group (2*k+1) xs
-           ]
+    sigs = Map.fromList (sigsFrom (Map.toList types) xs)
+    sigsFrom [] [] = []
+    sigsFrom ((v,(sh,ty)):vs) xs | length xs >= p =
+      (v,(sh, sig ty (take p xs))):sigsFrom vs (drop p xs)
+      where
+        p = 2*points sh+1
   
     sig ty [x]      = End (val ty x)
     sig ty (x:d:xs) = Point (val ty x) d (sig ty xs)

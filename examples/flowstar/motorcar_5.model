@@ -1,0 +1,236 @@
+hybrid reachability
+{
+  # Vars
+  state var x_1, x_2, x_3, x_4, x_5
+
+  setting
+  {
+    fixed steps 0.1
+    time 40000
+    remainder estimation 1e-4
+    identity precondition
+    gnuplot octagon x_1,x_2
+    adaptive orders { min 3, max 8 }
+    cutoff 1e-15
+    precision 53
+    output motorcar
+    max jumps 6
+    print on
+  }
+
+  modes
+  {
+    v1
+    {
+      linear ode
+      {
+        x_1' = 8.0
+        x_2' = 8.5
+        x_3' = 9.0
+        x_4' = 9.5
+        x_5' = 10.0
+      }
+      inv
+      {
+        x_1 - x_2 >= 2.0
+        x_1 - x_2 <= 10.0
+        x_2 - x_3 >= 2.0
+        x_2 - x_3 <= 10.0
+        x_3 - x_4 >= 2.0
+        x_3 - x_4 <= 10.0
+        x_4 - x_5 >= 2.0
+        x_4 - x_5 <= 10.0
+      }
+    }
+
+    v2
+    {
+      linear ode
+      {
+        x_1' = 12.0
+        x_2' = 10.0
+        x_3' = 8.0
+        x_4' = 9.0
+        x_5' = 10.0
+      }
+      inv
+      {
+        x_1 - x_2 >= 0.0
+        x_1 - x_2 <= 10.0
+        x_2 - x_3 >= 0.0
+        x_2 - x_3 <= 10.0
+        x_3 - x_4 >= 0.0
+        x_3 - x_4 <= 10.0
+        x_4 - x_5 >= 0.0
+        x_4 - x_5 <= 10.0
+      }
+    }
+
+    v3
+    {
+      linear ode
+      {
+        x_1' = 12.0
+        x_2' = 12.0
+        x_3' = 10.0
+        x_4' = 8.5
+        x_5' = 9.5
+      }
+      inv
+      {
+        x_1 - x_2 >= 0.0
+        x_1 - x_2 <= 10.0
+        x_2 - x_3 >= 0.0
+        x_2 - x_3 <= 10.0
+        x_3 - x_4 >= 0.0
+        x_3 - x_4 <= 10.0
+        x_4 - x_5 >= 0.0
+        x_4 - x_5 <= 10.0
+      }
+    }
+
+    v4
+    {
+      linear ode
+      {
+        x_1' = 12.0
+        x_2' = 12.0
+        x_3' = 12.0
+        x_4' = 10.0
+        x_5' = 9.0
+      }
+      inv
+      {
+        x_1 - x_2 >= 0.0
+        x_1 - x_2 <= 10.0
+        x_2 - x_3 >= 0.0
+        x_2 - x_3 <= 10.0
+        x_3 - x_4 >= 0.0
+        x_3 - x_4 <= 10.0
+        x_4 - x_5 >= 0.0
+        x_4 - x_5 <= 10.0
+      }
+    }
+
+    v5
+    {
+      linear ode
+      {
+        x_1' = 12.0
+        x_2' = 12.0
+        x_3' = 12.0
+        x_4' = 12.0
+        x_5' = 10.0
+      }
+      inv
+      {
+        x_1 - x_2 >= 0.0
+        x_1 - x_2 <= 10.0
+        x_2 - x_3 >= 0.0
+        x_2 - x_3 <= 10.0
+        x_3 - x_4 >= 0.0
+        x_3 - x_4 <= 10.0
+        x_4 - x_5 >= 0.0
+        x_4 - x_5 <= 10.0
+      }
+    }
+
+    v6
+    {
+      linear ode
+      {
+      	x_1' = 0
+        x_2' = 0
+        x_3' = 0
+        x_4' = 0
+        x_5' = 0
+      }
+      inv
+      {
+      }
+    }
+  }
+
+  jumps
+  {
+    v1 -> v2
+    guard { x_1 - x_2 <= 4.0 }
+    reset {}
+    parallelotope aggregation {}
+
+    v1 -> v3
+    guard { x_2 - x_3 <= 4.0 }
+    reset {}
+    parallelotope aggregation {}
+
+    v1 -> v4
+    guard { x_3 - x_4 <= 4.0 }
+    reset {}
+    parallelotope aggregation {}
+
+    v1 -> v5
+    guard { x_4 - x_5 <= 4.0 }
+    reset {}
+    parallelotope aggregation {}
+
+    v2 -> v1
+    guard { x_1 - x_2 >= 4.0 }
+    reset {}
+    parallelotope aggregation {}
+
+    v2 -> v6
+    guard { x_1 - x_2 <= 1.0 }
+    reset {}
+    parallelotope aggregation {}
+
+    v3 -> v1
+    guard { x_2 - x_3 >= 4.0 }
+    reset {}
+    parallelotope aggregation {}
+
+    v3 -> v6
+    guard { x_2 - x_3 <= 1.0 }
+    reset {}
+    parallelotope aggregation {}
+
+    v4 -> v1
+    guard { x_3 - x_4 >= 4.0 }
+    reset {}
+    parallelotope aggregation {}
+
+    v4 -> v6
+    guard { x_3 - x_4 <= 1.0 }
+    reset {}
+    parallelotope aggregation {}
+
+    v5 -> v1
+    guard { x_4 - x_5 >= 4.0 }
+    reset {}
+    parallelotope aggregation {}
+
+    v5 -> v6
+    guard { x_4 - x_5 <= 1.0 }
+    reset {}
+    parallelotope aggregation {}
+  }
+
+  init
+  {
+    v1
+    {
+      x_1 in [40, 40]
+      x_2 in [35, 35]
+      x_3 in [30, 30]
+      x_4 in [25, 25]
+      x_5 in [20, 20]
+    }
+  }
+}
+
+unsafe set
+{
+	v6
+	{
+
+	}
+}

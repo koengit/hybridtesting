@@ -1,0 +1,98 @@
+# Hyst v1.17
+# Hybrid Automaton in Flow*
+# Converted from: examples/toy/toy.xml
+# Using command line arguments: examples/toy/toy.xml -flowstar -o examples/toy/toy.model
+
+
+hybrid reachability
+{
+  # Vars
+  state var x, t, tglobal
+
+  setting
+  {
+    fixed steps .1
+    time 20
+    remainder estimation 1e-4
+    QR precondition
+    gnuplot octagon t,x
+    adaptive orders { min 3, max 8 } 
+    cutoff 1e-15
+    precision 53
+    output out
+    max jumps 99999999
+    print on
+  }
+
+  modes
+  {
+    loc1
+    {
+      linear ode
+      {
+        x' = 1.0
+        t' = 1.0
+        tglobal' = 1.0
+      }
+      inv
+      {
+        # Original invariant: x <= 10.0 & t <= 20.0 & tglobal <= 20.0
+
+        x <= 10.0   t <= 20.0   tglobal <= 20.0
+      }
+    }
+
+    loc2
+    {
+      linear ode
+      {
+        x' = -2.0
+        t' = 1.0
+        tglobal' = 1.0
+      }
+      inv
+      {
+        # Original invariant: x >= 2.0 & t <= 20.0 & tglobal <= 20.0
+
+        x >= 2.0   t <= 20.0   tglobal <= 20.0
+      }
+    }
+  }
+
+  jumps
+  {
+    loc1 -> loc2
+    guard
+    {
+      # Original guard: x >= 9.0 & t >= eps
+
+      x >= 9.0   t >= 0.1
+    }
+    reset
+    {
+    }
+    parallelotope aggregation {}
+
+    loc2 -> loc1
+    guard
+    {
+      # Original guard: x <= 3.0 & t >= eps
+
+      x <= 3.0   t >= 0.1
+    }
+    reset
+    {
+    }
+    parallelotope aggregation {}
+  }
+
+  init
+  {
+    loc1
+    {
+      t in [0, 0]
+      tglobal in [0, 0]
+      x in [5, 5]
+    }
+  }
+}

@@ -1,7 +1,7 @@
 # Hyst v1.17
 # Hybrid Automaton in Flow*
-# Converted from: examples/vanderpol/vanderpol.xml
-# Using command line arguments: examples/vanderpol/vanderpol.xml -flowstar -o examples/vanderpol/vanderpol.model
+# Converted from: examples/vanderpol/vanderpol_deterministic.xml
+# Using command line arguments: examples/vanderpol/vanderpol_deterministic.xml -flowstar -o examples/vanderpol/vanderpol_deterministic.model
 
 
 hybrid reachability
@@ -48,7 +48,7 @@ hybrid reachability
     running
     {
       x in [1, 1]
-      y in [.5, .75]
+      y in [.5, .5]
     }
   }
 }

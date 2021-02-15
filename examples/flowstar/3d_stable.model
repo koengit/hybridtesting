@@ -1,0 +1,80 @@
+# Hyst v1.17
+# Hybrid Automaton in Flow*
+# Converted from: examples/3d_stable/3d_stable.xml
+# Using command line arguments: examples/3d_stable/3d_stable.xml -flowstar -o examples/3d_stable/3d_stable.model
+
+
+hybrid reachability
+{
+  # Vars
+  state var x, y, z
+
+  setting
+  {
+    fixed steps .05
+    time 15
+    remainder estimation 1e-4
+    QR precondition
+    gnuplot octagon x,y
+    adaptive orders { min 3, max 8 } 
+    cutoff 1e-15
+    precision 53
+    output out
+    max jumps 99999999
+    print on
+  }
+
+  modes
+  {
+    l1
+    {
+      poly ode 1
+      {
+        x' = -9.0 * (x - 2.0) - 7.0 * (y + 2.0) + z - 1.0 + 0.2 * (x - 2.0) * (y + 2.0) + 0.1 * (y + 2.0) * (z - 1.0) + 0.1 * (x - 2.0) * (z - 1.0) + 0.5 * (z - 1.0) * (z - 1.0)
+        y' = 6.0 * (x - 2.0) + 4.0 * (y + 2.0) + z - 1.0
+        z' = 3.0 * (x - 2.0) + 2.0 * (y + 2.0) - 2.5 * (z - 1.0)
+      }
+      inv
+      {
+      }
+    }
+
+    l2
+    {
+      poly ode 1
+      {
+        x' = 2.2 * x + 3.6 * y + 3.9 * z
+        y' = 3.0 * x + 2.4 * y + 3.4 * z - 0.01 * x * x
+        z' = -5.0 * x - 5.4 * y - 6.7 * z
+      }
+      inv
+      {
+      }
+    }
+  }
+
+  jumps
+  {
+    l1 -> l2
+    guard
+    {
+      # Original guard: 1.7 <= x & x <= 2.3 & -2.3 <= y & y <= -1.7 & 0.7 <= z & z <= 1.3
+
+      1.7 - (x)<=0   x <= 2.3   -2.3 - (y)<=0   y <= -1.7   0.7 - (z)<=0   z <= 1.3
+    }
+    reset
+    {
+    }
+    parallelotope aggregation {}
+  }
+
+  init
+  {
+    l1
+    {
+      x in [3, 3.5]
+      y in [-3, -2.5]
+      z in [.9, 1.3]
+    }
+  }
+}

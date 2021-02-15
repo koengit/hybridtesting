@@ -1,0 +1,1002 @@
+# Hyst v1.17
+# Hybrid Automaton in Flow*
+# Converted from: 2017/HPWC/DutchRailwayNetwork/spaceex/DRNW01-BDS01.xml
+# Using command line arguments: 2017/HPWC/DutchRailwayNetwork/spaceex/DRNW01-BDS01.xml -flowstar -o 2017/HPWC/DutchRailwayNetwork/spaceex/DRNW01-BDS01.model
+
+
+hybrid reachability
+{
+  # Vars
+  state var x1, x2, x3, x4, x5, x6, x7, x8, hyst_urgent_clock
+
+  setting
+  {
+    fixed steps .001
+    time 1
+    remainder estimation 1e-4
+    identity precondition
+    gnuplot octagon x1,x2
+    adaptive orders { min 3, max 8 } 
+    cutoff 1e-15
+    precision 53
+    output out
+    max jumps 99999999
+    print on
+  }
+
+  modes
+  {
+    loc1_loc1
+    {
+      linear ode
+      {
+        hyst_urgent_clock' = 1.0
+      }
+      inv
+      {
+        # Original invariant: hyst_urgent_clock = 0.0
+
+        hyst_urgent_clock = 0.0
+      }
+    }
+
+    loc1_loc10
+    {
+      linear ode
+      {
+        hyst_urgent_clock' = 1.0
+      }
+      inv
+      {
+        # Original invariant: hyst_urgent_clock = 0.0
+
+        hyst_urgent_clock = 0.0
+      }
+    }
+
+    loc1_loc11
+    {
+      linear ode
+      {
+        hyst_urgent_clock' = 1.0
+      }
+      inv
+      {
+        # Original invariant: hyst_urgent_clock = 0.0
+
+        hyst_urgent_clock = 0.0
+      }
+    }
+
+    loc1_loc2
+    {
+      linear ode
+      {
+        hyst_urgent_clock' = 1.0
+      }
+      inv
+      {
+        # Original invariant: hyst_urgent_clock = 0.0
+
+        hyst_urgent_clock = 0.0
+      }
+    }
+
+    loc1_loc3
+    {
+      linear ode
+      {
+        hyst_urgent_clock' = 1.0
+      }
+      inv
+      {
+        # Original invariant: hyst_urgent_clock = 0.0
+
+        hyst_urgent_clock = 0.0
+      }
+    }
+
+    loc1_loc4
+    {
+      linear ode
+      {
+        hyst_urgent_clock' = 1.0
+      }
+      inv
+      {
+        # Original invariant: hyst_urgent_clock = 0.0
+
+        hyst_urgent_clock = 0.0
+      }
+    }
+
+    loc1_loc5
+    {
+      linear ode
+      {
+        hyst_urgent_clock' = 1.0
+      }
+      inv
+      {
+        # Original invariant: hyst_urgent_clock = 0.0
+
+        hyst_urgent_clock = 0.0
+      }
+    }
+
+    loc1_loc6
+    {
+      linear ode
+      {
+        hyst_urgent_clock' = 1.0
+      }
+      inv
+      {
+        # Original invariant: hyst_urgent_clock = 0.0
+
+        hyst_urgent_clock = 0.0
+      }
+    }
+
+    loc1_loc7
+    {
+      linear ode
+      {
+        hyst_urgent_clock' = 1.0
+      }
+      inv
+      {
+        # Original invariant: hyst_urgent_clock = 0.0
+
+        hyst_urgent_clock = 0.0
+      }
+    }
+
+    loc1_loc8
+    {
+      linear ode
+      {
+        hyst_urgent_clock' = 1.0
+      }
+      inv
+      {
+        # Original invariant: hyst_urgent_clock = 0.0
+
+        hyst_urgent_clock = 0.0
+      }
+    }
+
+    loc1_loc9
+    {
+      linear ode
+      {
+        hyst_urgent_clock' = 1.0
+      }
+      inv
+      {
+        # Original invariant: hyst_urgent_clock = 0.0
+
+        hyst_urgent_clock = 0.0
+      }
+    }
+  }
+
+  jumps
+  {
+    loc1_loc1 -> loc1_loc2
+    guard
+    {
+      # Original guard: x1 - x2 >= -1.0 & x5 - x6 >= 3.0
+
+      x1 - x2 >= -1.0   x5 - x6 >= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 55.0 + x1
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 90.0 + x5
+    }
+    parallelotope aggregation {}
+
+    loc1_loc1 -> loc1_loc2
+    guard
+    {
+      # Original guard: x1 - x2 <= -1.0 & x5 - x6 >= 3.0
+
+      x1 - x2 <= -1.0   x5 - x6 >= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 54.0 + x2
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 90.0 + x5
+    }
+    parallelotope aggregation {}
+
+    loc1_loc1 -> loc1_loc2
+    guard
+    {
+      # Original guard: x1 - x2 >= -1.0 & x5 - x6 <= 3.0
+
+      x1 - x2 >= -1.0   x5 - x6 <= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 55.0 + x1
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 93.0 + x6
+    }
+    parallelotope aggregation {}
+
+    loc1_loc1 -> loc1_loc2
+    guard
+    {
+      # Original guard: x1 - x2 <= -1.0 & x5 - x6 <= 3.0
+
+      x1 - x2 <= -1.0   x5 - x6 <= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 54.0 + x2
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 93.0 + x6
+    }
+    parallelotope aggregation {}
+
+    loc1_loc2 -> loc1_loc3
+    guard
+    {
+      # Original guard: x1 - x2 >= -1.0 & x5 - x6 >= 3.0
+
+      x1 - x2 >= -1.0   x5 - x6 >= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 55.0 + x1
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 90.0 + x5
+    }
+    parallelotope aggregation {}
+
+    loc1_loc2 -> loc1_loc3
+    guard
+    {
+      # Original guard: x1 - x2 <= -1.0 & x5 - x6 >= 3.0
+
+      x1 - x2 <= -1.0   x5 - x6 >= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 54.0 + x2
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 90.0 + x5
+    }
+    parallelotope aggregation {}
+
+    loc1_loc2 -> loc1_loc3
+    guard
+    {
+      # Original guard: x1 - x2 >= -1.0 & x5 - x6 <= 3.0
+
+      x1 - x2 >= -1.0   x5 - x6 <= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 55.0 + x1
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 93.0 + x6
+    }
+    parallelotope aggregation {}
+
+    loc1_loc2 -> loc1_loc3
+    guard
+    {
+      # Original guard: x1 - x2 <= -1.0 & x5 - x6 <= 3.0
+
+      x1 - x2 <= -1.0   x5 - x6 <= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 54.0 + x2
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 93.0 + x6
+    }
+    parallelotope aggregation {}
+
+    loc1_loc3 -> loc1_loc4
+    guard
+    {
+      # Original guard: x1 - x2 >= -1.0 & x5 - x6 >= 3.0
+
+      x1 - x2 >= -1.0   x5 - x6 >= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 55.0 + x1
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 90.0 + x5
+    }
+    parallelotope aggregation {}
+
+    loc1_loc3 -> loc1_loc4
+    guard
+    {
+      # Original guard: x1 - x2 <= -1.0 & x5 - x6 >= 3.0
+
+      x1 - x2 <= -1.0   x5 - x6 >= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 54.0 + x2
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 90.0 + x5
+    }
+    parallelotope aggregation {}
+
+    loc1_loc3 -> loc1_loc4
+    guard
+    {
+      # Original guard: x1 - x2 >= -1.0 & x5 - x6 <= 3.0
+
+      x1 - x2 >= -1.0   x5 - x6 <= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 55.0 + x1
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 93.0 + x6
+    }
+    parallelotope aggregation {}
+
+    loc1_loc3 -> loc1_loc4
+    guard
+    {
+      # Original guard: x1 - x2 <= -1.0 & x5 - x6 <= 3.0
+
+      x1 - x2 <= -1.0   x5 - x6 <= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 54.0 + x2
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 93.0 + x6
+    }
+    parallelotope aggregation {}
+
+    loc1_loc4 -> loc1_loc5
+    guard
+    {
+      # Original guard: x1 - x2 >= -1.0 & x5 - x6 >= 3.0
+
+      x1 - x2 >= -1.0   x5 - x6 >= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 55.0 + x1
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 90.0 + x5
+    }
+    parallelotope aggregation {}
+
+    loc1_loc4 -> loc1_loc5
+    guard
+    {
+      # Original guard: x1 - x2 <= -1.0 & x5 - x6 >= 3.0
+
+      x1 - x2 <= -1.0   x5 - x6 >= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 54.0 + x2
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 90.0 + x5
+    }
+    parallelotope aggregation {}
+
+    loc1_loc4 -> loc1_loc5
+    guard
+    {
+      # Original guard: x1 - x2 >= -1.0 & x5 - x6 <= 3.0
+
+      x1 - x2 >= -1.0   x5 - x6 <= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 55.0 + x1
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 93.0 + x6
+    }
+    parallelotope aggregation {}
+
+    loc1_loc4 -> loc1_loc5
+    guard
+    {
+      # Original guard: x1 - x2 <= -1.0 & x5 - x6 <= 3.0
+
+      x1 - x2 <= -1.0   x5 - x6 <= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 54.0 + x2
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 93.0 + x6
+    }
+    parallelotope aggregation {}
+
+    loc1_loc5 -> loc1_loc6
+    guard
+    {
+      # Original guard: x1 - x2 >= -1.0 & x5 - x6 >= 3.0
+
+      x1 - x2 >= -1.0   x5 - x6 >= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 55.0 + x1
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 90.0 + x5
+    }
+    parallelotope aggregation {}
+
+    loc1_loc5 -> loc1_loc6
+    guard
+    {
+      # Original guard: x1 - x2 <= -1.0 & x5 - x6 >= 3.0
+
+      x1 - x2 <= -1.0   x5 - x6 >= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 54.0 + x2
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 90.0 + x5
+    }
+    parallelotope aggregation {}
+
+    loc1_loc5 -> loc1_loc6
+    guard
+    {
+      # Original guard: x1 - x2 >= -1.0 & x5 - x6 <= 3.0
+
+      x1 - x2 >= -1.0   x5 - x6 <= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 55.0 + x1
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 93.0 + x6
+    }
+    parallelotope aggregation {}
+
+    loc1_loc5 -> loc1_loc6
+    guard
+    {
+      # Original guard: x1 - x2 <= -1.0 & x5 - x6 <= 3.0
+
+      x1 - x2 <= -1.0   x5 - x6 <= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 54.0 + x2
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 93.0 + x6
+    }
+    parallelotope aggregation {}
+
+    loc1_loc6 -> loc1_loc7
+    guard
+    {
+      # Original guard: x1 - x2 >= -1.0 & x5 - x6 >= 3.0
+
+      x1 - x2 >= -1.0   x5 - x6 >= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 55.0 + x1
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 90.0 + x5
+    }
+    parallelotope aggregation {}
+
+    loc1_loc6 -> loc1_loc7
+    guard
+    {
+      # Original guard: x1 - x2 <= -1.0 & x5 - x6 >= 3.0
+
+      x1 - x2 <= -1.0   x5 - x6 >= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 54.0 + x2
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 90.0 + x5
+    }
+    parallelotope aggregation {}
+
+    loc1_loc6 -> loc1_loc7
+    guard
+    {
+      # Original guard: x1 - x2 >= -1.0 & x5 - x6 <= 3.0
+
+      x1 - x2 >= -1.0   x5 - x6 <= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 55.0 + x1
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 93.0 + x6
+    }
+    parallelotope aggregation {}
+
+    loc1_loc6 -> loc1_loc7
+    guard
+    {
+      # Original guard: x1 - x2 <= -1.0 & x5 - x6 <= 3.0
+
+      x1 - x2 <= -1.0   x5 - x6 <= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 54.0 + x2
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 93.0 + x6
+    }
+    parallelotope aggregation {}
+
+    loc1_loc7 -> loc1_loc8
+    guard
+    {
+      # Original guard: x1 - x2 >= -1.0 & x5 - x6 >= 3.0
+
+      x1 - x2 >= -1.0   x5 - x6 >= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 55.0 + x1
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 90.0 + x5
+    }
+    parallelotope aggregation {}
+
+    loc1_loc7 -> loc1_loc8
+    guard
+    {
+      # Original guard: x1 - x2 <= -1.0 & x5 - x6 >= 3.0
+
+      x1 - x2 <= -1.0   x5 - x6 >= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 54.0 + x2
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 90.0 + x5
+    }
+    parallelotope aggregation {}
+
+    loc1_loc7 -> loc1_loc8
+    guard
+    {
+      # Original guard: x1 - x2 >= -1.0 & x5 - x6 <= 3.0
+
+      x1 - x2 >= -1.0   x5 - x6 <= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 55.0 + x1
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 93.0 + x6
+    }
+    parallelotope aggregation {}
+
+    loc1_loc7 -> loc1_loc8
+    guard
+    {
+      # Original guard: x1 - x2 <= -1.0 & x5 - x6 <= 3.0
+
+      x1 - x2 <= -1.0   x5 - x6 <= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 54.0 + x2
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 93.0 + x6
+    }
+    parallelotope aggregation {}
+
+    loc1_loc8 -> loc1_loc9
+    guard
+    {
+      # Original guard: x1 - x2 >= -1.0 & x5 - x6 >= 3.0
+
+      x1 - x2 >= -1.0   x5 - x6 >= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 55.0 + x1
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 90.0 + x5
+    }
+    parallelotope aggregation {}
+
+    loc1_loc8 -> loc1_loc9
+    guard
+    {
+      # Original guard: x1 - x2 <= -1.0 & x5 - x6 >= 3.0
+
+      x1 - x2 <= -1.0   x5 - x6 >= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 54.0 + x2
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 90.0 + x5
+    }
+    parallelotope aggregation {}
+
+    loc1_loc8 -> loc1_loc9
+    guard
+    {
+      # Original guard: x1 - x2 >= -1.0 & x5 - x6 <= 3.0
+
+      x1 - x2 >= -1.0   x5 - x6 <= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 55.0 + x1
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 93.0 + x6
+    }
+    parallelotope aggregation {}
+
+    loc1_loc8 -> loc1_loc9
+    guard
+    {
+      # Original guard: x1 - x2 <= -1.0 & x5 - x6 <= 3.0
+
+      x1 - x2 <= -1.0   x5 - x6 <= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 54.0 + x2
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 93.0 + x6
+    }
+    parallelotope aggregation {}
+
+    loc1_loc9 -> loc1_loc10
+    guard
+    {
+      # Original guard: x1 - x2 >= -1.0 & x5 - x6 >= 3.0
+
+      x1 - x2 >= -1.0   x5 - x6 >= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 55.0 + x1
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 90.0 + x5
+    }
+    parallelotope aggregation {}
+
+    loc1_loc9 -> loc1_loc10
+    guard
+    {
+      # Original guard: x1 - x2 <= -1.0 & x5 - x6 >= 3.0
+
+      x1 - x2 <= -1.0   x5 - x6 >= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 54.0 + x2
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 90.0 + x5
+    }
+    parallelotope aggregation {}
+
+    loc1_loc9 -> loc1_loc10
+    guard
+    {
+      # Original guard: x1 - x2 >= -1.0 & x5 - x6 <= 3.0
+
+      x1 - x2 >= -1.0   x5 - x6 <= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 55.0 + x1
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 93.0 + x6
+    }
+    parallelotope aggregation {}
+
+    loc1_loc9 -> loc1_loc10
+    guard
+    {
+      # Original guard: x1 - x2 <= -1.0 & x5 - x6 <= 3.0
+
+      x1 - x2 <= -1.0   x5 - x6 <= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 54.0 + x2
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 93.0 + x6
+    }
+    parallelotope aggregation {}
+
+    loc1_loc10 -> loc1_loc11
+    guard
+    {
+      # Original guard: x1 - x2 >= -1.0 & x5 - x6 >= 3.0
+
+      x1 - x2 >= -1.0   x5 - x6 >= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 55.0 + x1
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 90.0 + x5
+    }
+    parallelotope aggregation {}
+
+    loc1_loc10 -> loc1_loc11
+    guard
+    {
+      # Original guard: x1 - x2 <= -1.0 & x5 - x6 >= 3.0
+
+      x1 - x2 <= -1.0   x5 - x6 >= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 54.0 + x2
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 90.0 + x5
+    }
+    parallelotope aggregation {}
+
+    loc1_loc10 -> loc1_loc11
+    guard
+    {
+      # Original guard: x1 - x2 >= -1.0 & x5 - x6 <= 3.0
+
+      x1 - x2 >= -1.0   x5 - x6 <= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 55.0 + x1
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 93.0 + x6
+    }
+    parallelotope aggregation {}
+
+    loc1_loc10 -> loc1_loc11
+    guard
+    {
+      # Original guard: x1 - x2 <= -1.0 & x5 - x6 <= 3.0
+
+      x1 - x2 <= -1.0   x5 - x6 <= 3.0
+    }
+    reset
+    {
+      x8' := 16.0 + x7
+      x1' := 38.0 + x8
+      x2' := 36.0 + x8
+      x3' := 54.0 + x2
+      x4' := 35.0 + x3
+      x5' := 54.0 + x4
+      x6' := 58.0 + x4
+      x7' := 93.0 + x6
+    }
+    parallelotope aggregation {}
+  }
+
+  init
+  {
+    loc1_loc1
+    {
+      hyst_urgent_clock in [0, 0]
+      x1 in [0, 1]
+      x2 in [0, 1]
+      x3 in [0, 1]
+      x4 in [0, 1]
+      x5 in [0, 1]
+      x6 in [0, 1]
+      x7 in [0, 1]
+      x8 in [0, 1]
+    }
+  }
+}

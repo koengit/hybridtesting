@@ -194,7 +194,8 @@ parseDerivatives = do
     prefix = msum [
       symbol "poly" *> symbol "ode" *> num *> pure (),
       symbol "nonpoly" *> symbol "ode",
-      symbol "lti" *> symbol "ode"]
+      symbol "lti" *> symbol "ode",
+      symbol "linear" *> symbol "ode"]
 
 parseJumps :: Parser ([(ModeName, Jump)])
 parseJumps =

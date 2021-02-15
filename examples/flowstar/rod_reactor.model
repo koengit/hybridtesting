@@ -109,7 +109,7 @@ hybrid reachability
  {
   norod
   {
-   x in [510,520]
+   x in [510,530]
    c1 in [20,20]
    c2 in [20,20]
   }

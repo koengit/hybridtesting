@@ -1,0 +1,283 @@
+
+hybrid reachability
+{
+    # Vars
+    state var x_1, x_2, x_3, x_4, x_5
+
+    setting
+    {
+		fixed steps 10
+        time 40000
+        gnuplot octagon x_1,x_2
+        output motorcar_5_40000_10
+		max jumps 10
+        print on
+    }
+
+    modes
+    {
+        v1
+        {
+            linear ode
+            {
+                x_1' = 8
+                x_2' = 8.5
+                x_3' = 9
+                x_4' = 9.5
+                x_5' = 10
+            }
+            inv
+            {
+                # Original invariant: x_1 - x_2 >= 2 & x_1 - x_2 <= 10 & x_2 - x_3 >= 2 & x_2 - x_3 <= 10 & x_3 - x_4 >= 2 & x_3 - x_4 <= 10 & x_4 - x_5 >= 2 & x_4 - x_5 <= 10
+
+                x_1 - x_2 >= 2   x_1 - x_2 <= 10   x_2 - x_3 >= 2   x_2 - x_3 <= 10   x_3 - x_4 >= 2   x_3 - x_4 <= 10   x_4 - x_5 >= 2   x_4 - x_5 <= 10
+            }
+        }
+
+        v2
+        {
+            linear ode
+            {
+                x_1' = 12
+                x_2' = 10
+                x_3' = 8
+                x_4' = 9
+                x_5' = 10
+            }
+            inv
+            {
+                # Original invariant: x_1 - x_2 >= 0 & x_1 - x_2 <= 10 & x_2 - x_3 >= 0 & x_2 - x_3 <= 10 & x_3 - x_4 >= 0 & x_3 - x_4 <= 10 & x_4 - x_5 >= 0 & x_4 - x_5 <= 10
+
+                x_1 - x_2 >= 0   x_1 - x_2 <= 10   x_2 - x_3 >= 0   x_2 - x_3 <= 10   x_3 - x_4 >= 0   x_3 - x_4 <= 10   x_4 - x_5 >= 0   x_4 - x_5 <= 10
+            }
+        }
+
+        v3
+        {
+            linear ode
+            {
+                x_1' = 12
+                x_2' = 12
+                x_3' = 10
+                x_4' = 8.5
+                x_5' = 9.5
+            }
+            inv
+            {
+                # Original invariant: x_1 - x_2 >= 0 & x_1 - x_2 <= 10 & x_2 - x_3 >= 0 & x_2 - x_3 <= 10 & x_3 - x_4 >= 0 & x_3 - x_4 <= 10 & x_4 - x_5 >= 0 & x_4 - x_5 <= 10
+
+                x_1 - x_2 >= 0   x_1 - x_2 <= 10   x_2 - x_3 >= 0   x_2 - x_3 <= 10   x_3 - x_4 >= 0   x_3 - x_4 <= 10   x_4 - x_5 >= 0   x_4 - x_5 <= 10
+            }
+        }
+
+        v4
+        {
+            linear ode
+            {
+                x_1' = 12
+                x_2' = 12
+                x_3' = 12
+                x_4' = 10
+                x_5' = 9
+            }
+            inv
+            {
+                # Original invariant: x_1 - x_2 >= 0 & x_1 - x_2 <= 10 & x_2 - x_3 >= 0 & x_2 - x_3 <= 10 & x_3 - x_4 >= 0 & x_3 - x_4 <= 10 & x_4 - x_5 >= 0 & x_4 - x_5 <= 10
+
+                x_1 - x_2 >= 0   x_1 - x_2 <= 10   x_2 - x_3 >= 0   x_2 - x_3 <= 10   x_3 - x_4 >= 0   x_3 - x_4 <= 10   x_4 - x_5 >= 0   x_4 - x_5 <= 10
+            }
+        }
+
+        v5
+        {
+            linear ode
+            {
+                x_1' = 12
+                x_2' = 12
+                x_3' = 12
+                x_4' = 12
+                x_5' = 10
+            }
+            inv
+            {
+                # Original invariant: x_1 - x_2 >= 0 & x_1 - x_2 <= 10 & x_2 - x_3 >= 0 & x_2 - x_3 <= 10 & x_3 - x_4 >= 0 & x_3 - x_4 <= 10 & x_4 - x_5 >= 0 & x_4 - x_5 <= 10
+
+                x_1 - x_2 >= 0   x_1 - x_2 <= 10   x_2 - x_3 >= 0   x_2 - x_3 <= 10   x_3 - x_4 >= 0   x_3 - x_4 <= 10   x_4 - x_5 >= 0   x_4 - x_5 <= 10
+            }
+        }
+
+        v6
+        {
+            linear ode
+            {
+                x_1' = 0
+                x_2' = 0
+                x_3' = 0
+                x_4' = 0
+                x_5' = 0
+            }
+            inv
+            {
+            }
+        }
+    }
+
+    jumps
+    {
+        v1 -> v2
+        guard
+        {
+            # Original guard: x_1 - x_2 <= 4
+
+            x_1 - x_2 <= 4
+        }
+        reset
+        {
+        }
+        parallelotope aggregation {}
+
+        v1 -> v3
+        guard
+        {
+            # Original guard: x_2 - x_3 <= 4
+
+            x_2 - x_3 <= 4
+        }
+        reset
+        {
+        }
+        parallelotope aggregation {}
+
+        v1 -> v4
+        guard
+        {
+            # Original guard: x_3 - x_4 <= 4
+
+            x_3 - x_4 <= 4
+        }
+        reset
+        {
+        }
+        parallelotope aggregation {}
+
+        v1 -> v5
+        guard
+        {
+            # Original guard: x_4 - x_5 <= 4
+
+            x_4 - x_5 <= 4
+        }
+        reset
+        {
+        }
+        parallelotope aggregation {}
+
+        v2 -> v1
+        guard
+        {
+            # Original guard: x_1 - x_2 >= 4
+
+            x_1 - x_2 >= 4
+        }
+        reset
+        {
+        }
+        parallelotope aggregation {}
+
+        v2 -> v6
+        guard
+        {
+            # Original guard: x_1 - x_2 <= 1
+
+            x_1 - x_2 <= 1
+        }
+        reset
+        {
+        }
+        parallelotope aggregation {}
+
+        v3 -> v1
+        guard
+        {
+            # Original guard: x_2 - x_3 >= 4
+
+            x_2 - x_3 >= 4
+        }
+        reset
+        {
+        }
+        parallelotope aggregation {}
+
+        v3 -> v6
+        guard
+        {
+            # Original guard: x_2 - x_3 <= 1
+
+            x_2 - x_3 <= 1
+        }
+        reset
+        {
+        }
+        parallelotope aggregation {}
+
+        v4 -> v1
+        guard
+        {
+            # Original guard: x_3 - x_4 >= 4
+
+            x_3 - x_4 >= 4
+        }
+        reset
+        {
+        }
+        parallelotope aggregation {}
+
+        v4 -> v6
+        guard
+        {
+            # Original guard: x_3 - x_4 <= 1
+
+            x_3 - x_4 <= 1
+        }
+        reset
+        {
+        }
+        parallelotope aggregation {}
+
+        v5 -> v1
+        guard
+        {
+            # Original guard: x_4 - x_5 >= 4
+
+            x_4 - x_5 >= 4
+        }
+        reset
+        {
+        }
+        parallelotope aggregation {}
+
+        v5 -> v6
+        guard
+        {
+            # Original guard: x_4 - x_5 <= 1
+
+            x_4 - x_5 <= 1
+        }
+        reset
+        {
+        }
+        parallelotope aggregation {}
+    }
+
+    init
+    {
+        v1
+        {
+            x_2 in [35, 35]
+            x_1 in [40, 40]
+            x_4 in [25, 25]
+            x_3 in [30, 30]
+            x_5 in [20, 20]
+        }
+    }
+}

@@ -101,6 +101,18 @@ vlift3 :: (Valued f, Ord a, Ord b, Ord d) => (a -> b -> c -> d) -> f a -> f b ->
 vlift3 f x y z =
   vlift (uncurry f) (vlift (,) x y) z
 
+vlift4 :: (Valued f, Ord a, Ord b, Ord c, Ord d, Ord e) => (a -> b -> c -> d -> e) -> f a -> f b -> f c -> f d -> f e
+vlift4 f x y z w =
+  vmap (\(x, (y, (z, w))) -> f x y z w) (vlift (,) x (vlift (,) y (vlift (,) z w)))
+
+vlift6 :: (Valued v, Ord a, Ord b, Ord c, Ord d, Ord e, Ord f, Ord g) => (a -> b -> c -> d -> e -> f -> g) -> v a -> v b -> v c -> v d -> v e -> v f -> v g
+vlift6 op a b c d e f =
+  vmap (\(a, (b, (c, (d, (e, f))))) -> op a b c d e f) (vlift (,) a (vlift (,) b (vlift (,) c (vlift (,) d (vlift (,) e f)))))
+
+vlift7 :: (Valued v, Ord a, Ord b, Ord c, Ord d, Ord e, Ord f, Ord g, Ord h) => (a -> b -> c -> d -> e -> f -> g -> h) -> v a -> v b -> v c -> v d -> v e -> v f -> v g -> v h
+vlift7 op a b c d e f g =
+  vmap (\(a, (b, (c, (d, (e, (f, g)))))) -> op a b c d e f g) (vlift (,) a (vlift (,) b (vlift (,) c (vlift (,) d (vlift (,) e (vlift (,) f g))))))
+
 vmapM :: (Valued f, Ord b) => (a -> f b) -> [a] -> f [b]
 vmapM _ [] = val []
 vmapM f (x:xs) = vlift (:) (f x) (vmapM f xs)

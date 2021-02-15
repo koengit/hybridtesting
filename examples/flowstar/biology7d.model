@@ -1,0 +1,64 @@
+# Hyst v1.17
+# Hybrid Automaton in Flow*
+# Converted from: examples/biology7d/biology7d.xml
+# Using command line arguments: examples/biology7d/biology7d.xml -flowstar -o examples/biology7d/biology7d.model
+
+
+hybrid reachability
+{
+  # Vars
+  state var x1, x2, x3, x4, x5, x6, x7
+
+  setting
+  {
+    fixed steps .002
+    time .2
+    remainder estimation 1e-4
+    identity precondition
+    gnuplot octagon x3,x4
+    adaptive orders { min 3, max 8 } 
+    cutoff 1e-15
+    precision 53
+    output out
+    max jumps 99999999
+    print on
+  }
+
+  modes
+  {
+    running
+    {
+      poly ode 3
+      {
+        x1' = -0.4 * x1 + 50.0 * x3 * x4
+        x2' = 0.4 * x1 - x2
+        x3' = x2 - 50.0 * x3 * x4
+        x4' = 50.0 * x5 * x6 - 50.0 * x3 * x4
+        x5' = -50.0 * x5 * x6 + 50.0 * x3 * x4
+        x6' = 0.5 * x7 - 50.0 * x5 * x6
+        x7' = -0.5 * x7 + 50.0 * x5 * x6
+      }
+      inv
+      {
+      }
+    }
+  }
+
+  jumps
+  {
+  }
+
+  init
+  {
+    running
+    {
+      x1 in [.1, .105]
+      x2 in [.1, .105]
+      x3 in [.1, .105]
+      x4 in [.1, .105]
+      x5 in [.1, .105]
+      x6 in [.1, .105]
+      x7 in [.1, .105]
+    }
+  }
+}

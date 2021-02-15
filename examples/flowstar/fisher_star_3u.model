@@ -1,0 +1,4046 @@
+# Created by Hyst v1.3
+# Hybrid Automaton in Flow*
+# Converted from file: /Users/stefan/hybridsystems/repositories/benchmarks_hybrid/hypro/arch17competition/fisher_star/fisher_star_3u.xml
+# Command Line arguments: -tool flowstar "" -debug -output /Users/stefan/hybridsystems/repositories/benchmarks_hybrid/hypro/arch17competition/fisher_star/fisher_star_3u.model -input /Users/stefan/hybridsystems/repositories/benchmarks_hybrid/hypro/arch17competition/fisher_star/fisher_star_3u.xml /Users/stefan/hybridsystems/repositories/benchmarks_hybrid/hypro/arch17competition/fisher_star/fisher_star_3u.cfg
+
+
+hybrid reachability
+{
+    # Vars
+    state var process1_x, process2_x, process3_x, sv_x
+
+    setting
+    {
+        fixed steps 0.1
+        time 12
+        remainder estimation 1e-4
+        identity precondition
+        gnuplot octagon process2_x,process1_x
+        adaptive orders { min 3, max 8 }
+        cutoff 1e-15
+        precision 53
+        output fisher
+        max jumps 10
+        print on
+    }
+
+    modes
+    {
+        s1_s1_s1_s0
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 1.5
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s1_s1_s2_s0
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 1.5
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process3_x <= 1
+
+                process3_x <= 1
+            }
+        }
+
+        s1_s1_s3_s0
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 1.5
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s1_s1_s3_s3
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 1.5
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s1_s1_s4_s0
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 1.5
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s1_s1_s4_s3
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 1.5
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s1_s2_s1_s0
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 2.1
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process2_x <= 1
+
+                process2_x <= 1
+            }
+        }
+
+        s1_s2_s2_s0
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 2.1
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process2_x <= 1 & process3_x <= 1
+
+                process2_x <= 1   process3_x <= 1
+            }
+        }
+
+        s1_s2_s3_s0
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 2.1
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process2_x <= 1
+
+                process2_x <= 1
+            }
+        }
+
+        s1_s2_s3_s3
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 2.1
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process2_x <= 1
+
+                process2_x <= 1
+            }
+        }
+
+        s1_s2_s4_s0
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 2.1
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process2_x <= 1
+
+                process2_x <= 1
+            }
+        }
+
+        s1_s2_s4_s3
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 2.1
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process2_x <= 1
+
+                process2_x <= 1
+            }
+        }
+
+        s1_s3_s1_s0
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 1.8
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s1_s3_s1_s2
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 1.8
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s1_s3_s2_s0
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 1.8
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process3_x <= 1
+
+                process3_x <= 1
+            }
+        }
+
+        s1_s3_s2_s2
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 1.8
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process3_x <= 1
+
+                process3_x <= 1
+            }
+        }
+
+        s1_s3_s3_s0
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 1.8
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s1_s3_s3_s2
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 1.8
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s1_s3_s3_s3
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 1.8
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s1_s3_s4_s0
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 1.8
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s1_s3_s4_s2
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 1.8
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s1_s3_s4_s3
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 1.8
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s1_s4_s1_s0
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 2.2
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s1_s4_s1_s2
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 2.2
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s1_s4_s2_s0
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 2.2
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process3_x <= 1
+
+                process3_x <= 1
+            }
+        }
+
+        s1_s4_s2_s2
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 2.2
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process3_x <= 1
+
+                process3_x <= 1
+            }
+        }
+
+        s1_s4_s3_s0
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 2.2
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s1_s4_s3_s2
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 2.2
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s1_s4_s3_s3
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 2.2
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s1_s4_s4_s0
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 2.2
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s1_s4_s4_s2
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 2.2
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s1_s4_s4_s3
+        {
+            linear ode
+            {
+                process1_x' = 1.5
+                process2_x' = 2.2
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s2_s1_s1_s0
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 1.5
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1
+
+                process1_x <= 1
+            }
+        }
+
+        s2_s1_s2_s0
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 1.5
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1 & process3_x <= 1
+
+                process1_x <= 1   process3_x <= 1
+            }
+        }
+
+        s2_s1_s3_s0
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 1.5
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1
+
+                process1_x <= 1
+            }
+        }
+
+        s2_s1_s3_s3
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 1.5
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1
+
+                process1_x <= 1
+            }
+        }
+
+        s2_s1_s4_s0
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 1.5
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1
+
+                process1_x <= 1
+            }
+        }
+
+        s2_s1_s4_s3
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 1.5
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1
+
+                process1_x <= 1
+            }
+        }
+
+        s2_s2_s1_s0
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 2.1
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1 & process2_x <= 1
+
+                process1_x <= 1   process2_x <= 1
+            }
+        }
+
+        s2_s2_s2_s0
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 2.1
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1 & process2_x <= 1 & process3_x <= 1
+
+                process1_x <= 1   process2_x <= 1   process3_x <= 1
+            }
+        }
+
+        s2_s2_s3_s0
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 2.1
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1 & process2_x <= 1
+
+                process1_x <= 1   process2_x <= 1
+            }
+        }
+
+        s2_s2_s3_s3
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 2.1
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1 & process2_x <= 1
+
+                process1_x <= 1   process2_x <= 1
+            }
+        }
+
+        s2_s2_s4_s0
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 2.1
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1 & process2_x <= 1
+
+                process1_x <= 1   process2_x <= 1
+            }
+        }
+
+        s2_s2_s4_s3
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 2.1
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1 & process2_x <= 1
+
+                process1_x <= 1   process2_x <= 1
+            }
+        }
+
+        s2_s3_s1_s0
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 1.8
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1
+
+                process1_x <= 1
+            }
+        }
+
+        s2_s3_s1_s2
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 1.8
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1
+
+                process1_x <= 1
+            }
+        }
+
+        s2_s3_s2_s0
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 1.8
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1 & process3_x <= 1
+
+                process1_x <= 1   process3_x <= 1
+            }
+        }
+
+        s2_s3_s2_s2
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 1.8
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1 & process3_x <= 1
+
+                process1_x <= 1   process3_x <= 1
+            }
+        }
+
+        s2_s3_s3_s0
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 1.8
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1
+
+                process1_x <= 1
+            }
+        }
+
+        s2_s3_s3_s2
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 1.8
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1
+
+                process1_x <= 1
+            }
+        }
+
+        s2_s3_s3_s3
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 1.8
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1
+
+                process1_x <= 1
+            }
+        }
+
+        s2_s3_s4_s0
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 1.8
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1
+
+                process1_x <= 1
+            }
+        }
+
+        s2_s3_s4_s2
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 1.8
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1
+
+                process1_x <= 1
+            }
+        }
+
+        s2_s3_s4_s3
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 1.8
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1
+
+                process1_x <= 1
+            }
+        }
+
+        s2_s4_s1_s0
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 2.2
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1
+
+                process1_x <= 1
+            }
+        }
+
+        s2_s4_s1_s2
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 2.2
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1
+
+                process1_x <= 1
+            }
+        }
+
+        s2_s4_s2_s0
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 2.2
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1 & process3_x <= 1
+
+                process1_x <= 1   process3_x <= 1
+            }
+        }
+
+        s2_s4_s2_s2
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 2.2
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1 & process3_x <= 1
+
+                process1_x <= 1   process3_x <= 1
+            }
+        }
+
+        s2_s4_s3_s0
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 2.2
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1
+
+                process1_x <= 1
+            }
+        }
+
+        s2_s4_s3_s2
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 2.2
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1
+
+                process1_x <= 1
+            }
+        }
+
+        s2_s4_s3_s3
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 2.2
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1
+
+                process1_x <= 1
+            }
+        }
+
+        s2_s4_s4_s0
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 2.2
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1
+
+                process1_x <= 1
+            }
+        }
+
+        s2_s4_s4_s2
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 2.2
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1
+
+                process1_x <= 1
+            }
+        }
+
+        s2_s4_s4_s3
+        {
+            linear ode
+            {
+                process1_x' = 2.1
+                process2_x' = 2.2
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process1_x <= 1
+
+                process1_x <= 1
+            }
+        }
+
+        s3_s1_s1_s0
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 1.5
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s3_s1_s1_s1
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 1.5
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s3_s1_s2_s0
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 1.5
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process3_x <= 1
+
+                process3_x <= 1
+            }
+        }
+
+        s3_s1_s2_s1
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 1.5
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process3_x <= 1
+
+                process3_x <= 1
+            }
+        }
+
+        s3_s1_s3_s0
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 1.5
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s3_s1_s3_s1
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 1.5
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s3_s1_s3_s3
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 1.5
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s3_s1_s4_s0
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 1.5
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s3_s1_s4_s1
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 1.5
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s3_s1_s4_s3
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 1.5
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s3_s2_s1_s0
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 2.1
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process2_x <= 1
+
+                process2_x <= 1
+            }
+        }
+
+        s3_s2_s1_s1
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 2.1
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process2_x <= 1
+
+                process2_x <= 1
+            }
+        }
+
+        s3_s2_s2_s0
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 2.1
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process2_x <= 1 & process3_x <= 1
+
+                process2_x <= 1   process3_x <= 1
+            }
+        }
+
+        s3_s2_s2_s1
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 2.1
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process2_x <= 1 & process3_x <= 1
+
+                process2_x <= 1   process3_x <= 1
+            }
+        }
+
+        s3_s2_s3_s0
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 2.1
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process2_x <= 1
+
+                process2_x <= 1
+            }
+        }
+
+        s3_s2_s3_s1
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 2.1
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process2_x <= 1
+
+                process2_x <= 1
+            }
+        }
+
+        s3_s2_s3_s3
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 2.1
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process2_x <= 1
+
+                process2_x <= 1
+            }
+        }
+
+        s3_s2_s4_s0
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 2.1
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process2_x <= 1
+
+                process2_x <= 1
+            }
+        }
+
+        s3_s2_s4_s1
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 2.1
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process2_x <= 1
+
+                process2_x <= 1
+            }
+        }
+
+        s3_s2_s4_s3
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 2.1
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process2_x <= 1
+
+                process2_x <= 1
+            }
+        }
+
+        s3_s3_s1_s0
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 1.8
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s3_s3_s1_s1
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 1.8
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s3_s3_s1_s2
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 1.8
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s3_s3_s2_s0
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 1.8
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process3_x <= 1
+
+                process3_x <= 1
+            }
+        }
+
+        s3_s3_s2_s1
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 1.8
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process3_x <= 1
+
+                process3_x <= 1
+            }
+        }
+
+        s3_s3_s2_s2
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 1.8
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process3_x <= 1
+
+                process3_x <= 1
+            }
+        }
+
+        s3_s3_s3_s1
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 1.8
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s3_s3_s3_s2
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 1.8
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s3_s3_s3_s3
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 1.8
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s3_s3_s4_s1
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 1.8
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s3_s3_s4_s2
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 1.8
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s3_s3_s4_s3
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 1.8
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s3_s4_s1_s0
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 2.2
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s3_s4_s1_s1
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 2.2
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s3_s4_s1_s2
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 2.2
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s3_s4_s2_s0
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 2.2
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process3_x <= 1
+
+                process3_x <= 1
+            }
+        }
+
+        s3_s4_s2_s1
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 2.2
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process3_x <= 1
+
+                process3_x <= 1
+            }
+        }
+
+        s3_s4_s2_s2
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 2.2
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process3_x <= 1
+
+                process3_x <= 1
+            }
+        }
+
+        s3_s4_s3_s1
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 2.2
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s3_s4_s3_s2
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 2.2
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s3_s4_s3_s3
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 2.2
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s3_s4_s4_s1
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 2.2
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s3_s4_s4_s2
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 2.2
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s3_s4_s4_s3
+        {
+            linear ode
+            {
+                process1_x' = 1.8
+                process2_x' = 2.2
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s4_s1_s1_s0
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 1.5
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s4_s1_s1_s1
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 1.5
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s4_s1_s2_s0
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 1.5
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process3_x <= 1
+
+                process3_x <= 1
+            }
+        }
+
+        s4_s1_s2_s1
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 1.5
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process3_x <= 1
+
+                process3_x <= 1
+            }
+        }
+
+        s4_s1_s3_s0
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 1.5
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s4_s1_s3_s1
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 1.5
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s4_s1_s3_s3
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 1.5
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s4_s1_s4_s0
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 1.5
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s4_s1_s4_s1
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 1.5
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s4_s1_s4_s3
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 1.5
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s4_s2_s1_s0
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 2.1
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process2_x <= 1
+
+                process2_x <= 1
+            }
+        }
+
+        s4_s2_s1_s1
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 2.1
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process2_x <= 1
+
+                process2_x <= 1
+            }
+        }
+
+        s4_s2_s2_s0
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 2.1
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process2_x <= 1 & process3_x <= 1
+
+                process2_x <= 1   process3_x <= 1
+            }
+        }
+
+        s4_s2_s2_s1
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 2.1
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process2_x <= 1 & process3_x <= 1
+
+                process2_x <= 1   process3_x <= 1
+            }
+        }
+
+        s4_s2_s3_s0
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 2.1
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process2_x <= 1
+
+                process2_x <= 1
+            }
+        }
+
+        s4_s2_s3_s1
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 2.1
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process2_x <= 1
+
+                process2_x <= 1
+            }
+        }
+
+        s4_s2_s3_s3
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 2.1
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process2_x <= 1
+
+                process2_x <= 1
+            }
+        }
+
+        s4_s2_s4_s0
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 2.1
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process2_x <= 1
+
+                process2_x <= 1
+            }
+        }
+
+        s4_s2_s4_s1
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 2.1
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process2_x <= 1
+
+                process2_x <= 1
+            }
+        }
+
+        s4_s2_s4_s3
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 2.1
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process2_x <= 1
+
+                process2_x <= 1
+            }
+        }
+
+        s4_s3_s1_s0
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 1.8
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s4_s3_s1_s1
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 1.8
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s4_s3_s1_s2
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 1.8
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s4_s3_s2_s0
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 1.8
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process3_x <= 1
+
+                process3_x <= 1
+            }
+        }
+
+        s4_s3_s2_s1
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 1.8
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process3_x <= 1
+
+                process3_x <= 1
+            }
+        }
+
+        s4_s3_s2_s2
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 1.8
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process3_x <= 1
+
+                process3_x <= 1
+            }
+        }
+
+        s4_s3_s3_s1
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 1.8
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s4_s3_s3_s2
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 1.8
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s4_s3_s3_s3
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 1.8
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s4_s3_s4_s1
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 1.8
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s4_s3_s4_s2
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 1.8
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s4_s3_s4_s3
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 1.8
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s4_s4_s1_s0
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 2.2
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s4_s4_s1_s1
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 2.2
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s4_s4_s1_s2
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 2.2
+                process3_x' = 1.5
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s4_s4_s2_s0
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 2.2
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process3_x <= 1
+
+                process3_x <= 1
+            }
+        }
+
+        s4_s4_s2_s1
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 2.2
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process3_x <= 1
+
+                process3_x <= 1
+            }
+        }
+
+        s4_s4_s2_s2
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 2.2
+                process3_x' = 2.1
+                sv_x' = 0
+            }
+            inv
+            {
+                # Original invariant: process3_x <= 1
+
+                process3_x <= 1
+            }
+        }
+
+        s4_s4_s3_s1
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 2.2
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s4_s4_s3_s2
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 2.2
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s4_s4_s3_s3
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 2.2
+                process3_x' = 1.8
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s4_s4_s4_s1
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 2.2
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s4_s4_s4_s2
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 2.2
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+
+        s4_s4_s4_s3
+        {
+            linear ode
+            {
+                process1_x' = 2.2
+                process2_x' = 2.2
+                process3_x' = 2.2
+                sv_x' = 0
+            }
+            inv
+            {
+            }
+        }
+    }
+
+    jumps
+    {
+        s1_s1_s1_s0 -> s2_s1_s1_s0
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s1_s2_s0 -> s2_s1_s2_s0
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s1_s3_s0 -> s2_s1_s3_s0
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s1_s4_s0 -> s2_s1_s4_s0
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s2_s1_s0 -> s2_s2_s1_s0
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s2_s2_s0 -> s2_s2_s2_s0
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s2_s3_s0 -> s2_s2_s3_s0
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s2_s4_s0 -> s2_s2_s4_s0
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s3_s1_s0 -> s2_s3_s1_s0
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s3_s2_s0 -> s2_s3_s2_s0
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s3_s3_s0 -> s2_s3_s3_s0
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s3_s4_s0 -> s2_s3_s4_s0
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s4_s1_s0 -> s2_s4_s1_s0
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s4_s2_s0 -> s2_s4_s2_s0
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s4_s3_s0 -> s2_s4_s3_s0
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s4_s4_s0 -> s2_s4_s4_s0
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s1_s1_s0 -> s3_s1_s1_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s1_s2_s0 -> s3_s1_s2_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s1_s3_s0 -> s3_s1_s3_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s1_s3_s3 -> s3_s1_s3_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s1_s4_s0 -> s3_s1_s4_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s1_s4_s3 -> s3_s1_s4_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s2_s1_s0 -> s3_s2_s1_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s2_s2_s0 -> s3_s2_s2_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s2_s3_s0 -> s3_s2_s3_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s2_s3_s3 -> s3_s2_s3_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s2_s4_s0 -> s3_s2_s4_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s2_s4_s3 -> s3_s2_s4_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s3_s1_s0 -> s3_s3_s1_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s3_s1_s2 -> s3_s3_s1_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s3_s2_s0 -> s3_s3_s2_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s3_s2_s2 -> s3_s3_s2_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s3_s3_s0 -> s3_s3_s3_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s3_s3_s2 -> s3_s3_s3_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s3_s3_s3 -> s3_s3_s3_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s3_s4_s0 -> s3_s3_s4_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s3_s4_s2 -> s3_s3_s4_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s3_s4_s3 -> s3_s3_s4_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s4_s1_s0 -> s3_s4_s1_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s4_s1_s2 -> s3_s4_s1_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s4_s2_s0 -> s3_s4_s2_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s4_s2_s2 -> s3_s4_s2_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s4_s3_s0 -> s3_s4_s3_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s4_s3_s2 -> s3_s4_s3_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s4_s3_s3 -> s3_s4_s3_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s4_s4_s0 -> s3_s4_s4_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s4_s4_s2 -> s3_s4_s4_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s4_s4_s3 -> s3_s4_s4_s1
+        guard{}
+        reset { process1_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s1_s1_s1 -> s4_s1_s1_s1
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s1_s2_s1 -> s4_s1_s2_s1
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s1_s3_s1 -> s4_s1_s3_s1
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s1_s4_s1 -> s4_s1_s4_s1
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s2_s1_s1 -> s4_s2_s1_s1
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s2_s2_s1 -> s4_s2_s2_s1
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s2_s3_s1 -> s4_s2_s3_s1
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s2_s4_s1 -> s4_s2_s4_s1
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s3_s1_s1 -> s4_s3_s1_s1
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s3_s2_s1 -> s4_s3_s2_s1
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s3_s3_s1 -> s4_s3_s3_s1
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s3_s4_s1 -> s4_s3_s4_s1
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s4_s1_s1 -> s4_s4_s1_s1
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s4_s2_s1 -> s4_s4_s2_s1
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s4_s3_s1 -> s4_s4_s3_s1
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s4_s4_s1 -> s4_s4_s4_s1
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s1_s3_s3 -> s1_s1_s3_s3
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s1_s4_s3 -> s1_s1_s4_s3
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s2_s3_s3 -> s1_s2_s3_s3
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s2_s4_s3 -> s1_s2_s4_s3
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s3_s1_s2 -> s1_s3_s1_s2
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s3_s2_s2 -> s1_s3_s2_s2
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s3_s3_s2 -> s1_s3_s3_s2
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s3_s3_s3 -> s1_s3_s3_s3
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s3_s4_s2 -> s1_s3_s4_s2
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s3_s4_s3 -> s1_s3_s4_s3
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s4_s1_s2 -> s1_s4_s1_s2
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s4_s2_s2 -> s1_s4_s2_s2
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s4_s3_s2 -> s1_s4_s3_s2
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s4_s3_s3 -> s1_s4_s3_s3
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s4_s4_s2 -> s1_s4_s4_s2
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s4_s4_s3 -> s1_s4_s4_s3
+        guard{   process1_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s1_s1_s0 -> s1_s1_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s1_s1_s1 -> s1_s1_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s1_s2_s0 -> s1_s1_s2_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s1_s2_s1 -> s1_s1_s2_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s1_s3_s0 -> s1_s1_s3_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s1_s3_s1 -> s1_s1_s3_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s1_s4_s0 -> s1_s1_s4_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s1_s4_s1 -> s1_s1_s4_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s2_s1_s0 -> s1_s2_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s2_s1_s1 -> s1_s2_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s2_s2_s0 -> s1_s2_s2_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s2_s2_s1 -> s1_s2_s2_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s2_s3_s0 -> s1_s2_s3_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s2_s3_s1 -> s1_s2_s3_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s2_s4_s0 -> s1_s2_s4_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s2_s4_s1 -> s1_s2_s4_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s3_s1_s0 -> s1_s3_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s3_s1_s1 -> s1_s3_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s3_s2_s0 -> s1_s3_s2_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s3_s2_s1 -> s1_s3_s2_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s3_s3_s1 -> s1_s3_s3_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s3_s4_s1 -> s1_s3_s4_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s4_s1_s0 -> s1_s4_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s4_s1_s1 -> s1_s4_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s4_s2_s0 -> s1_s4_s2_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s4_s2_s1 -> s1_s4_s2_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s4_s3_s1 -> s1_s4_s3_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s4_s4_s1 -> s1_s4_s4_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s1_s1_s1_s0 -> s1_s2_s1_s0
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s1_s2_s0 -> s1_s2_s2_s0
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s1_s3_s0 -> s1_s2_s3_s0
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s1_s4_s0 -> s1_s2_s4_s0
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s1_s1_s0 -> s2_s2_s1_s0
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s1_s2_s0 -> s2_s2_s2_s0
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s1_s3_s0 -> s2_s2_s3_s0
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s1_s4_s0 -> s2_s2_s4_s0
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s1_s1_s0 -> s3_s2_s1_s0
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s1_s2_s0 -> s3_s2_s2_s0
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s1_s3_s0 -> s3_s2_s3_s0
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s1_s4_s0 -> s3_s2_s4_s0
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s4_s1_s1_s0 -> s4_s2_s1_s0
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s4_s1_s2_s0 -> s4_s2_s2_s0
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s4_s1_s3_s0 -> s4_s2_s3_s0
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s4_s1_s4_s0 -> s4_s2_s4_s0
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s2_s1_s0 -> s1_s3_s1_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s2_s2_s0 -> s1_s3_s2_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s2_s3_s0 -> s1_s3_s3_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s2_s3_s3 -> s1_s3_s3_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s2_s4_s0 -> s1_s3_s4_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s2_s4_s3 -> s1_s3_s4_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s2_s1_s0 -> s2_s3_s1_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s2_s2_s0 -> s2_s3_s2_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s2_s3_s0 -> s2_s3_s3_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s2_s3_s3 -> s2_s3_s3_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s2_s4_s0 -> s2_s3_s4_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s2_s4_s3 -> s2_s3_s4_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s2_s1_s0 -> s3_s3_s1_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s2_s1_s1 -> s3_s3_s1_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s2_s2_s0 -> s3_s3_s2_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s2_s2_s1 -> s3_s3_s2_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s2_s3_s0 -> s3_s3_s3_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s2_s3_s1 -> s3_s3_s3_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s2_s3_s3 -> s3_s3_s3_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s2_s4_s0 -> s3_s3_s4_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s2_s4_s1 -> s3_s3_s4_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s2_s4_s3 -> s3_s3_s4_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s4_s2_s1_s0 -> s4_s3_s1_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s4_s2_s1_s1 -> s4_s3_s1_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s4_s2_s2_s0 -> s4_s3_s2_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s4_s2_s2_s1 -> s4_s3_s2_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s4_s2_s3_s0 -> s4_s3_s3_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s4_s2_s3_s1 -> s4_s3_s3_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s4_s2_s3_s3 -> s4_s3_s3_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s4_s2_s4_s0 -> s4_s3_s4_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s4_s2_s4_s1 -> s4_s3_s4_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s4_s2_s4_s3 -> s4_s3_s4_s2
+        guard{}
+        reset { process2_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s3_s1_s2 -> s1_s4_s1_s2
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s1_s3_s2_s2 -> s1_s4_s2_s2
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s1_s3_s3_s2 -> s1_s4_s3_s2
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s1_s3_s4_s2 -> s1_s4_s4_s2
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s2_s3_s1_s2 -> s2_s4_s1_s2
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s2_s3_s2_s2 -> s2_s4_s2_s2
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s2_s3_s3_s2 -> s2_s4_s3_s2
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s2_s3_s4_s2 -> s2_s4_s4_s2
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s3_s1_s2 -> s3_s4_s1_s2
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s3_s2_s2 -> s3_s4_s2_s2
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s3_s3_s2 -> s3_s4_s3_s2
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s3_s4_s2 -> s3_s4_s4_s2
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s3_s1_s2 -> s4_s4_s1_s2
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s3_s2_s2 -> s4_s4_s2_s2
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s3_s3_s2 -> s4_s4_s3_s2
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s3_s4_s2 -> s4_s4_s4_s2
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s1_s3_s3_s3 -> s1_s1_s3_s3
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s1_s3_s4_s3 -> s1_s1_s4_s3
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s2_s3_s3_s3 -> s2_s1_s3_s3
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s2_s3_s4_s3 -> s2_s1_s4_s3
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s3_s1_s1 -> s3_s1_s1_s1
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s3_s2_s1 -> s3_s1_s2_s1
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s3_s3_s1 -> s3_s1_s3_s1
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s3_s3_s3 -> s3_s1_s3_s3
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s3_s4_s1 -> s3_s1_s4_s1
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s3_s4_s3 -> s3_s1_s4_s3
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s3_s1_s1 -> s4_s1_s1_s1
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s3_s2_s1 -> s4_s1_s2_s1
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s3_s3_s1 -> s4_s1_s3_s1
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s3_s3_s3 -> s4_s1_s3_s3
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s3_s4_s1 -> s4_s1_s4_s1
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s3_s4_s3 -> s4_s1_s4_s3
+        guard{   process2_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s1_s4_s1_s0 -> s1_s1_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s1_s4_s1_s2 -> s1_s1_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s1_s4_s2_s0 -> s1_s1_s2_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s1_s4_s2_s2 -> s1_s1_s2_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s1_s4_s3_s0 -> s1_s1_s3_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s1_s4_s3_s2 -> s1_s1_s3_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s1_s4_s4_s0 -> s1_s1_s4_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s1_s4_s4_s2 -> s1_s1_s4_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s2_s4_s1_s0 -> s2_s1_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s2_s4_s1_s2 -> s2_s1_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s2_s4_s2_s0 -> s2_s1_s2_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s2_s4_s2_s2 -> s2_s1_s2_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s2_s4_s3_s0 -> s2_s1_s3_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s2_s4_s3_s2 -> s2_s1_s3_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s2_s4_s4_s0 -> s2_s1_s4_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s2_s4_s4_s2 -> s2_s1_s4_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s4_s1_s0 -> s3_s1_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s4_s1_s2 -> s3_s1_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s4_s2_s0 -> s3_s1_s2_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s4_s2_s2 -> s3_s1_s2_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s4_s3_s2 -> s3_s1_s3_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s4_s4_s2 -> s3_s1_s4_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s4_s1_s0 -> s4_s1_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s4_s1_s2 -> s4_s1_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s4_s2_s0 -> s4_s1_s2_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s4_s2_s2 -> s4_s1_s2_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s4_s3_s2 -> s4_s1_s3_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s4_s4_s2 -> s4_s1_s4_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s1_s1_s1_s0 -> s1_s1_s2_s0
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s2_s1_s0 -> s1_s2_s2_s0
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s3_s1_s0 -> s1_s3_s2_s0
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s4_s1_s0 -> s1_s4_s2_s0
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s1_s1_s0 -> s2_s1_s2_s0
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s2_s1_s0 -> s2_s2_s2_s0
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s3_s1_s0 -> s2_s3_s2_s0
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s4_s1_s0 -> s2_s4_s2_s0
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s1_s1_s0 -> s3_s1_s2_s0
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s2_s1_s0 -> s3_s2_s2_s0
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s3_s1_s0 -> s3_s3_s2_s0
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s4_s1_s0 -> s3_s4_s2_s0
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s4_s1_s1_s0 -> s4_s1_s2_s0
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s4_s2_s1_s0 -> s4_s2_s2_s0
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s4_s3_s1_s0 -> s4_s3_s2_s0
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s4_s4_s1_s0 -> s4_s4_s2_s0
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s1_s2_s0 -> s1_s1_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s2_s2_s0 -> s1_s2_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s3_s2_s0 -> s1_s3_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s3_s2_s2 -> s1_s3_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s4_s2_s0 -> s1_s4_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s4_s2_s2 -> s1_s4_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s1_s2_s0 -> s2_s1_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s2_s2_s0 -> s2_s2_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s3_s2_s0 -> s2_s3_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s3_s2_s2 -> s2_s3_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s4_s2_s0 -> s2_s4_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s2_s4_s2_s2 -> s2_s4_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s1_s2_s0 -> s3_s1_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s1_s2_s1 -> s3_s1_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s2_s2_s0 -> s3_s2_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s2_s2_s1 -> s3_s2_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s3_s2_s0 -> s3_s3_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s3_s2_s1 -> s3_s3_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s3_s2_s2 -> s3_s3_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s4_s2_s0 -> s3_s4_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s4_s2_s1 -> s3_s4_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s3_s4_s2_s2 -> s3_s4_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s4_s1_s2_s0 -> s4_s1_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s4_s1_s2_s1 -> s4_s1_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s4_s2_s2_s0 -> s4_s2_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s4_s2_s2_s1 -> s4_s2_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s4_s3_s2_s0 -> s4_s3_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s4_s3_s2_s1 -> s4_s3_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s4_s3_s2_s2 -> s4_s3_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s4_s4_s2_s0 -> s4_s4_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s4_s4_s2_s1 -> s4_s4_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s4_s4_s2_s2 -> s4_s4_s3_s3
+        guard{}
+        reset { process3_x' := 0 }
+        parallelotope aggregation {}
+
+        s1_s1_s3_s3 -> s1_s1_s4_s3
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s1_s2_s3_s3 -> s1_s2_s4_s3
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s1_s3_s3_s3 -> s1_s3_s4_s3
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s1_s4_s3_s3 -> s1_s4_s4_s3
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s2_s1_s3_s3 -> s2_s1_s4_s3
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s2_s2_s3_s3 -> s2_s2_s4_s3
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s2_s3_s3_s3 -> s2_s3_s4_s3
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s2_s4_s3_s3 -> s2_s4_s4_s3
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s1_s3_s3 -> s3_s1_s4_s3
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s2_s3_s3 -> s3_s2_s4_s3
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s3_s3_s3 -> s3_s3_s4_s3
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s4_s3_s3 -> s3_s4_s4_s3
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s1_s3_s3 -> s4_s1_s4_s3
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s2_s3_s3 -> s4_s2_s4_s3
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s3_s3_s3 -> s4_s3_s4_s3
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s4_s3_s3 -> s4_s4_s4_s3
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s1_s3_s3_s2 -> s1_s3_s1_s2
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s1_s4_s3_s2 -> s1_s4_s1_s2
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s2_s3_s3_s2 -> s2_s3_s1_s2
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s2_s4_s3_s2 -> s2_s4_s1_s2
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s1_s3_s1 -> s3_s1_s1_s1
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s2_s3_s1 -> s3_s2_s1_s1
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s3_s3_s1 -> s3_s3_s1_s1
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s3_s3_s2 -> s3_s3_s1_s2
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s4_s3_s1 -> s3_s4_s1_s1
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s4_s3_s2 -> s3_s4_s1_s2
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s1_s3_s1 -> s4_s1_s1_s1
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s2_s3_s1 -> s4_s2_s1_s1
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s3_s3_s1 -> s4_s3_s1_s1
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s3_s3_s2 -> s4_s3_s1_s2
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s4_s3_s1 -> s4_s4_s1_s1
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s4_s3_s2 -> s4_s4_s1_s2
+        guard{   process3_x >= 3 }
+        reset{}
+        parallelotope aggregation {}
+
+        s1_s1_s4_s0 -> s1_s1_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s1_s1_s4_s3 -> s1_s1_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s1_s2_s4_s0 -> s1_s2_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s1_s2_s4_s3 -> s1_s2_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s1_s3_s4_s0 -> s1_s3_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s1_s3_s4_s3 -> s1_s3_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s1_s4_s4_s0 -> s1_s4_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s1_s4_s4_s3 -> s1_s4_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s2_s1_s4_s0 -> s2_s1_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s2_s1_s4_s3 -> s2_s1_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s2_s2_s4_s0 -> s2_s2_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s2_s2_s4_s3 -> s2_s2_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s2_s3_s4_s0 -> s2_s3_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s2_s3_s4_s3 -> s2_s3_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s2_s4_s4_s0 -> s2_s4_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s2_s4_s4_s3 -> s2_s4_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s1_s4_s0 -> s3_s1_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s1_s4_s3 -> s3_s1_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s2_s4_s0 -> s3_s2_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s2_s4_s3 -> s3_s2_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s3_s4_s3 -> s3_s3_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s3_s4_s4_s3 -> s3_s4_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s1_s4_s0 -> s4_s1_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s1_s4_s3 -> s4_s1_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s2_s4_s0 -> s4_s2_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s2_s4_s3 -> s4_s2_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s3_s4_s3 -> s4_s3_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+
+        s4_s4_s4_s3 -> s4_s4_s1_s0
+        guard{}
+        reset{}
+        parallelotope aggregation {}
+    }
+
+    init
+    {
+        s1_s1_s1_s0
+        {
+            process1_x in [0, 0]
+            process3_x in [0, 0]
+            process2_x in [0, 0]
+            sv_x in [0, 0]
+        }
+    }
+}
+
+unsafe set
+{
+	s4_s4_s4_s1
+	{
+
+	}
+
+	s4_s4_s4_s2
+	{
+
+	}
+
+	s4_s4_s4_s3
+	{
+
+	}
+}

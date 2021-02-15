@@ -1,0 +1,197 @@
+# Hyst v1.17
+# Hybrid Automaton in Flow*
+# Converted from: 2018/HBMC/bach/benchmarks/Navigation/NAV_2_2.xml
+# Using command line arguments: 2018/HBMC/bach/benchmarks/Navigation/NAV_2_2.xml -flowstar -o 2018/HBMC/bach/benchmarks/Navigation/NAV_2_2.model
+
+
+hybrid reachability
+{
+  # Vars
+  state var x1, x2
+
+  setting
+  {
+    fixed steps .1
+    time 40000
+    remainder estimation 1e-4
+    QR precondition
+    gnuplot octagon x1,x2
+    adaptive orders { min 3, max 8 } 
+    cutoff 1e-15
+    precision 53
+    output out
+    max jumps 99999999
+    print on
+  }
+
+  modes
+  {
+    L00
+    {
+      linear ode
+      {
+        x1' = 0.6
+        x2' = 1.2
+      }
+      inv
+      {
+        # Original invariant: 0.0 <= x1 & x1 <= 1.0 & 0.0 <= x2 & x2 <= 1.0
+
+        0.0 - (x1)<=0   x1 <= 1.0   0.0 - (x2)<=0   x2 <= 1.0
+      }
+    }
+
+    L01
+    {
+      linear ode
+      {
+        x1' = -0.5
+        x2' = -1.1
+      }
+      inv
+      {
+        # Original invariant: 1.0 <= x1 & x1 <= 2.0 & 0.0 <= x2 & x2 <= 1.0
+
+        1.0 - (x1)<=0   x1 <= 2.0   0.0 - (x2)<=0   x2 <= 1.0
+      }
+    }
+
+    L10
+    {
+      linear ode
+      {
+        x1' = 0.6
+        x2' = 1.2
+      }
+      inv
+      {
+        # Original invariant: 0.0 <= x1 & x1 <= 1.0 & 0.0 <= x2 & x2 <= 1.0
+
+        0.0 - (x1)<=0   x1 <= 1.0   0.0 - (x2)<=0   x2 <= 1.0
+      }
+    }
+
+    L11
+    {
+      linear ode
+      {
+        x1' = -0.5
+        x2' = -1.1
+      }
+      inv
+      {
+        # Original invariant: 1.0 <= x1 & x1 <= 2.0 & 0.0 <= x2 & x2 <= 1.0
+
+        1.0 - (x1)<=0   x1 <= 2.0   0.0 - (x2)<=0   x2 <= 1.0
+      }
+    }
+  }
+
+  jumps
+  {
+    L00 -> L01
+    guard
+    {
+      # Original guard: x1 = 1.0
+
+      x1 = 1.0
+    }
+    reset
+    {
+    }
+    parallelotope aggregation {}
+
+    L00 -> L10
+    guard
+    {
+      # Original guard: x2 = 2.0
+
+      x2 = 2.0
+    }
+    reset
+    {
+    }
+    parallelotope aggregation {}
+
+    L01 -> L00
+    guard
+    {
+      # Original guard: x1 = 1.0
+
+      x1 = 1.0
+    }
+    reset
+    {
+    }
+    parallelotope aggregation {}
+
+    L01 -> L11
+    guard
+    {
+      # Original guard: x2 = 2.0
+
+      x2 = 2.0
+    }
+    reset
+    {
+    }
+    parallelotope aggregation {}
+
+    L10 -> L11
+    guard
+    {
+      # Original guard: x1 = 1.0
+
+      x1 = 1.0
+    }
+    reset
+    {
+    }
+    parallelotope aggregation {}
+
+    L10 -> L00
+    guard
+    {
+      # Original guard: x2 = 1.0
+
+      x2 = 1.0
+    }
+    reset
+    {
+    }
+    parallelotope aggregation {}
+
+    L11 -> L10
+    guard
+    {
+      # Original guard: x1 = 1.0
+
+      x1 = 1.0
+    }
+    reset
+    {
+    }
+    parallelotope aggregation {}
+
+    L11 -> L01
+    guard
+    {
+      # Original guard: x2 = 1.0
+
+      x2 = 1.0
+    }
+    reset
+    {
+    }
+    parallelotope aggregation {}
+  }
+
+  init
+  {
+    L00
+    {
+      x1 in [0, 0]
+      x2 in [0, 0]
+    }
+  }
+}

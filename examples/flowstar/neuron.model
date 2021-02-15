@@ -1,7 +1,7 @@
 # Hyst v1.17
 # Hybrid Automaton in Flow*
-# Converted from: examples/vanderpol/vanderpol.xml
-# Using command line arguments: examples/vanderpol/vanderpol.xml -flowstar -o examples/vanderpol/vanderpol.model
+# Converted from: examples/neuron/neuron.xml
+# Using command line arguments: examples/neuron/neuron.xml -flowstar -o examples/neuron/neuron.model
 
 
 hybrid reachability
@@ -11,8 +11,8 @@ hybrid reachability
 
   setting
   {
-    fixed steps .001
-    time 5
+    fixed steps .01
+    time 50
     remainder estimation 1e-4
     QR precondition
     gnuplot octagon x,y
@@ -30,8 +30,8 @@ hybrid reachability
     {
       poly ode 1
       {
-        x' = y
-        y' = (1.0 - x * x) * y - x
+        x' = x - x * x * x - y + 0.875
+        y' = 0.08 * (x + 0.7 - 0.8 * y)
       }
       inv
       {
@@ -47,8 +47,8 @@ hybrid reachability
   {
     running
     {
-      x in [1, 1]
-      y in [.5, .75]
+      x in [.9, 1.1]
+      y in [2.4, 2.6]
     }
   }
 }
