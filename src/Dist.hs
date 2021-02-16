@@ -149,7 +149,7 @@ norm ps = linesAndPoints (twoPoints (usort ps))
 
   -- two Lines with the second Line starting somewhere below/on(-downwards) the first
   linesAndPoints (l@(Line (x1,a1) (x2,a2)) : m@(Line (y1,b1) (y2,b2)) : ps)
-    | b1 < a' =
+    | b1 < a' || x1 < y1 && b1 == a' && (m `at` x2 < a2) =
       Line (x1,a1) (y1,a') : Point (y1,a') :
         linesAndPoints (m : insert (Line (y1,a') (x2,a2)) ps)
    where
