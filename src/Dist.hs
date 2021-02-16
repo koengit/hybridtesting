@@ -71,7 +71,7 @@ distMul = lift2 pieceMul
 
     squareRootPiece' l1 l2
       | 0 <= z1 && z1 < z2 =
-        concatMap (mapDistance (\d -> 2*d + l1 `at` z1 + l2 `at` z2)) (squareRootApprox z1 z2)
+        concatMap (mapDistance (\d -> 2*(d-z1) + l1 `at` z1 + l2 `at` z1)) (squareRootApprox z1 z2)
       | otherwise = []
       where
         z1 = value (start l1) `max` value (start l2)
