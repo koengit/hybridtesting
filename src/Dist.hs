@@ -98,7 +98,7 @@ distMul = lift2 pieceMul
 
     squareRootPiece' s1 s2
       | 0 <= z1 && z1 < z2 =
-        map (plusDistance (line s1 `at` z1 + line s2 `at` z1 - 2*z1) . timesDistance 2) (squareRootApprox z1 z2)
+        map (mapDistance (\d -> 2*(d-z1) + line s1 `at` z1 + line s2 `at` z1)) (squareRootApprox z1 z2)
       | otherwise = []
       where
         z1 = fst (interval s1) `max` fst (interval s2)
@@ -114,6 +114,7 @@ distMul = lift2 pieceMul
 scale :: Double -> Piece -> [Piece]
 scale x = mapValue (* x)
 
+-- f must be linear
 mapValue :: (Double -> Double) -> Piece -> [Piece]
 mapValue f (Point (x, d)) = [Point (f x, d)]
 mapValue f s@Segment{interval = (x, y)} =
@@ -122,15 +123,14 @@ mapValue f s@Segment{interval = (x, y)} =
     (x1, d1) = start s
     (x2, d2) = end s
 
-timesDistance :: Double -> Piece -> Piece
-timesDistance a (Point (x, d)) = Point (x, a*d)
-timesDistance a s@Segment{line = l} =
-  s{line = Line{offset = a*offset l, slope = a*slope l}}
-
-plusDistance :: Double -> Piece -> Piece
-plusDistance a (Point (x, d)) = Point (x, a+d)
-plusDistance a s@Segment{line = l} =
-  s{line = l{offset = a+offset l}}
+-- f must be linear
+mapDistance :: (Double -> Double) -> Piece -> Piece
+mapDistance f (Point (x, d)) = Point (x, f d)
+mapDistance f s@Segment{line = l} =
+  s{line = l{offset = f0, slope = f1 - f0}}
+  where
+    f0 = f (offset l)
+    f1 = f (offset l + slope l)
 
 instance Ord Piece where
   compare = comparing tuple
