@@ -67,10 +67,12 @@ mkSegment sIn (xIn,aIn) (xOut,aOut) sOut =
 falsifyLine :: (Double -> Double)
             -> Double -> (Double,Double) -> Double
             -> [(Double,Double)]
-falsifyLine f xL (xM,aM) xR = takeUntil ((<0).snd) $ go [sg0,sg1,sg2,sg3]
+falsifyLine f xL (xM,aM) xR = takeUntil ((<0).snd) $ inits ++ go [sg0,sg1,sg2,sg3]
  where
   aL = f xL
   aR = f xR
+ 
+  inits = [] -- [(xL,aL),(xR,aR)] -- ++ [(xM,aM)]
  
   sg0 = mkSegment 0       (xL-1,aL) (xL,  aL) (s sg1)
   sg1 = mkSegment 0       (xL,  aL) (xM,  aM) (s sg2)
@@ -113,16 +115,19 @@ falsifyBox rnd f xsLR = go 0 rnd xs0 a0
     (cs,rnd') = generate rnd xsLR
      where
       generate rnd []         = ([],  rnd)
-      generate rnd (xLR:xsLR) = (c:cs,rnd2)
+      generate rnd (xLR:xsLR) = (clamp c:cs,rnd2)
        where
         (c, rnd1) = randomR (-1, 1 :: Double) rnd
         (cs,rnd2) = generate rnd1 xsLR
+
+      clamp x -- | -0.3 < x && x < 0.3 = 0
+              | otherwise           = x
 
     -- minimizing over the line through xs and ys
     h z      = zipWith3 (\x c (xL,xR) -> xL `max` (xR `min` (x + z*c))) xs cs xsLR
     zas      = falsifyLine (f . h) zL (0,a) zR
     (z,a')   = best maxTries zas
-    maxTries = round (10+sqrt (fromIntegral n))
+    maxTries = round (13 + log (fromIntegral n + 1))
 
     best m ((z,a):zas) = go 0 z a zas
      where
@@ -133,8 +138,60 @@ falsifyBox rnd f xsLR = go 0 rnd xs0 a0
         | otherwise = go (k+1) z a zas
 
     -- computing reasonable bounds on z
-    zL = minimum [ zL | (zL,zR) <- zsLR ]
-    zR = maximum [ zR | (zL,zR) <- zsLR ]
+    zL = maximum [ zL | (zL,zR) <- zsLR ]
+    zR = minimum [ zR | (zL,zR) <- zsLR ]
+    
+    zsLR =
+      [ ord (zL,zR)
+      | ((x,c),(xL,xR)) <- (xs `zip` cs) `zip` xsLR
+      , let (zL,zR)
+              | c == 0    = (0, 1) -- special case that'll never happen, but anyway...
+              | otherwise = ((xL-x)/c, (xR-x)/c)
+      ]
+
+    ord (x,y) | x <= y    = (x,y)
+              | otherwise = (y,x)
+{-
+falsifyBox2 :: StdGen
+            -> ([Double] -> Double)
+            -> [(Double,Double)]
+            -> [([Double],Double)]
+falsifyBox2 rnd f xsLR = go 0 rnd xs0 a0
+ where
+  xs0 = [ (xL+xR)/2 | (xL,xR) <- xsLR ]
+  a0  = f xs0
+
+  go n rnd xs a = (xs,a) : go (n+1) rnd' (h z) a'
+   where
+    -- generate a random point the box [-1,1]
+    (cs,rnd') = generate rnd xsLR
+     where
+      generate rnd []         = ([],  rnd)
+      generate rnd (xLR:xsLR) = (clamp c:cs,rnd2)
+       where
+        (c, rnd1) = randomR (-1, 1 :: Double) rnd
+        (cs,rnd2) = generate rnd1 xsLR
+
+      clamp x -- | -0.3 < x && x < 0.3 = 0
+              | otherwise           = x
+
+    -- minimizing over the line through xs and ys
+    h z      = zipWith3 (\x c (xL,xR) -> xL `max` (xR `min` (x + z*c))) xs cs xsLR
+    zas      = falsifyLine (f . h) zL (0,a) zR
+    (z,a')   = best maxTries zas
+    maxTries = round (13 + log (fromIntegral n + 1))
+
+    best m ((z,a):zas) = go 0 z a zas
+     where
+      go _ z a []   = (z,a)
+      go k z a ((w,b):zas)
+        | b < a     = go 0 w b zas
+        | k > m     = (z,a)
+        | otherwise = go (k+1) z a zas
+
+    -- computing reasonable bounds on z
+    zL = maximum [ zL | (zL,zR) <- zsLR ]
+    zR = minimum [ zR | (zL,zR) <- zsLR ]
     
     zsLR =
       [ ord (zL,zR)
@@ -147,4 +204,75 @@ falsifyBox rnd f xsLR = go 0 rnd xs0 a0
     ord (x,y) | x <= y    = (x,y)
               | otherwise = (y,x)
 
+falsifyBox2 :: StdGen
+            -> ([Double] -> Double)
+            -> [(Double,Double)]
+            -> [([Double],Double)]
+falsifyBox2 rnd f xsLR = go rnd []
+ where
+  xs0  = [ (xL+xR) / 2 | (xL,xR) <- xsLR ]
+  y0   = f xs0
+  dims = [ (xR-xL) / 2 | (xL,xR) <- xsLR ]
+
+  go rnd ps = (xs,y) : go rnd2 ((xs,y):ps)
+   where
+    (rnd1,rnd2) = split rnd
+   
+    (xs,_) = best 10 (Opt.minimizeBox rnd1 cost xsLR)
+    y      = f xs
+    
+    cost xsN
+      | out > 0                       = (2, out)
+      | map fst (take 1 dists) == [0] = (3, 0)
+      | otherwise                     =
+        (1, sum [ abs (s - s')
+                | (d,(xs,y)) <- take 2 dists
+                , let s = y/d
+                , let v = [ signum (x-xN) | (x,xN) <- xs `zip` xsN ]
+                , let s' = case [ (xs',y')
+                                | (_,(xs',y')) <- dists
+                                , xs' /= xs
+                                , let v' = [ signum (x'-x) | (x',x) <- xs' `zip` xs ]
+                                , all (\(u,u') -> u == u' || u == 0 || u' == 0)
+                                      (v `zip` v')
+                                ] of
+                             []         -> 0
+                             (xs',y'):_ -> abs ((y'-y) / dist xs xs')
+                ])
+     where
+      out = sum [ d
+                | (x,(xL,xR)) <- xsN `zip` xsLR
+                , d <- [ xL - x, x - xR ]
+                , d > 0
+                ]
+
+      dists = sort [ (dist xsN xs, (xs,y)) | (xs,y) <- ps ]
+
+  dist xs ys = sqrt (sum [ (x-y)^2 | (x,y) <- xs `zip` ys ])
+  
+best n ((xs,a):xsas) = go 0 xs a xsas
+ where
+  go _ xs a []  = (xs,a)
+  go k xs a ((ys,b):xsas)
+    | k > n     = (xs,a)
+    | b < a     = go 0 ys b xsas
+    | otherwise = go (k+1) xs a xsas
+
+-- vectors
+
+instance Num a => Num [a] where
+  (+) = zipWith (+)
+  (-) = zipWith (-)
+  (*) = zipWith (*)
+  abs = map abs
+
+  signum = error "signum on vectors"
+  fromInteger = repeat . fromInteger
+
+dot :: Num a => [a] -> [a] -> a
+xs `dot` ys = sum (xs + ys)
+
+len :: Floating a => [a] -> a
+len xs = sqrt (sum [ x*x | x <- xs ])
+-}
 

@@ -106,6 +106,14 @@ minimizeBox rnd f xsLR = go1 0 rnd xs0 a0
              . sort
              $ (xs,a) : [ pair xs | xs <- genPoints rnd1 (length xsLR) ]
 
+    progress n (x:xs) = go 0 x xs
+     where
+      go k x []     = x
+      go k x (y:xs)
+        | x /= y    = go 0 y xs
+        | k >= n    = y
+        | otherwise = go (k+1) y xs
+
   nm xas =
     (x0,a0) :
     if aR < aN then
@@ -150,15 +158,6 @@ minimizeBox rnd f xsLR = go1 0 rnd xs0 a0
   genPoint rnd (xLR:xsLR) = x : genPoint rnd' xsLR
    where
     (x,rnd') = randomR xLR rnd
-
-progress :: Eq a => Int -> [a] -> a
-progress n (x:xs) = go 0 x xs
- where
-  go k x []     = x
-  go k x (y:xs)
-    | x /= y    = go 0 y xs
-    | k >= n    = y
-    | otherwise = go (k+1) y xs
 
 centroid :: [Point] -> Point
 centroid ps = [ sum [p!!i | p <- ps] / fromIntegral l | i <- [0..l-1] ]

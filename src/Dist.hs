@@ -1,6 +1,7 @@
 module Dist where
 
-import Data.List( insert, sort, sortBy, nub )
+import Data.List( insert, sort, sortBy, group )
+import qualified Data.Set as S
 import Data.Ord( comparing )
 
 data Dist
@@ -97,7 +98,9 @@ mapDistance f (Point (x, d)) = [Point (x, f d)]
 mapDistance f (Line (x1, d1) (x2, d2)) = openSegment (x1, f d1) (x2, f d2)
 
 instance Ord Piece where
-  p `compare` q = (start p, slope p) `compare` (start q, slope q)
+  compare = comparing tuple
+   where
+    tuple p = (start p, slope p, -value (end p))
 
 constant :: Double -> Dist
 constant x = Dist x [Point (x,0)]
@@ -111,13 +114,13 @@ lift2 :: (Piece -> Piece -> [Piece]) -> Dist -> Dist -> Dist
 lift2 f a b =
   Dist
   { val  = f0 (val a) (val b)
-  , dist = {-norm-} [ r | p <- dist a, q <- dist b, r <- f p q ]
+  , dist = norm [ r | p <- dist a, q <- dist b, r <- f p q ]
   }
  where
   f0 x y = let [Point (z,_)] = f (Point (x,0)) (Point (y,0)) in z
 
 norm :: [Piece] -> [Piece]
-norm ps = linesAndPoints (twoPoints (sort ps))
+norm ps = linesAndPoints (twoPoints (usort ps))
  where
   -- remove Points that are on the same x
   twoPoints (p@(Point (x1,_)) : Point (x2,_) : ps)
@@ -131,7 +134,7 @@ norm ps = linesAndPoints (twoPoints (sort ps))
 
   -- a Line and something that lies beyond the Line: commit to the Line
   linesAndPoints (l@(Line _ (x2,_)) : p : ps)
-    | fst (start p) >= x2 =
+    | value (start p) >= x2 =
       l : linesAndPoints (p : ps)
   
   -- a Line and a Point: break the line if necessary
@@ -146,7 +149,7 @@ norm ps = linesAndPoints (twoPoints (sort ps))
 
   -- two Lines with the second Line starting somewhere below/on(-downwards) the first
   linesAndPoints (l@(Line (x1,a1) (x2,a2)) : m@(Line (y1,b1) (y2,b2)) : ps)
-    | b1 < a' || (b1 == a' && (m `at` x2) <= a2) =
+    | b1 < a' =
       Line (x1,a1) (y1,a') : Point (y1,a') :
         linesAndPoints (m : insert (Line (y1,a') (x2,a2)) ps)
    where
@@ -188,3 +191,17 @@ Line (x1,a1) (x2,a2) `at` x =
 slope :: Piece -> Maybe Double
 slope (Point _) = Nothing
 slope (Line (x1,a1) (x2,a2)) = Just ((a2-a1)/(x2-x1))
+
+--
+
+nub :: Ord a => [a] -> [a]
+nub xs = go S.empty xs
+ where
+  go seen (x:xs)
+    | x `S.member` seen = go seen xs
+    | otherwise         = x : go (S.insert x seen) xs
+  go _ []               = []
+
+usort :: Ord a => [a] -> [a]
+usort = map head . group . sort
+

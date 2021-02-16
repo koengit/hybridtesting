@@ -16,14 +16,19 @@ minimizeBox rnd f xsLR = go rnd 0 (pair xs0)
    where
     xs' = [ xL `max` (xR `min` x) | (x,(xL,xR)) <- xs `zip` xsLR ]
   
-  go rnd n xsa = xsa : go rnd2 (n+1) xsa'
+  go rnd n xsa = progress (5+round (log (1+fromIntegral n)))
+               . nm
+               . sort
+               $ xsa : [ pair xs | xs <- genPoints rnd1 (length xsLR) ]
    where
     (rnd1,rnd2) = split rnd
-    
-    xsa' = progress (5+round (log (1+fromIntegral n)))
-         . nm
-         . sort
-         $ xsa : [ pair xs | xs <- genPoints rnd1 (length xsLR) ]
+
+    progress m (t@(xs,a):xsas) = t : pr 0 xs a xsas
+     where
+      pr k xs a (t@(ys,b):xsas)
+        | a < b     = t : pr 0 ys b xsas
+        | k >= m    = t : go rnd2 (n+1) (xs,a)
+        | otherwise = t : pr (k+1) xs a xsas
 
   nm xas =
     (x0,a0) :
@@ -69,15 +74,6 @@ minimizeBox rnd f xsLR = go rnd 0 (pair xs0)
   genPoint rnd (xLR:xsLR) = x : genPoint rnd' xsLR
    where
     (x,rnd') = randomR xLR rnd
-
-progress :: Eq a => Int -> [a] -> a
-progress n (x:xs) = go 0 x xs
- where
-  go k x []     = x
-  go k x (y:xs)
-    | x /= y    = go 0 y xs
-    | k >= n    = y
-    | otherwise = go (k+1) y xs
 
 centroid :: [Point] -> Point
 centroid ps = [ sum [p!!i | p <- ps] / fromIntegral l | i <- [0..l-1] ]
