@@ -81,10 +81,11 @@ segments ps =
     (x1, y1) `above` (x2, y2) =
       x1 == x2 && y1 >= y2
 
-combineEndpoints :: (Point -> Point -> Point) -> Segment -> Segment -> [Segment]
+combineEndpoints :: (Double -> Double -> Double) -> Segment -> Segment -> [Segment]
 combineEndpoints f s@Segment{} t@Segment{} =
-  nub [ segment (uncurry f x) (uncurry f y) | (x, y) <- pairs ]
+  nub [ segment (g x) (g y) | (x, y) <- pairs ]
   where
+    g ((x1, d1), (x2, d2)) = (f x1 x2, d1 + d2)
     pairs = nub
       [((p, q1), (p, q2)) | p <- [p1, p2]] ++
       [((p1, q), (p2, q)) | q <- [q1, q2]]
@@ -94,14 +95,14 @@ combineEndpoints f s@Segment{} t@Segment{} =
     q2 = end t
 
 distAdd :: Dist -> Dist -> Dist
-distAdd = lift2 (combineEndpoints (\(x1, d1) (x2, d2) -> (x1+x2, d1+d2)))
+distAdd = lift2 (combineEndpoints (+))
 
 distMul :: Dist -> Dist -> Dist
 distMul = lift2 pieceMul
   where
     pieceMul p q =
       squareRootSegment p q ++
-      combineEndpoints (\(x1, d1) (x2, d2) -> (x1 * x2, d1 + d2)) p q
+      combineEndpoints (*) p q
 
     squareRootSegment s1@Segment{line = Line{slope = a}} s2@Segment{line = Line{slope = b}}
       | not (isPoint s1) && not (isPoint s2) && a /= 0 && b /= 0 =
