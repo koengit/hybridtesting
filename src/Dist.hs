@@ -59,16 +59,16 @@ segments ps =
   simplify (zipWith segment ps (tail ps))
   where
     simplify (Point p:Point q:ss)
-      | p `coveredBy` q = simplify (Point q:ss)
-      | q `coveredBy` p = simplify (Point p:ss)
+      | p `above` q = simplify (Point q:ss)
+      | q `above` p = simplify (Point p:ss)
     simplify (Point p:s@Segment{}:ss)
-      | p `coveredBy` start s = simplify (s:ss)
+      | p `above` start s = simplify (s:ss)
     simplify (s@Segment{}:Point p:ss)
-      | p `coveredBy` end s = simplify (s:ss)
+      | p `above` end s = simplify (s:ss)
     simplify (s:ss) = s:simplify ss
     simplify [] = []
 
-    (x1, y1) `coveredBy` (x2, y2) =
+    (x1, y1) `above` (x2, y2) =
       x1 == x2 && y1 >= y2
 
 combineEndpoints :: (Point -> Point -> Point) -> Segment -> Segment -> [Segment]
