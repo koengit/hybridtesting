@@ -1,3 +1,4 @@
+{-# LANGUAGE PatternSynonyms, ViewPatterns #-}
 module Dist where
 
 import Data.List( insert, sort, sortBy, group )
@@ -14,7 +15,6 @@ data Dist
 
 data Segment
   = Segment{ line :: Line, interval :: Interval } -- closed, >=0
-  | Point{ point :: Point }
  deriving ( Eq, Show )
 
 data Line
@@ -26,10 +26,22 @@ type Point = (Double, Double)
 
 start, end :: Segment -> Point
 start Segment{interval = (x, _), line = l} = (x, l `at` x)
-start (Point p) = p
-
 end Segment{interval = (_, x), line = l} = (x, l `at` x)
-end (Point p) = p
+
+-- Points are lines segments over an interval of length 0
+pattern Point p <- (matchPoint -> Just p) where
+  Point (x, y) =
+    Segment{
+      line = Line{slope = 0, offset = y},
+      interval = (x, x) }
+
+matchPoint :: Segment -> Maybe Point
+matchPoint s
+  | isPoint s = Just (start s)
+  | otherwise = Nothing
+
+isPoint :: Segment -> Bool
+isPoint s = fst (interval s) == snd (interval s)
 
 -- Returns Nothing in case both points have the same (or too close
 -- for floating point) x-value
@@ -42,9 +54,7 @@ lineThrough (x1, y1) (x2, y2)
     offset = y1 - slope*x1
 
 intervalBetween :: Double -> Double -> Interval
-intervalBetween x y
-  | x == y = error "empty interval"
-  | otherwise = (min x y, max x y)
+intervalBetween x y = (min x y, max x y)
 
 segment :: Point -> Point -> Segment
 segment p q =
@@ -72,22 +82,10 @@ segments ps =
       x1 == x2 && y1 >= y2
 
 combineEndpoints :: (Point -> Point -> Point) -> Segment -> Segment -> [Segment]
-combineEndpoints f (Point p) (Point q) =
-  [Point (f p q)]
-combineEndpoints f (Point p) s@Segment{} =
-  [segment (f p q1) (f p q2)]
-  where
-    q1 = start s
-    q2 = end s
-combineEndpoints f s@Segment{} (Point q) =
-  [segment (f p1 q) (f p2 q)]
-  where
-    p1 = start s
-    p2 = end s
 combineEndpoints f s@Segment{} t@Segment{} =
   nub [ segment (uncurry f x) (uncurry f y) | (x, y) <- pairs ]
   where
-    pairs =
+    pairs = nub
       [((p, q1), (p, q2)) | p <- [p1, p2]] ++
       [((p1, q), (p2, q)) | q <- [q1, q2]]
     p1 = start s
@@ -106,7 +104,7 @@ distMul = lift2 pieceMul
       combineEndpoints (\(x1, d1) (x2, d2) -> (x1 * x2, d1 + d2)) p q
 
     squareRootSegment s1@Segment{line = Line{slope = a}} s2@Segment{line = Line{slope = b}}
-      | a /= 0 && b /= 0 =
+      | not (isPoint s1) && not (isPoint s2) && a /= 0 && b /= 0 =
         map (scale (1/(a*b))) (squareRootSegment' (scale a s1) (scale b s2))
     squareRootSegment _ _ = []
 
