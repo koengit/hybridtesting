@@ -87,7 +87,7 @@ combineEndpoints f s@Segment{} (Point q) =
 combineEndpoints f s@Segment{} t@Segment{} =
   nub [ segment (uncurry f x) (uncurry f y) | (x, y) <- pairs ]
   where
-    pairs = nub
+    pairs =
       [((p, q1), (p, q2)) | p <- [p1, p2]] ++
       [((p1, q), (p2, q)) | q <- [q1, q2]]
     p1 = start s
