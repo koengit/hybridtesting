@@ -8,12 +8,12 @@ import Control.Monad( guard )
 data Dist
   = Dist
   { val  :: Double
-  , dist :: [Piece] -- strictly ordered
+  , dist :: [Segment] -- strictly ordered
   }
  deriving ( Eq, Ord, Show )
 
-data Piece
-  = Segment{ line :: Line, interval :: Interval } -- open, >0
+data Segment
+  = Segment{ line :: Line, interval :: Interval } -- closed, >=0
   | Point{ point :: Point }
  deriving ( Eq, Show )
 
@@ -24,48 +24,68 @@ data Line
 type Interval = (Double, Double)
 type Point = (Double, Double)
 
-start, end :: Piece -> Point
+start, end :: Segment -> Point
 start Segment{interval = (x, _), line = l} = (x, l `at` x)
 start (Point p) = p
 
 end Segment{interval = (_, x), line = l} = (x, l `at` x)
 end (Point p) = p
 
--- Assumes x1 < x2
-lineThrough :: Point -> Point -> Line
-lineThrough (x1, y1) (x2, y2) =
-  let slope = (y2-y1)/(x2-x1)
-  in Line{ slope = slope, offset = y1 - slope*x1}
+-- Returns Nothing in case both points have the same (or too close
+-- for floating point) x-value
+lineThrough :: Point -> Point -> Maybe Line
+lineThrough (x1, y1) (x2, y2)
+  | isInfinite slope || isNaN slope || isInfinite offset = Nothing
+  | otherwise = Just Line{ slope = slope, offset = offset }
+  where
+    slope = (y2-y1)/(x2-x1)
+    offset = y1 - slope*x1
 
-openSegment :: Point -> Point -> [Piece]
-openSegment p q =
-  case comparing fst p q of
-    LT -> [Segment{ line = lineThrough p q, interval = (fst p, fst q) }]
-    EQ -> []
-    GT -> [Segment{ line = lineThrough q p, interval = (fst q, fst p) }]
+intervalBetween :: Double -> Double -> Interval
+intervalBetween x y
+  | x == y = error "empty interval"
+  | otherwise = (min x y, max x y)
 
-segments :: [Point] -> [Piece]
+segment :: Point -> Point -> Segment
+segment p q =
+  case lineThrough p q of
+    Just l -> Segment{ line = l, interval = intervalBetween (fst p) (fst q) }
+    Nothing -> Point (fst p, min (snd p) (snd q))
+
+segments :: [Point] -> [Segment]
+segments [] = []
 segments [p] = [Point p]
-segments (p:q:ps) | fst p == fst q =
-  segments $ (if snd p < snd q then p else q):ps
-segments (p:q:ps) =
-  [Point p] ++ openSegment p q ++ segments (q:ps)
+segments ps =
+  simplify (zipWith segment ps (tail ps))
+  where
+    simplify (Point p:Point q:ss)
+      | p `coveredBy` q = simplify (Point q:ss)
+      | q `coveredBy` p = simplify (Point p:ss)
+    simplify (Point p:s@Segment{}:ss)
+      | p `coveredBy` start s = simplify (s:ss)
+    simplify (s@Segment{}:Point p:ss)
+      | p `coveredBy` end s = simplify (s:ss)
+    simplify (s:ss) = s:simplify ss
+    simplify [] = []
 
-combineEndpoints :: (Point -> Point -> Point) -> Piece -> Piece -> [Piece]
+    (x1, y1) `coveredBy` (x2, y2) =
+      x1 == x2 && y1 >= y2
+
+combineEndpoints :: (Point -> Point -> Point) -> Segment -> Segment -> [Segment]
 combineEndpoints f (Point p) (Point q) =
   [Point (f p q)]
 combineEndpoints f (Point p) s@Segment{} =
-  openSegment (f p q1) (f p q2)
+  [segment (f p q1) (f p q2)]
   where
     q1 = start s
     q2 = end s
 combineEndpoints f s@Segment{} (Point q) =
-  openSegment (f p1 q) (f p2 q)
+  [segment (f p1 q) (f p2 q)]
   where
     p1 = start s
     p2 = end s
 combineEndpoints f s@Segment{} t@Segment{} =
-  concat [ openSegment (uncurry f x) (uncurry f y) | (x, y) <- pairs ]
+  nub [ segment (uncurry f x) (uncurry f y) | (x, y) <- pairs ]
   where
     pairs = nub
       [((p, q1), (p, q2)) | p <- [p1, p2]] ++
@@ -82,21 +102,15 @@ distMul :: Dist -> Dist -> Dist
 distMul = lift2 pieceMul
   where
     pieceMul p q =
-      squareRootPiece p q ++
+      squareRootSegment p q ++
       combineEndpoints (\(x1, d1) (x2, d2) -> (x1 * x2, d1 + d2)) p q
 
-    squareRootPiece s1@Segment{} s2@Segment{} = do
-      guard (a /= 0 && b /= 0)
-      s1'@Segment{} <- scale a s1
-      s2'@Segment{} <- scale b s2
-      s <- squareRootPiece' s1' s2'
-      scale (1/(a*b)) s
-     where
-      a = slope (line s1)
-      b = slope (line s2)
-    squareRootPiece _ _ = []
+    squareRootSegment s1@Segment{line = Line{slope = a}} s2@Segment{line = Line{slope = b}}
+      | a /= 0 && b /= 0 =
+        map (scale (1/(a*b))) (squareRootSegment' (scale a s1) (scale b s2))
+    squareRootSegment _ _ = []
 
-    squareRootPiece' s1 s2
+    squareRootSegment' s1 s2
       | 0 <= z1 && z1 < z2 =
         map (mapDistance (\d -> 2*(d-z1) + line s1 `at` z1 + line s2 `at` z1)) (squareRootApprox z1 z2)
       | otherwise = []
@@ -105,26 +119,26 @@ distMul = lift2 pieceMul
         z2 = snd (interval s1) `min` snd (interval s2)
 
     -- approximate sqrt function between a^2 and c^2
-    squareRootApprox :: Double -> Double -> [Piece]
+    squareRootApprox :: Double -> Double -> [Segment]
     squareRootApprox a c =
       segments [(a^2, a), (b^2, b), (c^2, c)]
       where
         b = (a+c)/2 -- minimises absolute error
 
-scale :: Double -> Piece -> [Piece]
+scale :: Double -> Segment -> Segment
 scale x = mapValue (* x)
 
 -- f must be linear
-mapValue :: (Double -> Double) -> Piece -> [Piece]
-mapValue f (Point (x, d)) = [Point (f x, d)]
+mapValue :: (Double -> Double) -> Segment -> Segment
+mapValue f (Point (x, d)) = Point (f x, d)
 mapValue f s@Segment{interval = (x, y)} =
-  openSegment (f x1, d1) (f x2, d2)
+  segment (f x1, d1) (f x2, d2)
   where
     (x1, d1) = start s
     (x2, d2) = end s
 
 -- f must be linear
-mapDistance :: (Double -> Double) -> Piece -> Piece
+mapDistance :: (Double -> Double) -> Segment -> Segment
 mapDistance f (Point (x, d)) = Point (x, f d)
 mapDistance f s@Segment{line = l} =
   s{line = l{offset = f0, slope = f1 - f0}}
@@ -132,7 +146,7 @@ mapDistance f s@Segment{line = l} =
     f0 = f (offset l)
     f1 = f (offset l + slope l)
 
-instance Ord Piece where
+instance Ord Segment where
   compare = comparing tuple
    where
     tuple p = (start p, mslope p, -snd (interval p))
@@ -145,7 +159,7 @@ input (a,b) x
  | a <= x && x <= b = Dist x $ segments [(a,x-a), (x,0), (b,b-x)]
  | otherwise        = error "input out of bounds"
 
-lift2 :: (Piece -> Piece -> [Piece]) -> Dist -> Dist -> Dist
+lift2 :: (Segment -> Segment -> [Segment]) -> Dist -> Dist -> Dist
 lift2 f a b =
   Dist
   { val  = f0 (val a) (val b)
@@ -222,9 +236,9 @@ norm ps = linesAndPoints (twoPoints (usort ps))
 at :: Line -> Double -> Double
 l `at` x = slope l * x + offset l
 
-mslope :: Piece -> Maybe Double
+mslope :: Segment -> Maybe Double
 mslope (Point _) = Nothing
-mslope s@Segment{} = Just (slope (line s))
+mslope Segment{line = l} = Just (slope l)
 
 --
 
@@ -238,4 +252,3 @@ nub xs = go S.empty xs
 
 usort :: Ord a => [a] -> [a]
 usort = map head . group . sort
-
