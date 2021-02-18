@@ -306,6 +306,19 @@ ifThenElse d1 d2 d3 =
     seg (Point (0, d)) = 
       map (plusDistance d) (dist d3)
 
+-- Boolean operations
+true, false :: Dist
+true = constant 1
+false = constant 0
+
+nott :: Dist -> Dist
+nott p = ifThenElse p false true
+
+(||?), (&&?), (=>?) :: Dist -> Dist -> Dist
+p ||? q = ifThenElse p true q
+p &&? q = ifThenElse p q false
+p =>? q = ifThenElse p q true
+
 -- Numeric operations
 instance Num Dist where
   fromInteger = constant . fromInteger
@@ -364,7 +377,7 @@ signumDist = lift1 (divideSign pos neg zero)
 
 -- Comparisons
 
-(<=?) :: Dist -> Dist -> Dist
+(<=?), (>=?), (<?), (>?) :: Dist -> Dist -> Dist
 (<=?) = lift2 (divideOverlaps before after common)
   where
     before = constCase 1
@@ -391,7 +404,12 @@ signumDist = lift1 (divideSign pos neg zero)
 
     endpoints Segment{interval = (x, y)} = [x, y]
 
-(==?) :: Dist -> Dist -> Dist
+(>=?) = flip (<=?)
+
+d1 <? d2 = nott (d1 >=? d2)
+(>?) = flip (<?)
+
+(==?), (/=?) :: Dist -> Dist -> Dist
 (==?) = lift2 eqS
   where
     eqS (Point (x1, d1)) (Point (x2, d2))
@@ -406,6 +424,8 @@ signumDist = lift1 (divideSign pos neg zero)
       where
         z1 = fst (interval s1) `max` fst (interval s2)
         z2 = snd (interval s1) `min` snd (interval s2)
+
+d1 /=? d2 = nott (d1 ==? d2)
 
 -- Minimum - naive implementation
 minn' :: Dist -> Dist -> Dist
@@ -437,6 +457,14 @@ eval d x = search (dist d)
       | x == hi = (l `at` x) `min` search ss -- overlapping case
       | otherwise = search ss
 
+-- Find the value and robustness of a Boolean-like dist
+howTrue, howFalse :: Dist -> Double
+howTrue d
+  | val d == 1 = 1 + eval d 0
+  | otherwise = -(1 + eval d 1)
+
+howFalse d = -howTrue d
+
 ----------------------------------------------------------------------
 -- Visualising dists
 
@@ -454,3 +482,12 @@ plotDist d =
 showBool :: Dist -> String
 showBool d =
   show (val d == 1) ++ " with robustness " ++ show (eval d (1 - val d))
+
+-- A nice volcano!
+volcano :: Dist -> Dist
+volcano x =
+  ifThenElse (x <=? constant 9.6)  (10*x) $
+  ifThenElse (x >=? constant 10)   (110-x)
+    (-x * constant 0.01)
+  where
+    (>=?) = flip (<=?)
