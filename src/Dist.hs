@@ -143,9 +143,9 @@ norm vs = glue (simp (usort vs))
     | xw2 <= xwc =
         simp (v : vs)
     
-    -- if w's cutoff point would lead to a point: commit v (which must be a point now)
+    -- if w's cutoff point would make w into a point: commit v if, but only if it's lower than w
     | xwc <= xw1 =
-        v : simp (w : vs)
+        [ v | yv1 < yw1 ] ++ simp (w : vs)
     
     -- otherwise: cut w
     | otherwise =
@@ -155,6 +155,9 @@ norm vs = glue (simp (usort vs))
     xw1 = fst (interval w)
     xv2 = snd (interval v)
     xw2 = snd (interval w)
+
+    yv1 = snd (start v)
+    yw1 = snd (start w)
 
     ~(Just xc) = line v `cross` line w
     
