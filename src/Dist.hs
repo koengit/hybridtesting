@@ -143,13 +143,13 @@ norm vs = glue (simp (usort vs))
     | xw2 <= xwc =
         simp (v : vs)
     
-    -- if w's cutoff point would make w into a point: commit v if, but only if it's lower than w
+    -- if w's cutoff point would make w into a point: commit v, but only if it's lower than w
     | xwc <= xw1 =
         [ v | yv1 < yw1 ] ++ simp (w : vs)
     
     -- otherwise: cut w
     | otherwise =
-        simp (v : insert w{ interval = (xw1,xwc) } vs)
+        simp (v : insert w{ interval = (xwc,xw2) } vs)
    where
     xv1 = fst (interval v)
     xw1 = fst (interval w)
