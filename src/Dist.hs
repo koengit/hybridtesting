@@ -448,7 +448,7 @@ plotDist d =
     plotSeg (Point (x, d)) =
       Data2D [] [] [(x, d)]
     plotSeg Segment{line = l, interval = (x, y)} =
-      Function2D [] [Range x y] (\x -> slope l*x + offset l)
+      Function2D [] [Range x y, Step ((y-x)/10000)] (\x -> slope l*x + offset l)
 
 -- Show the value and robustness of a Boolean dist
 showBool :: Dist -> String
