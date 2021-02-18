@@ -6,6 +6,7 @@ import qualified Data.Set as S
 import Data.Ord( comparing )
 import Control.Monad( guard )
 import Graphics.EasyPlot
+import Control.Monad
 
 data Dist
   = Dist
@@ -278,6 +279,112 @@ nub xs = go S.empty xs
 usort :: Ord a => [a] -> [a]
 usort = map head . group . sort
 
+--
+
+ifThenElse :: Dist -> Dist -> Dist -> Dist
+ifThenElse d1 d2 d3 =
+  Dist {
+    val = if val d1 == 1 then val d2 else val d3,
+    dist = concatMap seg (dist d1) }
+  where
+    seg (Point (1, d)) =
+      map (plusDistance d) (dist d2)
+    seg (Point (0, d)) = 
+      map (plusDistance d) (dist d3)
+
+-- Combine two segments by chopping them up into disjoint intervals
+-- and equal intervals
+divideOverlaps ::
+  (Segment -> Segment -> [Segment]) -> -- first segment comes before second
+  (Segment -> Segment -> [Segment]) -> -- first segment comes after second
+  (Segment -> Segment -> [Segment]) -> -- both segments have the same interval
+  Segment -> Segment -> [Segment]
+  -- Note: in the disjoint cases, the segments can share an endpoint.
+  -- You can safely ignore this endpoint (i.e. treat the segments'
+  -- intervals as being open at that end), since it will also be
+  -- included in the "equal interval" case.
+divideOverlaps before after common s1 s2
+  | x > y =
+    if fst (interval s1) < fst (interval s2) then before s1 s2 else after s1 s2
+  | otherwise =
+    concat $
+      liftM2 before low1 (mid2:high2) ++
+      liftM2 before [mid1] high2 ++
+      [common mid1 mid2] ++
+      liftM2 after high1 (mid2:low2) ++
+      liftM2 after [mid1] low2
+    where
+      x = fst (interval s1) `max` fst (interval s2)
+      y = snd (interval s1) `min` snd (interval s2)
+
+      (low1, low2) = (low s1, low s2)
+      (mid1, mid2) = (mid s1, mid s2)
+      (high1, high2) = (high s1, high s2)
+
+      low s@Segment{interval=(lo, hi)} =
+        [s{interval=(lo, x)} | x > lo]
+      mid s = s{interval = (x, y)}
+      high s@Segment{interval=(lo, hi)} =
+        [s{interval=(y, hi)} | y < hi]
+
+leq :: Dist -> Dist -> Dist
+leq = lift2 (divideOverlaps before after common)
+  where
+    before = constCase 1
+    after = constCase 0
+    common s1 s2 =
+      concat
+        [ pointCase s1 s2 x1 x2
+        | x1 <- endpoints s1
+        , x2 <- endpoints s2 ]
+
+    constCase val s1 s2 = [Point (val, minDistance s1 + minDistance s2)]
+
+    pointCase s1 s2 x1 x2 =
+      [Point (1, d) | x1 <= x2] ++
+      [Point (0, d) | x1 >  x2] ++
+      -- Case where the interval is not a point, and the x-values are
+      -- the same. In this case, we can move x1 or x2 a little bit to
+      -- make x1 > x2.
+      [Point (0, d) | x1 == x2 && not (isPoint s1)]
+      where
+        d1 = line s1 `at` x1
+        d2 = line s2 `at` x2
+        d = d1 + d2
+
+    endpoints Segment{interval = (x, y)} = [x, y]
+
+eq :: Dist -> Dist -> Dist
+eq = lift2 eqS
+  where
+    eqS (Point (x1, d1)) (Point (x2, d2))
+      | x1 == x2  = [Point (1, d1+d2)]
+      | otherwise = [Point (0, d1+d2)]
+    eqS s1 s2 = 
+      -- non-point intervals can always be made unequal
+      [ Point (0, minDistance s1 + minDistance s2) ] ++
+      -- overlapping intervals - try both ends of the overlap
+      [ Point (1, line s1 `at` z + line s2 `at` z)
+      | z1 <= z2, z <- [z1, z2] ]
+      where
+        z1 = fst (interval s1) `max` fst (interval s2)
+        z2 = snd (interval s1) `min` snd (interval s2)
+
+minn' :: Dist -> Dist -> Dist
+minn' d1 d2 =
+  ifThenElse (leq d1 d2) d1 d2
+
+minn :: Dist -> Dist -> Dist
+minn = lift2 (divideOverlaps before after common)
+  where
+    before s1 s2 = [plusDistance (minDistance s2) s1]
+    after s1 s2 = [plusDistance (minDistance s1) s2]
+    common s1 s2 =
+      -- Try keeping one input as high as possible, or moving them in lockstep
+      [plusDistance (snd (end s1)) s2,
+       plusDistance (snd (end s2)) s1,
+       Segment{interval = interval s1, line = plusLines (line s1) (line s2)}]
+      
 --
 
 plotDist :: Dist -> IO Bool
