@@ -3,6 +3,7 @@ module Dist where
 
 import Utils
 import Data.List( insert, sort, sortBy, group )
+import Data.Maybe( isJust )
 import qualified Data.Set as S
 import Data.Ord( comparing )
 import Control.Monad( guard )
@@ -22,6 +23,13 @@ data Dist
 data Segment
   = Segment{ line :: Line, interval :: Interval } -- closed, >=0
  deriving ( Eq, Show )
+
+instance Ord Segment where
+  compare = comparing tuple
+   where
+    tuple p = (start p, mslope p, -snd (interval p))
+    mslope (Point _) = Nothing
+    mslope Segment{line = l} = Just (slope l)
 
 data Line
   = Line{ slope :: Double, offset :: Double }
@@ -109,15 +117,119 @@ simplify = simp
     (x1, y1) `above` (x2, y2) =
       x1 == x2 && y1 >= y2
 
+<<<<<<< Updated upstream
+-- Given a list of segments in any order, possibly overlapping,
+-- transform them to be strictly ordered and non-overlapping
+{-
+norm :: [Piece] -> [Piece]
+norm ps = linesAndPoints (twoPoints (usort ps))
+ where
+  -- remove Points that are on the same x
+  twoPoints (p@(Point (x1,_)) : Point (x2,_) : ps)
+    | x1 == x2       = twoPoints (p : ps)
+  twoPoints (p : ps) = p : twoPoints ps
+  twoPoints []       = []
+
+  -- a single Point at the beginning does not interfere with anything
+  linesAndPoints (p@(Point _) : ps) =
+    p : linesAndPoints ps
+
+  -- a Line and something that lies beyond the Line: commit to the Line
+  linesAndPoints (l@(Line _ (x2,_)) : p : ps)
+    | value (start p) >= x2 =
+      l : linesAndPoints (p : ps)
+  
+  -- a Line and a Point: break the line if necessary
+  linesAndPoints (l@(Line (x1,a1) (x2,a2)) : p@(Point (x,a)) : ps)
+    | a' <= a =
+      linesAndPoints (l : ps)
+=======
+combineEndpoints :: (Point -> Point -> Point) -> Segment -> Segment -> [Segment]
+combineEndpoints f s@Segment{} t@Segment{} =
+  nub [ segment (uncurry f x) (uncurry f y) | (x, y) <- pairs ]
+  where
+    pairs = nub
+      [((p, q1), (p, q2)) | p <- [p1, p2]] ++
+      [((p1, q), (p2, q)) | q <- [q1, q2]]
+    p1 = start s
+    p2 = end s
+    q1 = start t
+    q2 = end t
+
+distAdd :: Dist -> Dist -> Dist
+distAdd = lift2 (combineEndpoints (\(x1, d1) (x2, d2) -> (x1+x2, d1+d2)))
+
+distMul :: Dist -> Dist -> Dist
+distMul = lift2 pieceMul
+  where
+    pieceMul p q =
+      squareRootSegment p q ++
+      combineEndpoints (\(x1, d1) (x2, d2) -> (x1 * x2, d1 + d2)) p q
+
+    squareRootSegment s1@Segment{line = Line{slope = a}} s2@Segment{line = Line{slope = b}}
+      | not (isPoint s1) && not (isPoint s2) && a /= 0 && b /= 0 =
+        map (scale (1/(a*b))) (squareRootSegment' (scale a s1) (scale b s2))
+    squareRootSegment _ _ = []
+
+    squareRootSegment' s1 s2
+      | 0 <= z1 && z1 < z2 =
+        map (mapDistance (\d -> 2*(d-z1) + line s1 `at` z1 + line s2 `at` z1)) (squareRootApprox z1 z2)
+      | otherwise = []
+      where
+        z1 = fst (interval s1) `max` fst (interval s2)
+        z2 = snd (interval s1) `min` snd (interval s2)
+
+    -- approximate sqrt function between a^2 and c^2
+    squareRootApprox :: Double -> Double -> [Segment]
+    squareRootApprox a c =
+      segments [(a^2, a), (b^2, b), (c^2, c)]
+      where
+        b = (a+c)/2 -- minimises absolute error
+
+scale :: Double -> Segment -> Segment
+scale x = mapValue (* x)
+
+-- f must be linear
+mapValue :: (Double -> Double) -> Segment -> Segment
+mapValue f (Point (x, d)) = Point (f x, d)
+mapValue f s@Segment{interval = (x, y)} =
+  segment (f x1, d1) (f x2, d2)
+  where
+    (x1, d1) = start s
+    (x2, d2) = end s
+
+-- f must be linear
+mapDistance :: (Double -> Double) -> Segment -> Segment
+mapDistance f (Point (x, d)) = Point (x, f d)
+mapDistance f s@Segment{line = l} =
+  s{line = l{offset = f0, slope = f1 - f0}}
+  where
+    f0 = f (offset l)
+    f1 = f (offset l + slope l)
+
+constant :: Double -> Dist
+constant x = Dist x [Point (x,0)]
+
+input :: (Double,Double) -> Double -> Dist
+input (a,b) x
+ | a <= x && x <= b = Dist x $ segments [(a,x-a), (x,0), (b,b-x)]
+ | otherwise        = error "input out of bounds"
+
+lift2 :: (Segment -> Segment -> [Segment]) -> Dist -> Dist -> Dist
+lift2 f a b =
+  Dist
+  { val  = f0 (val a) (val b)
+  , dist = norm [ r | p <- dist a, q <- dist b, r <- f p q ]
+  }
+ where
+  f0 x y = let [Point (z,_)] = f (Point (x,0)) (Point (y,0)) in z
+>>>>>>> Stashed changes
+
 instance Ord Segment where
   compare = comparing tuple
    where
     tuple p = (start p, mslope p)
-    mslope (Point _) = Nothing
-    mslope Segment{line = l} = Just (slope l)
 
--- Given a list of segments in any order, possibly overlapping,
--- transform them to be strictly ordered and non-overlapping
 norm :: [Segment] -> [Segment]
 norm vs = glue (simp (usort vs))
  where
