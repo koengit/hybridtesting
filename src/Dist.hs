@@ -426,7 +426,18 @@ minn = lift2 (divideOverlaps before after common)
        Segment{interval = interval s1,
                line = Line { slope = slope (line s1) + slope (line s2),
                              offset = offset (line s1) + offset (line s2) }}]
-      
+
+-- Find the distance of a dist to a given value
+eval :: Dist -> Double -> Double
+eval d x = search (dist d)
+  where
+    search [] = 1/0
+    search (Segment{interval = (lo,hi), line = l}:ss)
+      | x < lo  = 1/0
+      | x < hi  = l `at` x
+      | x == hi = (l `at` x) `min` search ss -- overlapping case
+      | otherwise = search ss
+
 ----------------------------------------------------------------------
 -- Visualising dists
 
@@ -443,7 +454,4 @@ plotDist d =
 -- Show the value and robustness of a Boolean dist
 showBool :: Dist -> String
 showBool d =
-  show (val d == 1) ++ " with robustness " ++
-  case lookup (1 - val d) [p | Point p <- simplify (dist d)] of
-    Nothing -> "infinity"
-    Just y  -> show y
+  show (val d == 1) ++ " with robustness " ++ show (eval d (1 - val d))
