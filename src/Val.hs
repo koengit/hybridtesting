@@ -21,7 +21,7 @@ val :: a -> Val a
 val x = Val [(x, 0)]
 
 mkVal :: Ord a => [(a,Double)] -> Val a
-mkVal xs = Val (ordNubOn fst xs)
+mkVal xs = Val (nubOn fst xs)
 
 forget :: Int -> Val a -> Val a
 forget n (Val xs) = Val (take n xs)

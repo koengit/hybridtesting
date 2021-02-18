@@ -1,12 +1,16 @@
 {-# LANGUAGE PatternSynonyms, ViewPatterns #-}
 module Dist where
 
+import Utils
 import Data.List( insert, sort, sortBy, group )
 import qualified Data.Set as S
 import Data.Ord( comparing )
 import Control.Monad( guard )
 import Graphics.EasyPlot
 import Control.Monad
+
+----------------------------------------------------------------------
+-- Data types
 
 data Dist
   = Dist
@@ -19,20 +23,19 @@ data Segment
   = Segment{ line :: Line, interval :: Interval } -- closed, >=0
  deriving ( Eq, Show )
 
+instance Ord Segment where
+  compare = comparing tuple
+   where
+    tuple p = (start p, mslope p, -snd (interval p))
+    mslope (Point _) = Nothing
+    mslope Segment{line = l} = Just (slope l)
+
 data Line
   = Line{ slope :: Double, offset :: Double }
  deriving ( Eq, Show )
 
 type Interval = (Double, Double)
 type Point = (Double, Double)
-
-start, end :: Segment -> Point
-start Segment{interval = (x, _), line = l} = (x, l `at` x)
-end Segment{interval = (_, x), line = l} = (x, l `at` x)
-
-minDistance, maxDistance :: Segment -> Double
-minDistance s = snd (start s) `min` snd (end s)
-maxDistance s = snd (start s) `max` snd (end s)
 
 -- Points are lines segments over an interval of length 0
 pattern Point p <- (matchPoint -> Just p) where
@@ -49,8 +52,16 @@ matchPoint s
 isPoint :: Segment -> Bool
 isPoint s = fst (interval s) == snd (interval s)
 
+----------------------------------------------------------------------
+-- Computing with lines and segments
+
+-- Evaluate a line at a given x-value
+at :: Line -> Double -> Double
+l `at` x = slope l * x + offset l
+
+-- Construct a line passing through two points.
 -- Returns Nothing in case both points have the same (or too close
--- for floating point) x-value
+-- for floating point) x-value.
 lineThrough :: Point -> Point -> Maybe Line
 lineThrough (x1, y1) (x2, y2)
   | isInfinite slope || isNaN slope || isInfinite offset = Nothing
@@ -59,21 +70,36 @@ lineThrough (x1, y1) (x2, y2)
     slope = (y2-y1)/(x2-x1)
     offset = y1 - slope*x1
 
-intervalBetween :: Double -> Double -> Interval
-intervalBetween x y = (min x y, max x y)
+-- Find the start and end point (value and distance) of a segment
+start, end :: Segment -> Point
+start Segment{interval = (x, _), line = l} = (x, l `at` x)
+end Segment{interval = (_, x), line = l} = (x, l `at` x)
 
+-- Find the smallest and largest distance over the entirety of a segment
+minDistance, maxDistance :: Segment -> Double
+minDistance s = snd (start s) `min` snd (end s)
+maxDistance s = snd (start s) `max` snd (end s)
+
+-- Connect two points with a line segment.
+-- The two points can be given in either order, and may even have
+-- the same x-value (in which case the returned segment is a single Point).
 segment :: Point -> Point -> Segment
 segment p q =
   case lineThrough p q of
     Just l -> Segment{ line = l, interval = intervalBetween (fst p) (fst q) }
     Nothing -> Point (fst p, min (snd p) (snd q))
+  where
+    intervalBetween x y = (min x y, max x y)
 
+-- Connect a list of points with line segments.
+-- The points must be sorted by x-value, but duplicate x-values are allowed.
 segments :: [Point] -> [Segment]
 segments [] = []
 segments [p] = [Point p]
 segments ps =
   simplify (zipWith segment ps (tail ps))
 
+-- Remove once norm is done
 simplify :: [Segment] -> [Segment]
 simplify = simp
   where
@@ -90,106 +116,8 @@ simplify = simp
     (x1, y1) `above` (x2, y2) =
       x1 == x2 && y1 >= y2
 
-combineEndpoints :: (Double -> Double -> Double) -> Segment -> Segment -> [Segment]
-combineEndpoints f s@Segment{} t@Segment{} =
-  nub [ segment (g x) (g y) | (x, y) <- pairs ]
-  where
-    g ((x1, d1), (x2, d2)) = (f x1 x2, d1 + d2)
-    pairs = nub
-      [((p, q1), (p, q2)) | p <- [p1, p2]] ++
-      [((p1, q), (p2, q)) | q <- [q1, q2]]
-    p1 = start s
-    p2 = end s
-    q1 = start t
-    q2 = end t
-
-distNegate :: Dist -> Dist
-distNegate = lift1 (return . mapValue negate)
-
-distPlus :: Dist -> Dist -> Dist
-distPlus = lift2 (combineEndpoints (+))
-
-distMul :: Dist -> Dist -> Dist
-distMul = lift2 pieceMul
-  where
-    pieceMul p q =
-      squareRootSegment p q ++
-      combineEndpoints (*) p q
-
-    squareRootSegment s1@Segment{line = Line{slope = a}} s2@Segment{line = Line{slope = b}}
-      | not (isPoint s1) && not (isPoint s2) && a /= 0 && b /= 0 =
-        map (scale (1/(a*b))) (squareRootSegment' (scale a s1) (scale b s2))
-    squareRootSegment _ _ = []
-
-    squareRootSegment' s1 s2
-      | 0 <= z1 && z1 < z2 =
-        map (mapDistance (\d -> 2*(d-z1) + line s1 `at` z1 + line s2 `at` z1)) (squareRootApprox z1 z2)
-      | otherwise = []
-      where
-        z1 = fst (interval s1) `max` fst (interval s2)
-        z2 = snd (interval s1) `min` snd (interval s2)
-
-    -- approximate sqrt function between a^2 and c^2
-    squareRootApprox :: Double -> Double -> [Segment]
-    squareRootApprox a c =
-      segments [(a^2, a), (b^2, b), (c^2, c)]
-      where
-        b = (a+c)/2 -- minimises absolute error
-
-scale :: Double -> Segment -> Segment
-scale x = mapValue (* x)
-
-plusDistance :: Double -> Segment -> Segment
-plusDistance x = mapDistance (+ x)
-
--- f must be linear
-mapValue :: (Double -> Double) -> Segment -> Segment
-mapValue f (Point (x, d)) = Point (f x, d)
-mapValue f s@Segment{interval = (x, y)} =
-  segment (f x1, d1) (f x2, d2)
-  where
-    (x1, d1) = start s
-    (x2, d2) = end s
-
--- f must be linear
-mapDistance :: (Double -> Double) -> Segment -> Segment
-mapDistance f (Point (x, d)) = Point (x, f d)
-mapDistance f s@Segment{line = l} =
-  s{line = l{offset = f0, slope = f1 - f0}}
-  where
-    f0 = f (offset l)
-    f1 = f (offset l + slope l)
-
-instance Ord Segment where
-  compare = comparing tuple
-   where
-    tuple p = (start p, mslope p, -snd (interval p))
-
-constant :: Double -> Dist
-constant x = Dist x [Point (x,0)]
-
-input :: (Double,Double) -> Double -> Dist
-input (a,b) x
- | a <= x && x <= b = Dist x $ segments [(a,x-a), (x,0), (b,b-x)]
- | otherwise        = error "input out of bounds"
-
-lift1 :: (Segment -> [Segment]) -> Dist -> Dist
-lift1 f a =
-  Dist
-  { val  = f0 (val a)
-  , dist = simplify $ sort [ q | p <- dist a, q <- f p ]
-  }
- where
-  f0 x = let (Point (y,_):_) = f (Point (x,0)) in y
-
-lift2 :: (Segment -> Segment -> [Segment]) -> Dist -> Dist -> Dist
-lift2 f a b =
-  Dist
-  { val  = f0 (val a) (val b)
-  , dist = simplify $ sort [ r | p <- dist a, q <- dist b, r <- f p q ]
-  }
- where
-  f0 x y = let (Point (z,_):_) = f (Point (x,0)) (Point (y,0)) in z
+-- Given a list of segments in any order, possibly overlapping,
+-- transform them to be strictly ordered and non-overlapping
 {-
 norm :: [Piece] -> [Piece]
 norm ps = linesAndPoints (twoPoints (usort ps))
@@ -256,44 +184,70 @@ norm ps = linesAndPoints (twoPoints (usort ps))
     x  = (s2*y1 - s1*x1 + a1 - b1) / (s2-s1)  
 -}
 
-at :: Line -> Double -> Double
-l `at` x = slope l * x + offset l
+----------------------------------------------------------------------
+-- Combinators on segments and dists
 
-plusLines :: Line -> Line -> Line
-plusLines l1 l2 = Line{ slope = slope l1 + slope l2, offset = offset l1 + offset l2 }
-
-mslope :: Segment -> Maybe Double
-mslope (Point _) = Nothing
-mslope Segment{line = l} = Just (slope l)
-
---
-
-nub :: Ord a => [a] -> [a]
-nub xs = go S.empty xs
- where
-  go seen (x:xs)
-    | x `S.member` seen = go seen xs
-    | otherwise         = x : go (S.insert x seen) xs
-  go _ []               = []
-
-usort :: Ord a => [a] -> [a]
-usort = map head . group . sort
-
---
-
-ifThenElse :: Dist -> Dist -> Dist -> Dist
-ifThenElse d1 d2 d3 =
-  Dist {
-    val = if val d1 == 1 then val d2 else val d3,
-    dist = concatMap seg (dist d1) }
+-- Map a function over all values. The function must be linear.
+mapValue :: (Double -> Double) -> Segment -> Segment
+mapValue f (Point (x, d)) = Point (f x, d)
+mapValue f s@Segment{interval = (x, y)} =
+  segment (f x1, d1) (f x2, d2)
   where
-    seg (Point (1, d)) =
-      map (plusDistance d) (dist d2)
-    seg (Point (0, d)) = 
-      map (plusDistance d) (dist d3)
+    (x1, d1) = start s
+    (x2, d2) = end s
+
+-- Map a function over all distances. The function must be linear.
+mapDistance :: (Double -> Double) -> Segment -> Segment
+mapDistance f (Point (x, d)) = Point (x, f d)
+mapDistance f s@Segment{line = l} =
+  s{line = l{offset = f0, slope = f1 - f0}}
+  where
+    f0 = f (offset l)
+    f1 = f (offset l + slope l)
+
+-- Add a constant to all distances
+plusDistance :: Double -> Segment -> Segment
+plusDistance x = mapDistance (+ x)
+
+-- Lift a unary function on segments to dists
+lift1 :: (Segment -> [Segment]) -> Dist -> Dist
+lift1 f a =
+  Dist
+  { val  = f0 (val a)
+  , dist = simplify $ sort [ q | p <- dist a, q <- f p ]
+  }
+ where
+  f0 x = let (Point (y,_):_) = f (Point (x,0)) in y
+
+-- Lift a binary function on segments to dists
+lift2 :: (Segment -> Segment -> [Segment]) -> Dist -> Dist -> Dist
+lift2 f a b =
+  Dist
+  { val  = f0 (val a) (val b)
+  , dist = simplify $ sort [ r | p <- dist a, q <- dist b, r <- f p q ]
+  }
+ where
+  f0 x y = let (Point (z,_):_) = f (Point (x,0)) (Point (y,0)) in z
+
+-- Lift a binary operation on Doubles to a binary operation on line segments.
+-- One argument will be held to an endpoint of the line segment
+-- while the other argument varies across the whole line segment.
+-- The function should be linear when one argument is fixed.
+combineEndpoints :: (Double -> Double -> Double) -> Segment -> Segment -> [Segment]
+combineEndpoints f s@Segment{} t@Segment{} =
+  nub [ segment (g x) (g y) | (x, y) <- pairs ]
+  where
+    g ((x1, d1), (x2, d2)) = (f x1 x2, d1 + d2)
+    pairs = nub
+      [((p, q1), (p, q2)) | p <- [p1, p2]] ++
+      [((p1, q), (p2, q)) | q <- [q1, q2]]
+    p1 = start s
+    p2 = end s
+    q1 = start t
+    q2 = end t
 
 -- Combine two segments by chopping them up into disjoint intervals
--- and equal intervals
+-- and equal intervals, and applying a function to each pair of intervals.
 divideOverlaps ::
   (Segment -> Segment -> [Segment]) -> -- first segment comes before second
   (Segment -> Segment -> [Segment]) -> -- first segment comes after second
@@ -327,8 +281,77 @@ divideOverlaps before after common s1 s2
       high s@Segment{interval=(lo, hi)} =
         [s{interval=(y, hi)} | y < hi]
 
-leq :: Dist -> Dist -> Dist
-leq = lift2 (divideOverlaps before after common)
+----------------------------------------------------------------------
+-- Operations on dists
+
+-- A constant value
+constant :: Double -> Dist
+constant x = Dist x [Point (x,0)]
+
+-- An input in a particular range
+input :: (Double,Double) -> Double -> Dist
+input (a,b) x
+ | a <= x && x <= b = Dist x $ segments [(a,x-a), (x,0), (b,b-x)]
+ | otherwise        = error "input out of bounds"
+
+-- Choose between two dists
+ifThenElse :: Dist -> Dist -> Dist -> Dist
+ifThenElse d1 d2 d3 =
+  Dist {
+    val = if val d1 == 1 then val d2 else val d3,
+    dist = concatMap seg (dist d1) }
+  where
+    seg (Point (1, d)) =
+      map (plusDistance d) (dist d2)
+    seg (Point (0, d)) = 
+      map (plusDistance d) (dist d3)
+
+-- Numeric operations
+instance Num Dist where
+  fromInteger = constant . fromInteger
+  (+) = plusDist
+  (*) = timesDist
+  negate = negateDist
+  abs = error "abs"
+  signum = error "signum"
+
+negateDist :: Dist -> Dist
+negateDist = lift1 (return . mapValue negate)
+
+plusDist :: Dist -> Dist -> Dist
+plusDist = lift2 (combineEndpoints (+))
+
+timesDist :: Dist -> Dist -> Dist
+timesDist = lift2 timesS
+  where
+    timesS s1 s2 =
+      squareRootSegment s1 s2 ++
+      combineEndpoints (*) s1 s2
+
+    squareRootSegment s1@Segment{line = Line{slope = a}} s2@Segment{line = Line{slope = b}}
+      | not (isPoint s1) && not (isPoint s2) && a /= 0 && b /= 0 =
+        map (mapValue (/(a*b))) (squareRootSegment' (mapValue (*a) s1) (mapValue (*b) s2))
+    squareRootSegment _ _ = []
+
+    squareRootSegment' s1 s2
+      | 0 <= z1 && z1 < z2 =
+        map (mapDistance (\d -> 2*(d-z1) + line s1 `at` z1 + line s2 `at` z1)) (squareRootApprox z1 z2)
+      | otherwise = []
+      where
+        z1 = fst (interval s1) `max` fst (interval s2)
+        z2 = snd (interval s1) `min` snd (interval s2)
+
+    -- approximate sqrt function between a^2 and c^2
+    squareRootApprox :: Double -> Double -> [Segment]
+    squareRootApprox a c =
+      segments [(a^2, a), (b^2, b), (c^2, c)]
+      where
+        b = (a+c)/2 -- minimises absolute error
+
+-- Comparisons
+
+(<=?) :: Dist -> Dist -> Dist
+(<=?) = lift2 (divideOverlaps before after common)
   where
     before = constCase 1
     after = constCase 0
@@ -354,8 +377,8 @@ leq = lift2 (divideOverlaps before after common)
 
     endpoints Segment{interval = (x, y)} = [x, y]
 
-eq :: Dist -> Dist -> Dist
-eq = lift2 eqS
+(==?) :: Dist -> Dist -> Dist
+(==?) = lift2 eqS
   where
     eqS (Point (x1, d1)) (Point (x2, d2))
       | x1 == x2  = [Point (1, d1+d2)]
@@ -370,10 +393,12 @@ eq = lift2 eqS
         z1 = fst (interval s1) `max` fst (interval s2)
         z2 = snd (interval s1) `min` snd (interval s2)
 
+-- Minimum - naive implementation
 minn' :: Dist -> Dist -> Dist
 minn' d1 d2 =
-  ifThenElse (leq d1 d2) d1 d2
+  ifThenElse (d1 <=? d2) d1 d2
 
+-- Minimum - better implementation
 minn :: Dist -> Dist -> Dist
 minn = lift2 (divideOverlaps before after common)
   where
@@ -383,10 +408,14 @@ minn = lift2 (divideOverlaps before after common)
       -- Try keeping one input as high as possible, or moving them in lockstep
       [plusDistance (snd (end s1)) s2,
        plusDistance (snd (end s2)) s1,
-       Segment{interval = interval s1, line = plusLines (line s1) (line s2)}]
+       Segment{interval = interval s1,
+               line = Line { slope = slope (line s1) + slope (line s2),
+                             offset = offset (line s1) + offset (line s2) }}]
       
---
+----------------------------------------------------------------------
+-- Visualising dists
 
+-- Plot a dist on screen
 plotDist :: Dist -> IO Bool
 plotDist d =
   plot X11 $ map plotSeg (dist d)
@@ -396,6 +425,7 @@ plotDist d =
     plotSeg Segment{line = l, interval = (x, y)} =
       Function2D [] [Range x y] (\x -> slope l*x + offset l)
 
+-- Show the value and robustness of a Boolean dist
 showBool :: Dist -> String
 showBool d =
   show (val d == 1) ++ " with robustness " ++

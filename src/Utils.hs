@@ -23,11 +23,11 @@ isSorted xs = and (zipWith (<=) xs (tail xs))
 isSortedBy :: Ord b => (a -> b) -> [a] -> Bool
 isSortedBy f xs = isSorted (map f xs)
 
-ordNub :: Ord a => [a] -> [a]
-ordNub = ordNubOn id
+nub :: Ord a => [a] -> [a]
+nub = nubOn id
 
-ordNubOn :: Ord b => (a -> b) -> [a] -> [a]
-ordNubOn f = from Set.empty
+nubOn :: Ord b => (a -> b) -> [a] -> [a]
+nubOn f = from Set.empty
   where
     from _ [] = []
     from s (x:xs)
