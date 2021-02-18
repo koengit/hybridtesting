@@ -270,16 +270,17 @@ divideOverlaps before after common s1 s2
       high s@Segment{interval=(lo, hi)} =
         [s{interval=(y, hi)} | y < hi]
 
--- Transform a segment by dividing it into positive, negative and zero parts,
--- and applying a function to each part.
-divideSign ::
-  (Segment -> [Segment]) -> -- positive part
-  (Segment -> [Segment]) -> -- negative part
-  (Segment -> [Segment]) -> -- zero part
+-- Transform a segment by dividing it into parts <, > and == a given
+-- value, and applying a function to each part.
+divideAt ::
+  Double ->
+  (Segment -> [Segment]) -> -- less part
+  (Segment -> [Segment]) -> -- greater part
+  (Segment -> [Segment]) -> -- equal part
   Segment -> [Segment]
-divideSign pos neg zero s =
-  divideOverlaps (\_ s -> pos s) (\_ s -> neg s) (\_ s -> zero s)
-    (Point (0,0)) s
+divideAt x less greater equal s =
+  divideOverlaps (\_ s -> greater s) (\_ s -> less s) (\_ s -> equal s)
+    (Point (x,0)) s
 
 ----------------------------------------------------------------------
 -- Operations on dists
@@ -328,6 +329,10 @@ instance Num Dist where
   abs = absDist
   signum = signumDist
 
+instance Fractional Dist where
+  fromRational = constant . fromRational
+  recip = recipDist
+
 plusDist :: Dist -> Dist -> Dist
 plusDist = lift2 (combineEndpoints (+))
 
@@ -362,18 +367,32 @@ negateDist :: Dist -> Dist
 negateDist = lift1 (return . mapValue negate)
 
 absDist :: Dist -> Dist
-absDist = lift1 (divideSign pos neg zero)
+absDist = lift1 (divideAt 0 neg pos zero)
   where
     pos s = [s]
     neg s = [mapValue negate s]
     zero s = [s]
 
 signumDist :: Dist -> Dist
-signumDist = lift1 (divideSign pos neg zero)
+signumDist = lift1 (divideAt 0 neg pos zero)
   where
     pos s = [mapValue (const 1) s]
     neg s = [mapValue (const (-1)) s]
     zero s = [mapValue (const 0) s]
+
+recipDist :: Dist -> Dist
+recipDist = lift1 (divideAt 0 neg pos skip)
+  where
+    neg s = map (mapValue negate) (pos (mapValue negate s))
+    pos s@Segment{line = Line{slope = a, offset = b}} =
+      divideAt (signum a * sqrt (abs a)) seg' seg' skip s
+      where
+        seg' Segment{line = l, interval = (lo, hi)} =
+          [segment (lo', b + a/lo') (hi', b + a/hi')]
+          where
+            lo' = if hi == 0 then 10000 else 1/hi
+            hi' = if lo == 0 then 10000 else 1/lo
+    skip _ = []
 
 -- Comparisons
 
