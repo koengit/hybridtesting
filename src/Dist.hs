@@ -5,6 +5,7 @@ import Data.List( insert, sort, sortBy, group )
 import qualified Data.Set as S
 import Data.Ord( comparing )
 import Control.Monad( guard )
+import Graphics.EasyPlot
 
 data Dist
   = Dist
@@ -251,3 +252,14 @@ nub xs = go S.empty xs
 
 usort :: Ord a => [a] -> [a]
 usort = map head . group . sort
+
+--
+
+plotDist :: Dist -> IO Bool
+plotDist d =
+  plot X11 $ map plotSeg (dist d)
+  where
+    plotSeg (Point (x, d)) =
+      Data2D [] [] [(x, d)]
+    plotSeg Segment{line = l, interval = (x, y)} =
+      Function2D [] [Range x y] (\x -> slope l*x + offset l)

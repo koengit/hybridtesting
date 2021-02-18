@@ -65,7 +65,8 @@ library
       random,
       array,
       parsec,
-      Glob
+      Glob,
+      easyplot
   ghc-options: -O2
   default-language: Haskell2010
 
