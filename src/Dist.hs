@@ -263,3 +263,10 @@ plotDist d =
       Data2D [] [] [(x, d)]
     plotSeg Segment{line = l, interval = (x, y)} =
       Function2D [] [Range x y] (\x -> slope l*x + offset l)
+
+showBool :: Dist -> String
+showBool d =
+  show (val d == 1) ++ " with robustness " ++
+  case lookup (1 - val d) [p | Point p <- simplify (dist d)] of
+    Nothing -> "infinity"
+    Just y  -> show y
