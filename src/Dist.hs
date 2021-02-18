@@ -166,7 +166,7 @@ lift2 f a b =
   , dist = {-norm-} [ r | p <- dist a, q <- dist b, r <- f p q ]
   }
  where
-  f0 x y = let [Point (z,_)] = f (Point (x,0)) (Point (y,0)) in z
+  f0 x y = let (Point (z,_):_) = f (Point (x,0)) (Point (y,0)) in z
 {-
 norm :: [Piece] -> [Piece]
 norm ps = linesAndPoints (twoPoints (usort ps))
