@@ -91,20 +91,16 @@ segments [] = []
 segments [p] = [Point p]
 segments ps =
   simplify (zipWith segment ps (tail ps))
-
--- Remove once norm is done
-simplify :: [Segment] -> [Segment]
-simplify = simp
   where
-    simp (Point p:Point q:ss)
-      | p `above` q = simp (Point q:ss)
-      | q `above` p = simp (Point p:ss)
-    simp (Point p:s@Segment{}:ss)
-      | p `above` start s = simp (s:ss)
-    simp (s@Segment{}:Point p:ss)
-      | p `above` end s = simp (s:ss)
-    simp (s:ss) = s:simp ss
-    simp [] = []
+    simplify (Point p:Point q:ss)
+      | p `above` q = simplify (Point q:ss)
+      | q `above` p = simplify (Point p:ss)
+    simplify (Point p:s@Segment{}:ss)
+      | p `above` start s = simplify (s:ss)
+    simplify (s@Segment{}:Point p:ss)
+      | p `above` end s = simplify (s:ss)
+    simplify (s:ss) = s:simplify ss
+    simplify [] = []
 
     (x1, y1) `above` (x2, y2) =
       x1 == x2 && y1 >= y2
@@ -204,7 +200,7 @@ lift1 :: (Segment -> [Segment]) -> Dist -> Dist
 lift1 f a =
   Dist
   { val  = f0 (val a)
-  , dist = simplify $ sort [ q | p <- dist a, q <- f p ]
+  , dist = norm $ sort [ q | p <- dist a, q <- f p ]
   }
  where
   f0 x = let (Point (y,_):_) = f (Point (x,0)) in y
@@ -214,7 +210,7 @@ lift2 :: (Segment -> Segment -> [Segment]) -> Dist -> Dist -> Dist
 lift2 f a b =
   Dist
   { val  = f0 (val a) (val b)
-  , dist = simplify $ sort [ r | p <- dist a, q <- dist b, r <- f p q ]
+  , dist = norm $ sort [ r | p <- dist a, q <- dist b, r <- f p q ]
   }
  where
   f0 x y = let (Point (z,_):_) = f (Point (x,0)) (Point (y,0)) in z
