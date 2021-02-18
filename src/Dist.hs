@@ -281,6 +281,17 @@ divideOverlaps before after common s1 s2
       high s@Segment{interval=(lo, hi)} =
         [s{interval=(y, hi)} | y < hi]
 
+-- Transform a segment by dividing it into positive, negative and zero parts,
+-- and applying a function to each part.
+divideSign ::
+  (Segment -> [Segment]) -> -- positive part
+  (Segment -> [Segment]) -> -- negative part
+  (Segment -> [Segment]) -> -- zero part
+  Segment -> [Segment]
+divideSign pos neg zero s =
+  divideOverlaps (\_ s -> pos s) (\_ s -> neg s) (\_ s -> zero s)
+    (Point (0,0)) s
+
 ----------------------------------------------------------------------
 -- Operations on dists
 
@@ -312,11 +323,8 @@ instance Num Dist where
   (+) = plusDist
   (*) = timesDist
   negate = negateDist
-  abs = error "abs"
-  signum = error "signum"
-
-negateDist :: Dist -> Dist
-negateDist = lift1 (return . mapValue negate)
+  abs = absDist
+  signum = signumDist
 
 plusDist :: Dist -> Dist -> Dist
 plusDist = lift2 (combineEndpoints (+))
@@ -347,6 +355,23 @@ timesDist = lift2 timesS
       segments [(a^2, a), (b^2, b), (c^2, c)]
       where
         b = (a+c)/2 -- minimises absolute error
+
+negateDist :: Dist -> Dist
+negateDist = lift1 (return . mapValue negate)
+
+absDist :: Dist -> Dist
+absDist = lift1 (divideSign pos neg zero)
+  where
+    pos s = [s]
+    neg s = [mapValue negate s]
+    zero s = [s]
+
+signumDist :: Dist -> Dist
+signumDist = lift1 (divideSign pos neg zero)
+  where
+    pos s = [mapValue (const 1) s]
+    neg s = [mapValue (const (-1)) s]
+    zero s = [mapValue (const 0) s]
 
 -- Comparisons
 
