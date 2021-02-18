@@ -203,7 +203,7 @@ lift1 :: (Segment -> [Segment]) -> Dist -> Dist
 lift1 f a =
   Dist
   { val  = f0 (val a)
-  , dist = norm $ sort [ q | p <- dist a, q <- f p ]
+  , dist = norm [ q | p <- dist a, q <- f p ]
   }
  where
   f0 x = let (Point (y,_):_) = f (Point (x,0)) in y
@@ -213,7 +213,7 @@ lift2 :: (Segment -> Segment -> [Segment]) -> Dist -> Dist -> Dist
 lift2 f a b =
   Dist
   { val  = f0 (val a) (val b)
-  , dist = norm $ sort [ r | p <- dist a, q <- dist b, r <- f p q ]
+  , dist = norm [ r | p <- dist a, q <- dist b, r <- f p q ]
   }
  where
   f0 x y = let (Point (z,_):_) = f (Point (x,0)) (Point (y,0)) in z
@@ -291,7 +291,7 @@ constant x = Dist x [Point (x,0)]
 -- An input in a particular range
 input :: (Double,Double) -> Double -> Dist
 input (a,b) x
- | a <= x && x <= b = Dist x $ segments [(a,x-a), (x,0), (b,b-x)]
+ | a <= x && x <= b = Dist x $ norm $ segments [(a,x-a), (x,0), (b,b-x)]
  | otherwise        = error "input out of bounds"
 
 -- Choose between two dists
@@ -299,7 +299,7 @@ ifThenElse :: Dist -> Dist -> Dist -> Dist
 ifThenElse d1 d2 d3 =
   Dist {
     val = if val d1 == 1 then val d2 else val d3,
-    dist = concatMap seg (dist d1) }
+    dist = norm $ concatMap seg (dist d1) }
   where
     seg (Point (1, d)) =
       map (plusDistance d) (dist d2)
