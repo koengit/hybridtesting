@@ -29,6 +29,10 @@ start, end :: Segment -> Point
 start Segment{interval = (x, _), line = l} = (x, l `at` x)
 end Segment{interval = (_, x), line = l} = (x, l `at` x)
 
+minDistance, maxDistance :: Segment -> Double
+minDistance s = snd (start s) `min` snd (end s)
+maxDistance s = snd (start s) `max` snd (end s)
+
 -- Points are lines segments over an interval of length 0
 pattern Point p <- (matchPoint -> Just p) where
   Point (x, y) =
@@ -98,8 +102,11 @@ combineEndpoints f s@Segment{} t@Segment{} =
     q1 = start t
     q2 = end t
 
-distAdd :: Dist -> Dist -> Dist
-distAdd = lift2 (combineEndpoints (+))
+distNegate :: Dist -> Dist
+distNegate = lift1 (return . mapValue negate)
+
+distPlus :: Dist -> Dist -> Dist
+distPlus = lift2 (combineEndpoints (+))
 
 distMul :: Dist -> Dist -> Dist
 distMul = lift2 pieceMul
@@ -131,6 +138,9 @@ distMul = lift2 pieceMul
 scale :: Double -> Segment -> Segment
 scale x = mapValue (* x)
 
+plusDistance :: Double -> Segment -> Segment
+plusDistance x = mapDistance (+ x)
+
 -- f must be linear
 mapValue :: (Double -> Double) -> Segment -> Segment
 mapValue f (Point (x, d)) = Point (f x, d)
@@ -161,6 +171,15 @@ input :: (Double,Double) -> Double -> Dist
 input (a,b) x
  | a <= x && x <= b = Dist x $ segments [(a,x-a), (x,0), (b,b-x)]
  | otherwise        = error "input out of bounds"
+
+lift1 :: (Segment -> [Segment]) -> Dist -> Dist
+lift1 f a =
+  Dist
+  { val  = f0 (val a)
+  , dist = simplify $ sort [ q | p <- dist a, q <- f p ]
+  }
+ where
+  f0 x = let (Point (y,_):_) = f (Point (x,0)) in y
 
 lift2 :: (Segment -> Segment -> [Segment]) -> Dist -> Dist -> Dist
 lift2 f a b =
@@ -238,6 +257,9 @@ norm ps = linesAndPoints (twoPoints (usort ps))
 
 at :: Line -> Double -> Double
 l `at` x = slope l * x + offset l
+
+plusLines :: Line -> Line -> Line
+plusLines l1 l2 = Line{ slope = slope l1 + slope l2, offset = offset l1 + offset l2 }
 
 mslope :: Segment -> Maybe Double
 mslope (Point _) = Nothing
