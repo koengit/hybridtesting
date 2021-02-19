@@ -129,41 +129,42 @@ norm vs = glue (simp (usort vs))
   glue []       = []
  
   simp (v : w : vs)
-    -- if v ends before w starts: commit v
-    | xv2 < xw1 =
+    -- if v ends before w starts or if v is a point and w a line: commit v
+    | xv2 < xw1 || (isPoint v && not (isPoint w))  =
         v : simp (w : vs)
         
     -- if v starts before w starts: split v
     | xv1 < xw1 =
         v{ interval = (xv1,xw1) } : simp (insert v{ interval = (xw1,xv2) } (w:vs))
 
-    -- ... (now, v and w have the same starting point; w will start above= v)
-    
-    -- if w's cutoff point lies beyond w: delete w
-    | xw2 <= xwc =
+    -- if w is a point: discard w
+    | isPoint w =
         simp (v : vs)
-    
-    -- if w's cutoff point would make w into a point: commit v, but only if it's lower than w
-    | xwc <= xw1 =
-        [ v | yv1 < yw1 ] ++ simp (w : vs)
-    
-    -- otherwise: cut w
+
+    -- if w ends before v ends: split v
+    | xw2 < xv2 =
+        simp (v{ interval = (xv1,xw2) } : insert v{ interval = (xw2,xv2) } (w:vs))
+
+    -- if v ends before w ends: split w
+    | xv2 < xw2 =
+        simp (v : insert w{ interval = (xw1,xv2) } (insert w{ interval = (xv2,xw2) } vs))
+
+    -- if v and w cross: keep a bit of each
+    | slope (line v) > slope (line w) && xv1 <= xc && xc <= xv2 =
+        simp ( [ v{ interval = (xv1,xc) } | xv1 < xc ]
+            ++ foldr insert vs [ w{ interval = (xc,xw2) } | xc < xw2 ]
+             )
+        
+    -- otherwise: commit v and discard w
     | otherwise =
-        simp (v : insert w{ interval = (xwc,xw2) } vs)
+        simp (v : vs)
    where
     xv1 = fst (interval v)
     xw1 = fst (interval w)
     xv2 = snd (interval v)
     xw2 = snd (interval w)
 
-    yv1 = snd (start v)
-    yw1 = snd (start w)
-
     ~(Just xc) = line v `cross` line w
-    
-    -- what is the point beyond which w might be the minimum?
-    xwc | slope (line v) > slope (line w) && xv1 < xc && xc < xv2 = xc
-        | otherwise                                               = xv2
  
   simp [v] = [v]
   simp []  = []
