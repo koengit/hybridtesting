@@ -87,23 +87,24 @@ segment p q =
 -- Connect a list of points with line segments.
 -- The points must be sorted by x-value, but duplicate x-values are allowed.
 segments :: [Point] -> [Segment]
-segments [] = []
+segments []  = []
 segments [p] = [Point p]
-segments ps =
-  simplify (zipWith segment ps (tail ps))
-  where
-    simplify (Point p:Point q:ss)
-      | p `above` q = simplify (Point q:ss)
-      | q `above` p = simplify (Point p:ss)
-    simplify (Point p:s@Segment{}:ss)
-      | p `above` start s = simplify (s:ss)
-    simplify (s@Segment{}:Point p:ss)
-      | p `above` end s = simplify (s:ss)
-    simplify (s:ss) = s:simplify ss
-    simplify [] = []
+segments ps  = simplify (zipWith segment ps (tail ps))
 
-    (x1, y1) `above` (x2, y2) =
-      x1 == x2 && y1 >= y2
+simplify :: [Segment] -> [Segment]
+simplify (Point p:Point q:ss)
+  | p `above` q = simplify (Point q:ss)
+  | q `above` p = simplify (Point p:ss)
+simplify (Point p:s@Segment{}:ss)
+  | p `above` start s = simplify (s:ss)
+simplify (s@Segment{}:Point p:ss)
+  | p `above` end s = simplify (s:ss)
+simplify (s:ss) = s:simplify ss
+simplify [] = []
+
+above :: Point -> Point -> Bool
+(x1, y1) `above` (x2, y2) =
+  x1 == x2 && y1 >= y2
 
 instance Ord Segment where
   compare = comparing tuple
@@ -115,7 +116,7 @@ instance Ord Segment where
 -- Given a list of segments in any order, possibly overlapping,
 -- transform them to be strictly ordered and non-overlapping
 norm :: [Segment] -> [Segment]
-norm vs = glue (simp (usort vs))
+norm vs = glue (simplify (simp (usort vs)))
  where
   glue (v : w : vs) | line v == line w && xv2 >= xw1 =
     glue (v{ interval = (xv1, xv2 `max` xw2) } : vs)
