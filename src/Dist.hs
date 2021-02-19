@@ -301,15 +301,16 @@ input (a,b) x
 
 -- Choose between two dists
 ifThenElse :: Dist -> Dist -> Dist -> Dist
-ifThenElse d1 d2 d3 =
+ifThenElse c t e = switch c [e,t] -- [0,1]
+
+-- Choose between the branches
+switch :: Dist -> [Dist] -> Dist
+switch sel cas =
   Dist {
-    val = if val d1 == 1 then val d2 else val d3,
-    dist = norm $ concatMap seg (dist d1) }
+    val  = val (head [ c | (c,k) <- cas `zip` [0..], fromInteger k == val sel]),
+    dist = norm $ concatMap seg (dist sel) }
   where
-    seg (Point (1, d)) =
-      map (plusDistance d) (dist d2)
-    seg (Point (0, d)) = 
-      map (plusDistance d) (dist d3)
+    seg (Point (k, d)) = map (plusDistance d) (dist (cas!!round k))
 
 -- Boolean operations
 true, false :: Dist
