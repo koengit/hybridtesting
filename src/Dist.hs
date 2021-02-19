@@ -152,10 +152,12 @@ norm vs = glue (simplify (simp (usort vs)))
 
     -- if v and w cross: keep a bit of each
     | slope (line v) > slope (line w) && xv1 <= xc && xc <= xv2 =
-        simp ( [ v{ interval = (xv1,xc) } | xv1 < xc ]
-            ++ foldr insert vs [ w{ interval = (xc,xw2) } | xc < xw2 ]
+        simp ( [ v{ interval = (xv1,xc) } | xv1 <= xc ]
+            ++ foldr insert vs [ w{ interval = (xc,xw2) } | xc <= xw2 ]
              )
-        
+      -- NOTE: the use of "<=" may introduce superfluous points which will hopefully be removed
+      --       by simplify
+      
     -- otherwise: commit v and discard w
     | otherwise =
         simp (v : vs)
