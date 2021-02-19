@@ -515,3 +515,23 @@ volcano x =
     (-x * constant 0.01)
   where
     (>=?) = flip (<=?)
+
+-- Spaceship
+spaceship :: [Dist] -> [Dist]
+spaceship as = ss
+ where
+  vs = zipWith (+) as (constant 0 : vs)
+  xs = zipWith (+) vs (constant 0 : xs)
+  ss = zipWith adv xs (constant 0 : ss)
+
+  adv x s = switch s
+            {- 0 -} [ ifThenElse (x >=? 100)    1 0
+            {- 1 -} , ifThenElse (x <=? (-100)) 2 1
+            {- 2 -} , ifThenElse (x >=? 100)    3 2
+                    , 3
+                    ]
+
+spaceshipProp :: [Dist] -> Double
+spaceshipProp as = -howTrue (foldr (||?) false [ s ==? 3 | s <- spaceship as])
+
+
