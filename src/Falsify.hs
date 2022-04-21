@@ -49,12 +49,13 @@ mkSegment sIn (xIn,aIn) (xOut,aOut) sOut =
     sqaOut = sqrt aOut
 
   xNew = case (xIn < xL && xL < xOut, xIn < xR && xR < xOut) of
-           (True,  False)           -> xL
-           (False, True)            -> xR
+           (True,  False)            -> xL
+           (False, True)             -> xR
            (True,  True)
-             | (xL-xIn) < (xOut-xR) -> xR
-             | otherwise            -> xL
-           _                        -> xM
+             | (xL-xIn) < (xOut-xR)  -> xR
+             | otherwise             -> xL
+           _ | xIn < xM && xM < xOut -> xM
+             | otherwise             -> (xIn+xOut) / 2 -- emergency solution
 
 
   -- delta in slope-change if we sample xNew
@@ -67,7 +68,9 @@ mkSegment sIn (xIn,aIn) (xOut,aOut) sOut =
 falsifyLine :: (Double -> Double)
             -> Double -> (Double,Double) -> Double
             -> [(Double,Double)]
-falsifyLine f xL (xM,aM) xR = takeUntil ((<0).snd) $ inits ++ go [sg0,sg1,sg2,sg3]
+falsifyLine f xL (xM,aM) xR
+  | xL /= xL || xR /= xR || xM /= xM = error (show (xL,xR))
+  | otherwise = takeUntil ((<0).snd) $ inits ++ go [sg0,sg1,sg2,sg3]
  where
   aL = f xL
   aR = f xR
@@ -94,6 +97,8 @@ falsifyLine f xL (xM,aM) xR = takeUntil ((<0).snd) $ inits ++ go [sg0,sg1,sg2,sg
     sg1L = mkSegment (sIn sg1) (xIn sg1, aIn sg1) (xN,       aN)       (s sg1R)
     sg1R = mkSegment (s sg1L)  (xN,      aN)      (xOut sg1, aOut sg1) (sOut sg1)
     sg2' = mkSegment (s sg1R)  (xIn sg2, aIn sg2) (xOut sg2, aOut sg2) (sOut sg2)
+
+  update sg xN aN sgs = error (show (sg,xN,aN,sgs))
 
 takeUntil p [] = []
 takeUntil p (x:xs)
